@@ -8,8 +8,12 @@ import (
 	"github.com/buger/jsonparser"
 )
 
+const (
+	maxSizeAPIv1 = 1000
+)
+
 func main() {
-	getGameListV2()
+	getGameListV1()
 }
 
 func getGameListV1() {
@@ -28,7 +32,7 @@ func getGameListV1() {
 
 	gameIds := make([]string, 0)
 
-	for size == 1000 {
+	for size == maxSizeAPIv1 {
 		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			gameId, _ := jsonparser.GetString(value, "id")
 			gameIds = append(gameIds, gameId)
@@ -43,6 +47,7 @@ func getGameListV1() {
 		size, _ = jsonparser.GetInt(request, "pagination", "size")
 	}
 
+	// TODO: Handle the gameIds. Write to file? Insert into database?
 	fmt.Println(gameIds)
 }
 
@@ -70,5 +75,6 @@ func getGameListV2() {
 		request, _ = srcomv2.GetGameList(currentPage)
 	}
 
+	// TODO: Handle the gameIds. Write to file? Insert into database?
 	fmt.Println(gameIds)
 }

@@ -1,8 +1,8 @@
 package srcomv1
 
 import (
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 )
@@ -22,7 +22,7 @@ func requestSrcom(URL string) ([]byte, error) {
 		return requestSrcom(URL)
 	}
 
-	fmt.Println(URL)
+	log.Print(URL)
 
 	defer response.Body.Close()
 	return io.ReadAll(response.Body)

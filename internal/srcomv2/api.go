@@ -12,6 +12,8 @@ const (
 	gameCategoryLeaderboardFunction              = "GetGameLeaderboard2"
 	gameCategoryVariableValueLeaderboardFunction = "GetGameLeaderboard2"
 	gameCategoryWorldRecordHistory               = "GetGameRecordHistory"
+
+	searchResultLimit = 15
 )
 
 func GetUserData(userID string) ([]byte, error) {
@@ -135,7 +137,7 @@ func GetGameCategoryWorldRecordHistory(gameID, categoryID string) ([]byte, error
 func GetSearch(query string) ([]byte, error) {
 	data := map[string]interface{}{
 		"query":         query,
-		"limit":         5,
+		"limit":         searchResultLimit,
 		"includeGames":  true,
 		"includeNews":   true,
 		"includePages":  true,

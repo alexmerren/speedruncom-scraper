@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -22,7 +23,7 @@ func requestSrcom(URL string) ([]byte, error) {
 
 	if response.StatusCode == 429 {
 		defer response.Body.Close()
-		fmt.Println(response.Header, response.Body)
+		log.Print(response.Header, response.Body)
 		return nil, fmt.Errorf("Rate limit has been hit.")
 	}
 
@@ -31,7 +32,7 @@ func requestSrcom(URL string) ([]byte, error) {
 		return requestSrcom(URL)
 	}
 
-	fmt.Println(URL)
+	log.Print(URL)
 
 	defer response.Body.Close()
 	return io.ReadAll(response.Body)
