@@ -1,10 +1,9 @@
 GO ?= go
 DOCKER ?= docker
-LINTER := golanglint-ci
+LINTER := golangci-lint
 
 DIST_DIR := $(CURDIR)/dist
 INTERNAL_DIR := $(CURDIR)/internal
-PKG_DIR := $(CURDIR)/pkg
 CMD_DIR := $(CURDIR)/cmd
 
 TEST_MODULES := $(shell $(GO) list $(INTERNAL_DIR)/... $(PKG_DIR)/...)
