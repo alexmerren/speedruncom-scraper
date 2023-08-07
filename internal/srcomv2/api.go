@@ -1,10 +1,5 @@
 package srcomv2
 
-import (
-	"fmt"
-	"time"
-)
-
 const (
 	baseApiUrl = "https://www.speedrun.com/api/v2/%s?_r=%s"
 
@@ -19,48 +14,122 @@ const (
 	gameCategoryWorldRecordHistory               = "GetGameRecordHistory"
 )
 
-func GetUserData(userID string, data []byte) ([]byte, error) {
-	return requestSrcom("")
+func GetUserData(userID string) ([]byte, error) {
+	data := map[string]interface{}{
+		"userId":    userID,
+		"levelType": 1,
+	}
+
+	URL, err := formatHeader(data, userDataFunction)
+	if err != nil {
+		return nil, err
+	}
+
+	return requestSrcom(URL)
 }
 
-func GetGameData(gameID string, data []byte) ([]byte, error) {
-	return requestSrcom("")
+func GetGameData(gameID string) ([]byte, error) {
+	data := map[string]interface{}{
+		"gameId": gameID,
+	}
+
+	URL, err := formatHeader(data, gameDataFunction)
+	if err != nil {
+		return nil, err
+	}
+
+	return requestSrcom(URL)
 }
 
 func GetGameSummary(gameURL string) ([]byte, error) {
-	return requestSrcom("")
+	data := map[string]interface{}{
+		"gameUrl": gameURL,
+	}
+
+	URL, err := formatHeader(data, gameSummaryFunction)
+	if err != nil {
+		return nil, err
+	}
+
+	return requestSrcom(URL)
 }
 
 func GetGameList(pageNumber int) ([]byte, error) {
 	data := map[string]interface{}{
 		"page": pageNumber,
-		"vary": time.Now().Unix(),
 	}
 
-	flattenedData, err := getBytes(data)
+	URL, err := formatHeader(data, gameListFunction)
 	if err != nil {
 		return nil, err
 	}
-
-	formattedData := EncodeB64Header(flattenedData)
-	URL := fmt.Sprintf(baseApiUrl, gameListFunction, formattedData)
 
 	return requestSrcom(URL)
 }
 
 func GetGameCategoryLeaderboard(gameID, categoryID string, pageNumber int) ([]byte, error) {
-	return requestSrcom("")
+	data := map[string]interface{}{
+		"params": map[string]interface{}{
+			"gameId":     gameID,
+			"categoryId": categoryID,
+			"timer":      0,
+			"video":      0,
+			"obsolete":   0,
+		},
+		"page": pageNumber,
+	}
+
+	URL, err := formatHeader(data, gameListFunction)
+	if err != nil {
+		return nil, err
+	}
+
+	return requestSrcom(URL)
 }
 
 func GetGameCategoryVariableValueLeaderboard(
 	gameID, categoryID, variableID, valueID string,
 	pageNumber int,
 ) ([]byte, error) {
-	return requestSrcom("")
+	data := map[string]interface{}{
+		"params": map[string]interface{}{
+			"gameId":     gameID,
+			"categoryId": categoryID,
+			"values": []map[string]interface{}{
+				{
+					"variableId": variableID,
+					"valueIds":   []string{valueID},
+				},
+			},
+			"timer":    0,
+			"video":    0,
+			"obsolete": 0,
+		},
+		"page": pageNumber,
+	}
+
+	URL, err := formatHeader(data, gameListFunction)
+	if err != nil {
+		return nil, err
+	}
+
+	return requestSrcom(URL)
 }
 
 func GetGameCategoryWorldRecordHistory(gameID, categoryID string) ([]byte, error) {
-	return requestSrcom("")
+	data := map[string]interface{}{
+		"params": map[string]interface{}{
+			"gameId":     gameID,
+			"categoryId": categoryID,
+		},
+	}
+
+	URL, err := formatHeader(data, gameListFunction)
+	if err != nil {
+		return nil, err
+	}
+
+	return requestSrcom(URL)
 }
 
 func GetSearch(query string) ([]byte, error) {
@@ -74,13 +143,10 @@ func GetSearch(query string) ([]byte, error) {
 		"includeUsers":  true,
 	}
 
-	flattenedData, err := getBytes(data)
+	URL, err := formatHeader(data, searchFunction)
 	if err != nil {
 		return nil, err
 	}
-
-	formattedData := EncodeB64Header(flattenedData)
-	URL := fmt.Sprintf(baseApiUrl, searchFunction, formattedData)
 
 	return requestSrcom(URL)
 }
