@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/alexmerren/speedruncom-scraper/internal/srcomv1"
 	"github.com/alexmerren/speedruncom-scraper/internal/srcomv2"
@@ -10,6 +12,7 @@ import (
 
 const (
 	maxSizeAPIv1 = 1000
+	outputFile   = "../data/games-id-list.csv"
 )
 
 func main() {
@@ -30,12 +33,20 @@ func getGameListV1() {
 		return
 	}
 
-	gameIds := make([]string, 0)
+	// TODO: If file does not exist, create it!
+	file, err := os.Open(outputFile)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	file.Write([]byte("Game ID\n"))
 
 	for size == maxSizeAPIv1 {
 		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			gameId, _ := jsonparser.GetString(value, "id")
-			gameIds = append(gameIds, gameId)
+			output := strings.Join([]string{gameId, "\n"}, "")
+			file.Write([]byte(output))
 		}, "data")
 		if err != nil {
 			fmt.Println(err)
@@ -46,9 +57,6 @@ func getGameListV1() {
 		request, _ = srcomv1.GetGameList(currentPage)
 		size, _ = jsonparser.GetInt(request, "pagination", "size")
 	}
-
-	// TODO: Handle the gameIds. Write to file? Insert into database?
-	fmt.Println(gameIds)
 }
 
 func getGameListV2() {
