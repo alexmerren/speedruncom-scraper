@@ -1,7 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/alexmerren/speedruncom-scraper/internal/srcomv1"
 	"github.com/alexmerren/speedruncom-scraper/internal/srcomv2"
@@ -9,46 +12,48 @@ import (
 )
 
 const (
-	maxSizeAPIv1 = 1000
+	maxSizeAPIv1     = 1000
+	outputFilenameV1 = "./data/games-id-list-v1.csv"
+	outputFilenameV2 = "./data/games-id-list-v2.csv"
 )
 
 func main() {
 	getGameListV1()
+	getGameListV2()
 }
 
 func getGameListV1() {
+	outputFile, err := createOutputFile(outputFilenameV1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer outputFile.Close()
+
+	outputFile.WriteString("Game ID\n")
 	currentPage := 1
-	request, err := srcomv1.GetGameList(currentPage)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
 
-	size, err := jsonparser.GetInt(request, "pagination", "size")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	gameIds := make([]string, 0)
-
-	for size == maxSizeAPIv1 {
+	for true {
+		request, _ := srcomv1.GetGameList(currentPage)
 		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			gameId, _ := jsonparser.GetString(value, "id")
-			gameIds = append(gameIds, gameId)
+			output := strings.Join([]string{gameId, "\n"}, "")
+			outputFile.WriteString(output)
 		}, "data")
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		currentPage += 1
-		request, _ = srcomv1.GetGameList(currentPage)
-		size, _ = jsonparser.GetInt(request, "pagination", "size")
-	}
+		// The pagination size should always be at 1000, unless we get to last page then
+		// it will be some random integer such that: 0 <= x <= 1000.
+		size, _ := jsonparser.GetInt(request, "pagination", "size")
+		if size < maxSizeAPIv1 {
+			return
+		}
 
-	// TODO: Handle the gameIds. Write to file? Insert into database?
-	fmt.Println(gameIds)
+		currentPage += 1
+	}
 }
 
 func getGameListV2() {
@@ -60,12 +65,20 @@ func getGameListV2() {
 		return
 	}
 
-	gameIds := make([]string, 0)
+	outputFile, err := createOutputFile(outputFilenameV2)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer outputFile.Close()
 
-	for int64(currentPage) < lastPage {
+	outputFile.WriteString("Game ID\n")
+
+	for int64(currentPage) <= lastPage {
 		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			gameId, _ := jsonparser.GetString(value, "id")
-			gameIds = append(gameIds, gameId)
+			output := strings.Join([]string{gameId, "\n"}, "")
+			outputFile.WriteString(output)
 		}, "gameList")
 		if err != nil {
 			fmt.Println(err)
@@ -74,7 +87,18 @@ func getGameListV2() {
 		currentPage += 1
 		request, _ = srcomv2.GetGameList(currentPage)
 	}
+}
 
-	// TODO: Handle the gameIds. Write to file? Insert into database?
-	fmt.Println(gameIds)
+func createOutputFile(filename string) (*os.File, error) {
+	if _, err := os.Stat(filename); errors.Is(err, os.ErrNotExist) {
+		if _, err := os.Create(filename); err != nil {
+			return nil, err
+		}
+	}
+
+	outputFile, err := os.OpenFile(filename, os.O_RDWR, 0)
+	if err != nil {
+		return nil, err
+	}
+	return outputFile, nil
 }
