@@ -32,9 +32,8 @@ func getGameListV1() {
 
 	outputFile.WriteString("Game ID\n")
 	currentPage := 1
-	morePages := true
 
-	for morePages {
+	for true {
 		request, _ := srcomv1.GetGameList(currentPage)
 		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			gameId, _ := jsonparser.GetString(value, "id")
