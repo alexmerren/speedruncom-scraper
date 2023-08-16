@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	maxSizeAPIv1     = 1000
+	maxSizeAPIv1 = 1000
+
 	outputFilenameV1 = "./data/games-id-list-v1.csv"
 	outputFilenameV2 = "./data/games-id-list-v2.csv"
 )
@@ -33,7 +34,7 @@ func getGameListV1() {
 	outputFile.WriteString("Game ID\n")
 	currentPage := 1
 
-	for true {
+	for {
 		request, _ := srcomv1.GetGameList(currentPage)
 		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			gameId, _ := jsonparser.GetString(value, "id")

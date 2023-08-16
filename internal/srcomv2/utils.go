@@ -21,10 +21,10 @@ func requestSrcom(URL string) ([]byte, error) {
 		return nil, err
 	}
 
+	// Still investigating how to respond to a 429, so if we hit it, we will know!
 	if response.StatusCode == 429 {
 		defer response.Body.Close()
-		log.Panic(response.Header, response.Body)
-		return nil, fmt.Errorf("Rate limit has been hit.")
+		log.Fatal(response.Header, response.Body)
 	}
 
 	if response.StatusCode != 200 {
