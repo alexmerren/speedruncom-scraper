@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+
+	"github.com/alexmerren/speedruncom-scraper/internal/srcomv2"
 )
 
 const (
@@ -16,7 +18,28 @@ const (
 )
 
 func main() {
-	getGameDataV1()
+	gameID := "76r55vd8"
+	response, _ := srcomv2.GetGameData(gameID)
+	fmt.Println(string(response))
+	// game.id
+	// game.name
+	// game.url
+	// game.type
+	// game.emulator
+	// game.releaseDate
+	// game.addedDate
+	// game.runCount
+	// game.totalPlayerCount
+	// game.rules
+	// game.platforms
+	// game.categories (count)
+	// game.categories.id (each)
+	// game.categories.name (each)
+	// game.categories.rules (each)
+	// game.categories.numPlayers (each)
+	// what should I do in terms of the breakdown of each number of runs to the game,category,variable,value combination?
+	// What should I do for the values/variable for each game?
+
 }
 
 func getGameDataV1() {
