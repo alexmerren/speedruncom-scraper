@@ -7,39 +7,21 @@ import (
 	"os"
 
 	"github.com/alexmerren/speedruncom-scraper/internal/srcomv2"
+	"github.com/buger/jsonparser"
 )
 
 const (
 	allGameIDListV1  = "./data/games-id-list-v1.csv"
 	outputFilenameV1 = "./data/games-data-v1.csv"
 
-	allGameIDListV2  = "./data/games-id-list-v2.csv"
-	outputFilenameV2 = "./data/games-data-v2.csv"
+	allGameIDListV2          = "./data/games-id-list-v2.csv"
+	gameOutputFilenameV2     = "./data/games-data-v2.csv"
+	categoryOutputFilenameV2 = "./data/categories-data-v2.csv"
+	levelOutputFilenameV2    = "./data/level-data-v2.csv"
 )
 
 func main() {
-	gameID := "76r55vd8"
-	response, _ := srcomv2.GetGameData(gameID)
-	fmt.Println(string(response))
-	// game.id
-	// game.name
-	// game.url
-	// game.type
-	// game.emulator
-	// game.releaseDate
-	// game.addedDate
-	// game.runCount
-	// game.totalPlayerCount
-	// game.rules
-	// game.platforms
-	// game.categories (count)
-	// game.categories.id (each)
-	// game.categories.name (each)
-	// game.categories.rules (each)
-	// game.categories.numPlayers (each)
-	// what should I do in terms of the breakdown of each number of runs to the game,category,variable,value combination?
-	// What should I do for the values/variable for each game?
-
+	getGameDataV2()
 }
 
 func getGameDataV1() {
@@ -69,6 +51,7 @@ func getGameDataV1() {
 	}
 }
 
+//nolint:errcheck// Not worth checking for an error for every file write -- that's the whole point of the file.
 func getGameDataV2() {
 	inputFile, err := openInputFile(allGameIDListV2)
 	if err != nil {
@@ -77,17 +60,81 @@ func getGameDataV2() {
 	}
 	defer inputFile.Close()
 
-	outputFile, err := createOutputFile(outputFilenameV2)
+	gameOuptutFile, err := createOutputFile(gameOutputFilenameV2)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer outputFile.Close()
+	defer gameOuptutFile.Close()
+	gameOuptutFile.WriteString("#ID,name,URL,type,rules,releaseDate,addedDate,runCount,playerCount,numCategories,numLevels,emulator\n")
 
+	categoryOuptutFile, err := createOutputFile(categoryOutputFilenameV2)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer categoryOuptutFile.Close()
+	categoryOuptutFile.WriteString("#parentGameID,ID,name,rules,numPlayers\n")
+
+	levelOutputFile, err := createOutputFile(levelOutputFilenameV2)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer levelOutputFile.Close()
+	levelOutputFile.WriteString("#parentGameID,ID,name,rules,numPlayers\n")
+
+	// Scan the input file and get information for each of the game ID's in the
+	// input file. We progress to the next line using scanner.Scan()
 	scanner := bufio.NewScanner(inputFile)
+	scanner.Scan()
 	for scanner.Scan() {
-		// TODO: Insert logic of getting data, formatting the data, and writing to output file.
-		fmt.Println(scanner.Text())
+		response, err := srcomv2.GetGameData(scanner.Text())
+		if err != nil {
+			return
+		}
+
+		gameID, _, _, _ := jsonparser.Get(response, "game", "id")
+
+		// Step 1. Process each category for a game
+		numCategories := 0
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			numCategories += 1
+			categoryID, _, _, _ := jsonparser.Get(value, "id")
+			categoryName, _, _, _ := jsonparser.Get(value, "name")
+			categoryRules, _, _, _ := jsonparser.Get(value, "rules")
+			categoryNumPlayers, _ := jsonparser.GetInt(value, "numPlayers")
+			categoryOuptutFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",\"%s\",%d\n", gameID, categoryID, categoryName, categoryRules, categoryNumPlayers))
+		}, "categories")
+		if err != nil {
+			return
+		}
+
+		// Step 2. Process each level for a game
+		numLevels := 0
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			numLevels += 1
+			levelID, _, _, _ := jsonparser.Get(value, "id")
+			levelName, _, _, _ := jsonparser.Get(value, "name")
+			levelRules, _, _, _ := jsonparser.Get(value, "rules")
+			levelNumPlayers, _ := jsonparser.GetInt(value, "numPlayers")
+			levelOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",\"%s\",%d\n", gameID, levelID, levelName, levelRules, levelNumPlayers))
+		}, "levels")
+		if err != nil {
+			return
+		}
+
+		// Step 3. Process each game
+		gameName, _, _, _ := jsonparser.Get(response, "game", "name")
+		gameURL, _, _, _ := jsonparser.Get(response, "game", "url")
+		gameType, _, _, _ := jsonparser.Get(response, "game", "type")
+		gameEmulator, _ := jsonparser.GetInt(response, "game", "emulator")
+		gameReleaseDate, _ := jsonparser.GetInt(response, "game", "releaseDate")
+		gameAddedDate, _ := jsonparser.GetInt(response, "game", "addedDate")
+		gameRunCount, _ := jsonparser.GetInt(response, "game", "runCount")
+		gamePlayerCount, _ := jsonparser.GetInt(response, "game", "totalPlayerCount")
+		gameRules, _, _, _ := jsonparser.Get(response, "game", "rules")
+		gameOuptutFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,\"%s\",%d,%d,%d,%d,%d,%d,%d\n", gameID, gameName, gameURL, gameType, gameRules, gameReleaseDate, gameAddedDate, gameRunCount, gamePlayerCount, numCategories, numLevels, gameEmulator))
 	}
 
 	if err := scanner.Err(); err != nil {

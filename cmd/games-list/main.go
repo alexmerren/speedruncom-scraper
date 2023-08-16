@@ -23,6 +23,7 @@ func main() {
 	getGameListV2()
 }
 
+//nolint:errcheck// Not worth checking for an error for every file write -- that's the whole point of the file.
 func getGameListV1() {
 	outputFile, err := createOutputFile(outputFilenameV1)
 	if err != nil {
@@ -30,8 +31,7 @@ func getGameListV1() {
 		return
 	}
 	defer outputFile.Close()
-
-	outputFile.WriteString("Game ID\n")
+	outputFile.WriteString("#gameID\n")
 	currentPage := 1
 
 	for {
@@ -57,6 +57,7 @@ func getGameListV1() {
 	}
 }
 
+//nolint:errcheck// Not worth checking for an error for every file write -- that's the whole point of the file.
 func getGameListV2() {
 	currentPage := 1
 	request, _ := srcomv2.GetGameList(currentPage)
@@ -72,8 +73,7 @@ func getGameListV2() {
 		return
 	}
 	defer outputFile.Close()
-
-	outputFile.WriteString("Game ID\n")
+	outputFile.WriteString("#gameID\n")
 
 	for int64(currentPage) <= lastPage {
 		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {

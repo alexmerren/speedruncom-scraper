@@ -53,19 +53,6 @@ func getBytes(data interface{}) ([]byte, error) {
 	return json.Marshal(data)
 }
 
-func decodeB64Header(header string) ([]byte, error) {
-	if i := len(header) % 4; i != 0 {
-		header += strings.Repeat("=", 4-i)
-	}
-
-	decodedString, err := b64.StdEncoding.DecodeString(header)
-	if err != nil {
-		return nil, err
-	}
-
-	return decodedString, nil
-}
-
 func encodeB64Header(data []byte) string {
 	encodedString := b64.StdEncoding.EncodeToString(data)
 	return strings.TrimRight(encodedString, "=")
