@@ -6,13 +6,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/alexmerren/speedruncom-scraper/internal/srcomv1"
 	"github.com/alexmerren/speedruncom-scraper/internal/srcomv2"
 	"github.com/buger/jsonparser"
 )
 
 const (
-	allGameIDListV1  = "./data/games-id-list-v1.csv"
-	outputFilenameV1 = "./data/games-data-v1.csv"
+	allGameIDListV1          = "./data/games-id-list-v1.csv"
+	gameOutputFilenameV1     = "./data/games-data-v1.csv"
+	categoryOutputFilenameV1 = "./data/categories-data-v1.csv"
+	levelOutputFilenameV1    = "./data/level-data-v1.csv"
 
 	allGameIDListV2          = "./data/games-id-list-v2.csv"
 	gameOutputFilenameV2     = "./data/games-data-v2.csv"
@@ -21,9 +24,11 @@ const (
 )
 
 func main() {
-	getGameDataV2()
+	getGameDataV1()
+	//getGameDataV2()
 }
 
+//nolint:errcheck// Not worth checking for an error for every file write.
 func getGameDataV1() {
 	inputFile, err := openInputFile(allGameIDListV1)
 	if err != nil {
@@ -32,17 +37,43 @@ func getGameDataV1() {
 	}
 	defer inputFile.Close()
 
-	outputFile, err := createOutputFile(outputFilenameV1)
+	gameOuptutFile, err := createOutputFile(gameOutputFilenameV1)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer outputFile.Close()
+	defer gameOuptutFile.Close()
+	gameOuptutFile.WriteString("#ID,name,URL,type,rules,releaseDate,addedDate,runCount,playerCount,numCategories,numLevels,emulator\n")
 
+	categoryOuptutFile, err := createOutputFile(categoryOutputFilenameV1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer categoryOuptutFile.Close()
+	categoryOuptutFile.WriteString("#parentGameID,ID,name,rules,numPlayers\n")
+
+	levelOutputFile, err := createOutputFile(levelOutputFilenameV1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer levelOutputFile.Close()
+	levelOutputFile.WriteString("#parentGameID,ID,name,rules,numPlayers\n")
+
+	// Scan the input file and get information for each of the game ID's in the
+	// input file. We progress to the next line using scanner.Scan()
 	scanner := bufio.NewScanner(inputFile)
+	scanner.Scan()
 	for scanner.Scan() {
-		// TODO: Insert logic of getting data, formatting the data, and writing to output file.
-		fmt.Println(scanner.Text())
+		_, err := srcomv1.GetGame(scanner.Text())
+		if err != nil {
+			return
+		}
+
+		// Step 1. Process each category for a game
+		// Step 2. Process each level for a game
+		// Step 3. Process each game
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -51,7 +82,7 @@ func getGameDataV1() {
 	}
 }
 
-//nolint:errcheck// Not worth checking for an error for every file write -- that's the whole point of the file.
+//nolint:errcheck// Not worth checking for an error for every file write.
 func getGameDataV2() {
 	inputFile, err := openInputFile(allGameIDListV2)
 	if err != nil {

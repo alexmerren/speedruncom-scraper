@@ -17,13 +17,18 @@ func requestSrcom(URL string) ([]byte, error) {
 		return nil, err
 	}
 
+	if response.StatusCode == 429 {
+		defer response.Body.Close()
+		log.Fatal(response.Header, response.Body)
+	}
+
 	if response.StatusCode != 200 {
 		time.Sleep(unsuccessfulRequestSleepTime)
 		return requestSrcom(URL)
 	}
 
 	log.Print(URL)
-
 	defer response.Body.Close()
+
 	return io.ReadAll(response.Body)
 }

@@ -1,6 +1,7 @@
 GO ?= go
 DOCKER ?= docker
 LINTER := golangci-lint
+GOFMT := gofmt
 
 DIST_DIR := $(CURDIR)/dist
 INTERNAL_DIR := $(CURDIR)/internal
@@ -23,7 +24,7 @@ help:
 
 ## all: Download dependencies, generate mocks, fmt, run unit tests, build binary.
 .PHONY: all
-all: vendor mocks fmt test build
+all: vendor fmt test build
 
 ## build: Create the binary 
 .PHONY: build
@@ -53,4 +54,4 @@ test:
 ## fmt: Format all code for the project
 .PHONY: fmt
 fmt: 
-	$(GO) fmt ./...
+	$(GOFMT) -s -w $(CURDIR) 
