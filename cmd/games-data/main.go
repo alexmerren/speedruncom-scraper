@@ -24,62 +24,7 @@ const (
 )
 
 func main() {
-	getGameDataV1()
-	//getGameDataV2()
-}
-
-//nolint:errcheck// Not worth checking for an error for every file write.
-func getGameDataV1() {
-	inputFile, err := openInputFile(allGameIDListV1)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer inputFile.Close()
-
-	gameOuptutFile, err := createOutputFile(gameOutputFilenameV1)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer gameOuptutFile.Close()
-	gameOuptutFile.WriteString("#ID,name,URL,type,rules,releaseDate,addedDate,runCount,playerCount,numCategories,numLevels,emulator\n")
-
-	categoryOuptutFile, err := createOutputFile(categoryOutputFilenameV1)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer categoryOuptutFile.Close()
-	categoryOuptutFile.WriteString("#parentGameID,ID,name,rules,numPlayers\n")
-
-	levelOutputFile, err := createOutputFile(levelOutputFilenameV1)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer levelOutputFile.Close()
-	levelOutputFile.WriteString("#parentGameID,ID,name,rules,numPlayers\n")
-
-	// Scan the input file and get information for each of the game ID's in the
-	// input file. We progress to the next line using scanner.Scan()
-	scanner := bufio.NewScanner(inputFile)
-	scanner.Scan()
-	for scanner.Scan() {
-		_, err := srcomv1.GetGame(scanner.Text())
-		if err != nil {
-			return
-		}
-
-		// Step 1. Process each category for a game
-		// Step 2. Process each level for a game
-		// Step 3. Process each game
-	}
-
-	if err := scanner.Err(); err != nil {
-		fmt.Println(err)
-		return
-	}
+	getGameDataV2()
 }
 
 //nolint:errcheck// Not worth checking for an error for every file write.
@@ -166,6 +111,60 @@ func getGameDataV2() {
 		gamePlayerCount, _ := jsonparser.GetInt(response, "game", "totalPlayerCount")
 		gameRules, _, _, _ := jsonparser.Get(response, "game", "rules")
 		gameOuptutFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,\"%s\",%d,%d,%d,%d,%d,%d,%d\n", gameID, gameName, gameURL, gameType, gameRules, gameReleaseDate, gameAddedDate, gameRunCount, gamePlayerCount, numCategories, numLevels, gameEmulator))
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
+//nolint:errcheck// Not worth checking for an error for every file write.
+func getGameDataV1() {
+	inputFile, err := openInputFile(allGameIDListV1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer inputFile.Close()
+
+	gameOuptutFile, err := createOutputFile(gameOutputFilenameV1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer gameOuptutFile.Close()
+	gameOuptutFile.WriteString("#ID,name,URL,type,rules,releaseDate,addedDate,runCount,playerCount,numCategories,numLevels,emulator\n")
+
+	categoryOuptutFile, err := createOutputFile(categoryOutputFilenameV1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer categoryOuptutFile.Close()
+	categoryOuptutFile.WriteString("#parentGameID,ID,name,rules,numPlayers\n")
+
+	levelOutputFile, err := createOutputFile(levelOutputFilenameV1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer levelOutputFile.Close()
+	levelOutputFile.WriteString("#parentGameID,ID,name,rules,numPlayers\n")
+
+	// Scan the input file and get information for each of the game ID's in the
+	// input file. We progress to the next line using scanner.Scan()
+	scanner := bufio.NewScanner(inputFile)
+	scanner.Scan()
+	for scanner.Scan() {
+		_, err := srcomv1.GetGame(scanner.Text())
+		if err != nil {
+			return
+		}
+
+		// Step 1. Process each category for a game
+		// Step 2. Process each level for a game
+		// Step 3. Process each game
 	}
 
 	if err := scanner.Err(); err != nil {

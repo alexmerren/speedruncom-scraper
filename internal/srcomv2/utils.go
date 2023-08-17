@@ -6,13 +6,15 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net/http"
 	"strings"
 	"time"
 )
 
 const (
-	unsuccessfulRequestSleepTime = 5 * time.Second
+	exponentialBackoffStartInt   = 500
+	exponentialBackoffMultiplier = 2
 )
 
 func requestSrcom(URL string) ([]byte, error) {
@@ -21,20 +23,39 @@ func requestSrcom(URL string) ([]byte, error) {
 		return nil, err
 	}
 
-	if response.StatusCode == 429 {
-		defer response.Body.Close()
-		log.Fatal(response.Header, response.Body)
-	}
-
 	if response.StatusCode != 200 {
-		time.Sleep(unsuccessfulRequestSleepTime)
-		return requestSrcom(URL)
+		response, err = retryWithExponentialBackoff(URL)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	log.Print(URL)
 	defer response.Body.Close()
 
 	return io.ReadAll(response.Body)
+}
+
+func retryWithExponentialBackoff(URL string) (*http.Response, error) {
+	iterationNumber := 0
+	for {
+		time.Sleep(exponentialBackoff(iterationNumber))
+		response, err := http.DefaultClient.Get(URL)
+		if err != nil {
+			return nil, err
+		}
+
+		if response.StatusCode == 200 {
+			return response, nil
+		}
+
+		iterationNumber += 1
+	}
+}
+
+func exponentialBackoff(iteration int) time.Duration {
+	newTime := exponentialBackoffStartInt * math.Pow(exponentialBackoffMultiplier, float64(iteration))
+	return time.Duration(newTime) * time.Millisecond
 }
 
 func formatHeader(data map[string]interface{}, function string) (string, error) {
