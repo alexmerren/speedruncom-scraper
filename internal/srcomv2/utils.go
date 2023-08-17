@@ -17,7 +17,7 @@ const (
 	exponentialBackoffMultiplier = 2
 )
 
-func requestSrcom(URL string) ([]byte, error) {
+func RequestSrcom(URL string) ([]byte, error) {
 	response, err := http.DefaultClient.Get(URL)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,9 @@ func requestSrcom(URL string) ([]byte, error) {
 func retryWithExponentialBackoff(URL string) (*http.Response, error) {
 	iterationNumber := 0
 	for {
-		time.Sleep(exponentialBackoff(iterationNumber))
+		backoffTime := exponentialBackoff(iterationNumber)
+		log.Printf("Sleeping for %s", backoffTime)
+		time.Sleep(backoffTime)
 		response, err := http.DefaultClient.Get(URL)
 		if err != nil {
 			return nil, err
@@ -58,7 +60,7 @@ func exponentialBackoff(iteration int) time.Duration {
 	return time.Duration(newTime) * time.Millisecond
 }
 
-func formatHeader(data map[string]interface{}, function string) (string, error) {
+func formatHeader(data interface{}, function string) (string, error) {
 	flattenedData, err := getBytes(data)
 	if err != nil {
 		return "", err

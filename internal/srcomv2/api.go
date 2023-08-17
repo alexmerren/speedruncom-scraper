@@ -27,7 +27,7 @@ func GetUserData(userID string) ([]byte, error) {
 		return nil, err
 	}
 
-	return requestSrcom(URL)
+	return RequestSrcom(URL)
 }
 
 func GetGameData(gameID string) ([]byte, error) {
@@ -40,7 +40,7 @@ func GetGameData(gameID string) ([]byte, error) {
 		return nil, err
 	}
 
-	return requestSrcom(URL)
+	return RequestSrcom(URL)
 }
 
 func GetGameSummary(gameURL string) ([]byte, error) {
@@ -53,7 +53,7 @@ func GetGameSummary(gameURL string) ([]byte, error) {
 		return nil, err
 	}
 
-	return requestSrcom(URL)
+	return RequestSrcom(URL)
 }
 
 func GetGameList(pageNumber int) ([]byte, error) {
@@ -66,7 +66,7 @@ func GetGameList(pageNumber int) ([]byte, error) {
 		return nil, err
 	}
 
-	return requestSrcom(URL)
+	return RequestSrcom(URL)
 }
 
 func GetGameCategoryLeaderboard(gameID, categoryID string, pageNumber int) ([]byte, error) {
@@ -86,7 +86,7 @@ func GetGameCategoryLeaderboard(gameID, categoryID string, pageNumber int) ([]by
 		return nil, err
 	}
 
-	return requestSrcom(URL)
+	return RequestSrcom(URL)
 }
 
 func GetGameCategoryVariableValueLeaderboard(
@@ -115,7 +115,7 @@ func GetGameCategoryVariableValueLeaderboard(
 		return nil, err
 	}
 
-	return requestSrcom(URL)
+	return RequestSrcom(URL)
 }
 
 func GetGameCategoryWorldRecordHistory(gameID, categoryID string) ([]byte, error) {
@@ -131,7 +131,7 @@ func GetGameCategoryWorldRecordHistory(gameID, categoryID string) ([]byte, error
 		return nil, err
 	}
 
-	return requestSrcom(URL)
+	return RequestSrcom(URL)
 }
 
 func GetSearch(query string) ([]byte, error) {
@@ -150,5 +150,5 @@ func GetSearch(query string) ([]byte, error) {
 		return nil, err
 	}
 
-	return requestSrcom(URL)
+	return RequestSrcom(URL)
 }
