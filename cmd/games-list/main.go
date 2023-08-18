@@ -1,11 +1,10 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"os"
 	"strings"
 
+	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
 	"github.com/alexmerren/speedruncom-scraper/internal/srcomv1"
 	"github.com/alexmerren/speedruncom-scraper/internal/srcomv2"
 	"github.com/buger/jsonparser"
@@ -14,8 +13,8 @@ import (
 const (
 	maxSizeAPIv1 = 1000
 
-	outputFilenameV1 = "./data/games-id-list-v1.csv"
-	outputFilenameV2 = "./data/games-id-list-v2.csv"
+	outputFilenameV1 = "./data/v1/games-id-list.csv"
+	outputFilenameV2 = "./data/v2/games-id-list.csv"
 )
 
 func main() {
@@ -25,7 +24,7 @@ func main() {
 
 //nolint:errcheck// Not worth checking for an error for every file write -- that's the whole point of the file.
 func getGameListV1() {
-	outputFile, err := createOutputFile(outputFilenameV1)
+	outputFile, err := filesystem.CreateOutputFile(outputFilenameV1)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -67,7 +66,7 @@ func getGameListV2() {
 		return
 	}
 
-	outputFile, err := createOutputFile(outputFilenameV2)
+	outputFile, err := filesystem.CreateOutputFile(outputFilenameV2)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -88,18 +87,4 @@ func getGameListV2() {
 		currentPage += 1
 		request, _ = srcomv2.GetGameList(currentPage)
 	}
-}
-
-func createOutputFile(filename string) (*os.File, error) {
-	if _, err := os.Stat(filename); errors.Is(err, os.ErrNotExist) {
-		if _, err := os.Create(filename); err != nil {
-			return nil, err
-		}
-	}
-
-	outputFile, err := os.OpenFile(filename, os.O_RDWR, 0)
-	if err != nil {
-		return nil, err
-	}
-	return outputFile, nil
 }
