@@ -134,6 +134,23 @@ func GetGameCategoryWorldRecordHistory(gameID, categoryID string) ([]byte, error
 	return RequestSrcom(URL)
 }
 
+func GetGameCategoryLevelWorldRecordHistory(gameID, categoryID, levelID string) ([]byte, error) {
+	data := map[string]interface{}{
+		"params": map[string]interface{}{
+			"gameId":     gameID,
+			"categoryId": categoryID,
+			"levelId":    levelID,
+		},
+	}
+
+	URL, err := formatHeader(data, gameListFunction)
+	if err != nil {
+		return nil, err
+	}
+
+	return RequestSrcom(URL)
+}
+
 func GetSearch(query string) ([]byte, error) {
 	data := map[string]interface{}{
 		"query":         query,
