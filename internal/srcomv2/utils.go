@@ -6,39 +6,61 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net/http"
 	"strings"
 	"time"
 )
 
 const (
-	unsuccessfulRequestSleepTime = 5 * time.Second
+	exponentialBackoffStartInt   = 500
+	exponentialBackoffMultiplier = 2
 )
 
-func requestSrcom(URL string) ([]byte, error) {
+func RequestSrcom(URL string) ([]byte, error) {
 	response, err := http.DefaultClient.Get(URL)
 	if err != nil {
 		return nil, err
 	}
 
-	if response.StatusCode == 429 {
-		defer response.Body.Close()
-		log.Panic(response.Header, response.Body)
-		return nil, fmt.Errorf("Rate limit has been hit.")
-	}
-
 	if response.StatusCode != 200 {
-		time.Sleep(unsuccessfulRequestSleepTime)
-		return requestSrcom(URL)
+		response, err = retryWithExponentialBackoff(URL)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	log.Print(URL)
-
 	defer response.Body.Close()
+
 	return io.ReadAll(response.Body)
 }
 
-func formatHeader(data map[string]interface{}, function string) (string, error) {
+func retryWithExponentialBackoff(URL string) (*http.Response, error) {
+	iterationNumber := 0
+	for {
+		backoffTime := exponentialBackoff(iterationNumber)
+		log.Printf("Sleeping for %s", backoffTime)
+		time.Sleep(backoffTime)
+		response, err := http.DefaultClient.Get(URL)
+		if err != nil {
+			return nil, err
+		}
+
+		if response.StatusCode == 200 {
+			return response, nil
+		}
+
+		iterationNumber += 1
+	}
+}
+
+func exponentialBackoff(iteration int) time.Duration {
+	newTime := exponentialBackoffStartInt * math.Pow(exponentialBackoffMultiplier, float64(iteration))
+	return time.Duration(newTime) * time.Millisecond
+}
+
+func formatHeader(data interface{}, function string) (string, error) {
 	flattenedData, err := getBytes(data)
 	if err != nil {
 		return "", err
@@ -51,19 +73,6 @@ func formatHeader(data map[string]interface{}, function string) (string, error) 
 
 func getBytes(data interface{}) ([]byte, error) {
 	return json.Marshal(data)
-}
-
-func decodeB64Header(header string) ([]byte, error) {
-	if i := len(header) % 4; i != 0 {
-		header += strings.Repeat("=", 4-i)
-	}
-
-	decodedString, err := b64.StdEncoding.DecodeString(header)
-	if err != nil {
-		return nil, err
-	}
-
-	return decodedString, nil
 }
 
 func encodeB64Header(data []byte) string {
