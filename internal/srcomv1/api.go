@@ -9,7 +9,7 @@ import (
 const (
 	baseApiUrl                                   = "https://www.speedrun.com/api/v1/%s"
 	gameListFunction                             = "games?_bulk=yes&max=1000&orderby=released&direction=asc&offset=%d"
-	gameFunction                                 = "games/%s?embed=levels,cateogires,developers,platforms,genres,variables"
+	gameFunction                                 = "games/%s?embed=levels,categories,developers,platforms,genres,variables"
 	categoryFunction                             = "categories/%s?embed=game,variables"
 	levelFunction                                = "levels/%s?embed=categories,variables"
 	userFunction                                 = "users/%s"

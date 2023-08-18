@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"strings"
+	"sync"
 
 	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
 	"github.com/alexmerren/speedruncom-scraper/internal/srcomv1"
@@ -18,8 +18,19 @@ const (
 )
 
 func main() {
-	getGameListV1()
-	getGameListV2()
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		getGameListV1()
+	}()
+
+	go func() {
+		defer wg.Done()
+		getGameListV2()
+	}()
+
+	wg.Wait()
 }
 
 //nolint:errcheck// Not worth checking for an error for every file write -- that's the whole point of the file.
@@ -36,9 +47,8 @@ func getGameListV1() {
 	for {
 		request, _ := srcomv1.GetGameList(currentPage)
 		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			gameId, _ := jsonparser.GetString(value, "id")
-			output := strings.Join([]string{gameId, "\n"}, "")
-			outputFile.WriteString(output)
+			gameID, _ := jsonparser.GetString(value, "id")
+			outputFile.WriteString(fmt.Sprintf("%s\n", gameID))
 		}, "data")
 		if err != nil {
 			fmt.Println(err)
@@ -76,9 +86,8 @@ func getGameListV2() {
 
 	for int64(currentPage) <= lastPage {
 		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			gameId, _ := jsonparser.GetString(value, "id")
-			output := strings.Join([]string{gameId, "\n"}, "")
-			outputFile.WriteString(output)
+			gameID, _ := jsonparser.GetString(value, "id")
+			outputFile.WriteString(fmt.Sprintf("%s\n", gameID))
 		}, "gameList")
 		if err != nil {
 			fmt.Println(err)
