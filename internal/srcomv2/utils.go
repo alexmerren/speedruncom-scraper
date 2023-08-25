@@ -42,6 +42,7 @@ func retryWithExponentialBackoff(URL string) (*http.Response, error) {
 		backoffTime := exponentialBackoff(iterationNumber)
 		log.Printf("Sleeping for %s", backoffTime)
 		time.Sleep(backoffTime)
+
 		response, err := http.DefaultClient.Get(URL)
 		if err != nil {
 			return nil, err

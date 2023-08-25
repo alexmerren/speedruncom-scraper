@@ -2,10 +2,7 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"os"
-
-	"github.com/alexmerren/speedruncom-scraper/internal/srcomv2"
 )
 
 func main() {
@@ -15,9 +12,6 @@ func main() {
 func getLeaderboardDataV1() {}
 
 func getLeaderboardDataV2() {
-	gameID := "76r55vd8"
-	response, _ := srcomv2.GetGameData(gameID)
-	fmt.Println(string(response))
 	// Deal with this stuff in leaderboards-data! \/
 	// what should I do in terms of the breakdown of each number of runs to the game,category,variable,value combination?
 	// What should I do for the values/variable for each game?
