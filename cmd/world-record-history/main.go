@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
-	"github.com/alexmerren/speedruncom-scraper/internal/srcomv2"
 )
 
 const (
@@ -14,10 +13,8 @@ const (
 )
 
 func main() {
+	getWorldRecordHistory()
 	fmt.Println("Not implemented yet...")
-	response, _ := srcomv2.GetSession()
-	fmt.Println(string(response))
-	// getWorldRecordHistory()
 }
 
 func getWorldRecordHistory() {
