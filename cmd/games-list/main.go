@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
 	"github.com/alexmerren/speedruncom-scraper/internal/srcomv1"
@@ -18,19 +17,7 @@ const (
 )
 
 func main() {
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		getGameListV1()
-	}()
-
-	go func() {
-		defer wg.Done()
-		getGameListV2()
-	}()
-
-	wg.Wait()
+	getGameListV1()
 }
 
 //nolint:errcheck// Not worth checking for an error for every file write -- that's the whole point of the file.

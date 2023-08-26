@@ -16,7 +16,7 @@ const (
 )
 
 func main() {
-	//getLeaderboardDataV1()
+	getLeaderboardDataV1()
 }
 
 func getLeaderboardDataV1() {
@@ -33,7 +33,7 @@ func getLeaderboardDataV1() {
 		return
 	}
 	defer leaderboardOuptutFile.Close()
-	leaderboardOuptutFile.WriteString("#ID,name,URL,type,rules,releaseDate,addedDate,runCount,playerCount,numCategories,numLevels,emulator\n")
+	leaderboardOuptutFile.WriteString("")
 
 	scanner := bufio.NewScanner(inputFile)
 	scanner.Scan()

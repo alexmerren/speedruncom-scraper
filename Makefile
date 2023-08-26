@@ -54,4 +54,4 @@ test:
 ## fmt: Format all code for the project
 .PHONY: fmt
 fmt: 
-	$(GOFMT) -s -w $(CURDIR) 
+	$(GOFMT) -s -w $(CURDIR)

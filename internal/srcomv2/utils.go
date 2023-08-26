@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/alexmerren/speedruncom-scraper/internal/httpcache"
 )
 
 const (
@@ -18,7 +20,7 @@ const (
 )
 
 func RequestSrcom(URL string) ([]byte, error) {
-	response, err := http.DefaultClient.Get(URL)
+	response, err := httpcache.DefaultClient.Get(URL)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +45,7 @@ func retryWithExponentialBackoff(URL string) (*http.Response, error) {
 		log.Printf("Sleeping for %s", backoffTime)
 		time.Sleep(backoffTime)
 
-		response, err := http.DefaultClient.Get(URL)
+		response, err := httpcache.DefaultClient.Get(URL)
 		if err != nil {
 			return nil, err
 		}

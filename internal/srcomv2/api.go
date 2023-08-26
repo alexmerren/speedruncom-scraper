@@ -5,6 +5,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/alexmerren/speedruncom-scraper/internal/httpcache"
 )
 
 const (
@@ -191,7 +193,7 @@ func GetSession() ([]byte, error) {
 		"Origin":          {"https://www.speedrun.com"},
 	}
 
-	response, err := http.DefaultClient.Do(request)
+	response, err := httpcache.DefaultClient.Do(request)
 	if err != nil {
 		return nil, err
 	}
