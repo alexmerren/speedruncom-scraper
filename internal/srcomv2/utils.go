@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/alexmerren/speedruncom-scraper/internal/httpcache"
 )
 
 const (
@@ -18,9 +20,15 @@ const (
 )
 
 func RequestSrcom(URL string) ([]byte, error) {
-	response, err := http.DefaultClient.Get(URL)
+	response, err := httpcache.DefaultClient.Get(URL)
 	if err != nil {
 		return nil, err
+	}
+
+	if response.StatusCode == 404 {
+		parts := strings.Split(URL, "/")
+		gameID, _, _ := strings.Cut(parts[6], "?")
+		return nil, fmt.Errorf("srcom: gameID %s doesn't exist", gameID)
 	}
 
 	if response.StatusCode != 200 {
@@ -42,7 +50,8 @@ func retryWithExponentialBackoff(URL string) (*http.Response, error) {
 		backoffTime := exponentialBackoff(iterationNumber)
 		log.Printf("Sleeping for %s", backoffTime)
 		time.Sleep(backoffTime)
-		response, err := http.DefaultClient.Get(URL)
+
+		response, err := httpcache.DefaultClient.Get(URL)
 		if err != nil {
 			return nil, err
 		}
