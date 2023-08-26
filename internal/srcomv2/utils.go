@@ -26,9 +26,7 @@ func RequestSrcom(URL string) ([]byte, error) {
 	}
 
 	if response.StatusCode == 404 {
-		parts := strings.Split(URL, "/")
-		gameID, _, _ := strings.Cut(parts[6], "?")
-		return nil, fmt.Errorf("srcom: gameID %s doesn't exist", gameID)
+		return nil, fmt.Errorf("srcom: %s doesn't exist", URL)
 	}
 
 	if response.StatusCode != 200 {

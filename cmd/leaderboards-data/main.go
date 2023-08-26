@@ -6,22 +6,17 @@ import (
 
 	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
 	"github.com/alexmerren/speedruncom-scraper/internal/srcomv1"
-	"github.com/alexmerren/speedruncom-scraper/internal/srcomv2"
+	"github.com/buger/jsonparser"
 )
 
 const (
 	allGameIDListV1                         = "./data/v1/games-id-list.csv"
 	leaderboardOutputFilenameV1             = "./data/v1/leaderboard-data.csv"
 	leaderboardCombinationsOutputFilenameV1 = "./data/v1/leaderboard-combinations-data.csv"
-
-	allGameIDListV2             = "./data/v2/games-id-list.csv"
-	leaderboardOutputFilenameV2 = "./data/v2/leaderboard-data.csv"
 )
 
 func main() {
-	//getLeaderboardDataV1()
-	response, _ := srcomv1.GetGame("76r55vd8")
-	fmt.Println(string(response))
+	getLeaderboardDataV1()
 }
 
 func getLeaderboardDataV1() {
@@ -51,33 +46,21 @@ func getLeaderboardDataV1() {
 	scanner := bufio.NewScanner(inputFile)
 	scanner.Scan()
 	for scanner.Scan() {
-		response, err := srcomv2.GetGameData(scanner.Text())
+		response, err := srcomv1.GetGame(scanner.Text())
 		if err != nil {
+			fmt.Println(err)
 			continue
 		}
-		fmt.Printf(string(response))
-	}
-}
 
-func getLeaderboardDataV2() {
-	inputFile, err := filesystem.OpenInputFile(allGameIDListV2)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer inputFile.Close()
+		// Step 1. Go through each 'per-game' category.
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			// categoryID, _, _, _ := jsonparser.Get(value, "id")
+			// categoryType, _, _, _ := jsonparser.Get(value, "type")
+			// if categoryType == "per-game" {
+			// }
 
-	leaderboardOuptutFile, err := filesystem.CreateOutputFile(leaderboardOutputFilenameV2)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer leaderboardOuptutFile.Close()
-	leaderboardOuptutFile.WriteString("")
-
-	scanner := bufio.NewScanner(inputFile)
-	scanner.Scan()
-	for scanner.Scan() {
-		fmt.Println(scanner.Text())
+			// if categoryType == "per-level" {
+			// }
+		}, "data", "categories", "data")
 	}
 }

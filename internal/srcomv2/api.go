@@ -1,14 +1,5 @@
 package srcomv2
 
-import (
-	"bytes"
-	"io"
-	"log"
-	"net/http"
-
-	"github.com/alexmerren/speedruncom-scraper/internal/httpcache"
-)
-
 const (
 	baseApiUrl = "https://www.speedrun.com/api/v2/%s?_r=%s"
 
@@ -177,29 +168,4 @@ func GetSearch(query string) ([]byte, error) {
 	}
 
 	return RequestSrcom(URL)
-}
-
-func GetSession() ([]byte, error) {
-	sessionURL := "https://www.speedrun.com/api/v2/GetSession"
-	request, err := http.NewRequest(http.MethodPost, sessionURL, bytes.NewBuffer([]byte("{}")))
-	if err != nil {
-		return nil, err
-	}
-
-	request.Header = map[string][]string{
-		"Accept":          {"application/json"},
-		"Accept-Language": {"en-GB,en;q=0.9"},
-		"Content-Type":    {"application/json"},
-		"Origin":          {"https://www.speedrun.com"},
-	}
-
-	response, err := httpcache.DefaultClient.Do(request)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Print(sessionURL)
-	defer response.Body.Close()
-
-	return io.ReadAll(response.Body)
 }
