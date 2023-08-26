@@ -7,15 +7,15 @@ import (
 )
 
 const (
-	baseApiUrl                                   = "https://www.speedrun.com/api/v1/%s"
-	gameListFunction                             = "games?_bulk=yes&max=1000&orderby=released&direction=asc&offset=%d"
-	gameFunction                                 = "games/%s?embed=levels,categories,developers,platforms,genres,variables"
-	categoryFunction                             = "categories/%s?embed=game,variables"
-	levelFunction                                = "levels/%s?embed=categories,variables"
-	userFunction                                 = "users/%s"
-	developerFunction                            = "developers/%s"
-	gameCategoryLeaderboardFunction              = "leaderboards/%s/category/%s?embed=game,category,level,players,variables"
-	gameCategoryVariableValueLeaderboardFunction = "leaderboards/%s/category/%s?%s=%s"
+	baseApiUrl                           = "https://www.speedrun.com/api/v1/%s"
+	gameListFunction                     = "games?_bulk=yes&max=1000&orderby=released&direction=asc&offset=%d"
+	gameFunction                         = "games/%s?embed=levels,categories,developers,platforms,genres,variables"
+	categoryFunction                     = "categories/%s?embed=game,variables"
+	levelFunction                        = "levels/%s?embed=categories,variables"
+	userFunction                         = "users/%s"
+	developerFunction                    = "developers/%s"
+	gameCategoryLeaderboardFunction      = "leaderboards/%s/category/%s?embed=game,category,level,players,variables"
+	gameCategoryLevelLeaderboardFunction = "leaderboards/%s/level/%s/%s"
 
 	gameListNumberPerPage = 1000
 )
@@ -64,12 +64,9 @@ func GetGameCategoryLeaderboard(gameID, categoryID string) ([]byte, error) {
 	return srcomv2.RequestSrcom(URL)
 }
 
-func GetGameCategoryVariableValueLeaderboard(
-	gameID, categoryID, variableID, valueID string,
-	pageNumber int,
-) ([]byte, error) {
-	header := fmt.Sprintf(gameCategoryVariableValueLeaderboardFunction,
-		gameID, categoryID, variableID, valueID,
+func GetGameCategoryLevelLeaderboard(gameID, categoryID, levelID string) ([]byte, error) {
+	header := fmt.Sprintf(gameCategoryLevelLeaderboardFunction,
+		gameID, levelID, categoryID,
 	)
 	URL := fmt.Sprintf(baseApiUrl, header)
 	return srcomv2.RequestSrcom(URL)

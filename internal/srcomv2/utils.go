@@ -8,6 +8,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 
@@ -19,17 +20,24 @@ const (
 	exponentialBackoffMultiplier = 2
 )
 
+var unrecovableStatusCodes = []int{
+	http.StatusNotFound,
+	http.StatusBadRequest,
+	http.StatusGatewayTimeout,
+	http.StatusServiceUnavailable,
+}
+
 func RequestSrcom(URL string) ([]byte, error) {
 	response, err := httpcache.DefaultClient.Get(URL)
 	if err != nil {
 		return nil, err
 	}
 
-	if response.StatusCode == 404 {
-		return nil, fmt.Errorf("srcom: %s doesn't exist", URL)
+	if slices.Contains(unrecovableStatusCodes, response.StatusCode) {
+		return nil, fmt.Errorf("srcom: unrecoverable error for url %s", URL)
 	}
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		response, err = retryWithExponentialBackoff(URL)
 		if err != nil {
 			return nil, err
