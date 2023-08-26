@@ -25,6 +25,12 @@ func RequestSrcom(URL string) ([]byte, error) {
 		return nil, err
 	}
 
+	if response.StatusCode == 404 {
+		parts := strings.Split(URL, "/")
+		gameID, _, _ := strings.Cut(parts[6], "?")
+		return nil, fmt.Errorf("srcom: gameID %s doesn't exist", gameID)
+	}
+
 	if response.StatusCode != 200 {
 		response, err = retryWithExponentialBackoff(URL)
 		if err != nil {

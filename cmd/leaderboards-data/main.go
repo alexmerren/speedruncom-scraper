@@ -5,18 +5,23 @@ import (
 	"fmt"
 
 	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
+	"github.com/alexmerren/speedruncom-scraper/internal/srcomv1"
+	"github.com/alexmerren/speedruncom-scraper/internal/srcomv2"
 )
 
 const (
-	allGameIDListV1             = "./data/v1/games-id-list.csv"
-	leaderboardOutputFilenameV1 = "./data/v1/leaderboard-data.csv"
+	allGameIDListV1                         = "./data/v1/games-id-list.csv"
+	leaderboardOutputFilenameV1             = "./data/v1/leaderboard-data.csv"
+	leaderboardCombinationsOutputFilenameV1 = "./data/v1/leaderboard-combinations-data.csv"
 
 	allGameIDListV2             = "./data/v2/games-id-list.csv"
 	leaderboardOutputFilenameV2 = "./data/v2/leaderboard-data.csv"
 )
 
 func main() {
-	getLeaderboardDataV1()
+	//getLeaderboardDataV1()
+	response, _ := srcomv1.GetGame("76r55vd8")
+	fmt.Println(string(response))
 }
 
 func getLeaderboardDataV1() {
@@ -26,6 +31,14 @@ func getLeaderboardDataV1() {
 		return
 	}
 	defer inputFile.Close()
+
+	leaderboardCombinationsOutputFile, err := filesystem.CreateOutputFile(leaderboardCombinationsOutputFilenameV1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer leaderboardCombinationsOutputFile.Close()
+	leaderboardCombinationsOutputFile.WriteString("")
 
 	leaderboardOuptutFile, err := filesystem.CreateOutputFile(leaderboardOutputFilenameV1)
 	if err != nil {
@@ -38,7 +51,11 @@ func getLeaderboardDataV1() {
 	scanner := bufio.NewScanner(inputFile)
 	scanner.Scan()
 	for scanner.Scan() {
-		fmt.Println(scanner.Text())
+		response, err := srcomv2.GetGameData(scanner.Text())
+		if err != nil {
+			continue
+		}
+		fmt.Printf(string(response))
 	}
 }
 

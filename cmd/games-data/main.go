@@ -69,7 +69,7 @@ func getGameDataV1() {
 		return
 	}
 	defer variableOutputFile.Close()
-	variableOutputFile.WriteString("#parentGameID,ID,name,category,scope\n")
+	variableOutputFile.WriteString("#parentGameID,ID,name,category,scope,isSubcategory,defaultValue\n")
 
 	valueOutputFile, err := filesystem.CreateOutputFile(valueOutputFileV1)
 	if err != nil {
@@ -88,7 +88,7 @@ func getGameDataV1() {
 		response, err := srcomv1.GetGame(gameID)
 		if err != nil {
 			fmt.Println(err)
-			return
+			continue
 		}
 
 		// Step 1. Process each category for a game
@@ -125,7 +125,9 @@ func getGameDataV1() {
 			variableName, _, _, _ := jsonparser.Get(value, "name")
 			variableCategory, _, _, _ := jsonparser.Get(value, "category")
 			variableScope, _, _, _ := jsonparser.Get(value, "scope", "type")
-			variableOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",%s,%s\n", gameID, variableID, variableName, variableCategory, variableScope))
+			variableIsSubcategory, _ := jsonparser.GetBoolean(value, "is-subcategory")
+			variableDefault, _, _, _ := jsonparser.Get(value, "values", "default")
+			variableOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",%s,%s,%t,%s\n", gameID, variableID, variableName, variableCategory, variableScope, variableIsSubcategory, variableDefault))
 
 			err = jsonparser.ObjectEach(value, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 				valueID := string(key)
@@ -212,7 +214,7 @@ func getGameDataV2() {
 	for scanner.Scan() {
 		response, err := srcomv2.GetGameData(scanner.Text())
 		if err != nil {
-			return
+			continue
 		}
 
 		gameID, _, _, _ := jsonparser.Get(response, "game", "id")
