@@ -34,9 +34,8 @@ func getUsersListV1() {
 	defer usersListOutputFile.Close()
 	usersListOutputFile.WriteString("#userID\n")
 
-	// We define void as to reduce the amount of memory to store all the user IDs.
-	type void struct{}
-	allUsers := make(map[string]void)
+	// We use a struct to reduce the amount of memory to store all the user IDs.
+	allUsers := make(map[string]struct{})
 
 	// Call reader.Read() to not read the header line into the records variable.
 	reader := csv.NewReader(inputFile)
@@ -54,7 +53,7 @@ func getUsersListV1() {
 
 		users := strings.Split(record[usersFieldIndex], ",")
 		for _, user := range users {
-			allUsers[user] = void{}
+			allUsers[user] = struct{}{}
 		}
 	}
 
