@@ -11,6 +11,7 @@ import (
 const (
 	leaderboardDataFilenameV1 = "./data/v1/leaderboards-data.csv"
 	usersListOutputFilenameV1 = "./data/v1/users-id-list.csv"
+	usersFieldIndex           = 8
 )
 
 func main() {
@@ -31,17 +32,33 @@ func getUsersListV1() {
 		return
 	}
 	defer usersListOutputFile.Close()
-	usersListOutputFile.WriteString("#userID")
+	usersListOutputFile.WriteString("#userID\n")
 
+	// We define void as to reduce the amount of memory to store all the user IDs.
+	type void struct{}
+	allUsers := make(map[string]void)
+
+	// Call reader.Read() to not read the header line into the records variable.
 	reader := csv.NewReader(inputFile)
 	reader.Read()
-	for {
-		record, err := reader.Read()
-		if err != nil {
-			return
+	records, err := reader.ReadAll()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, record := range records {
+		if record[usersFieldIndex] == "" || record[usersFieldIndex] == "," {
+			continue
 		}
 
-		playersString := strings.ReplaceAll(record[8], ",", "\n")
-		usersListOutputFile.WriteString(fmt.Sprintf("%s\n", playersString))
+		users := strings.Split(record[usersFieldIndex], ",")
+		for _, user := range users {
+			allUsers[user] = void{}
+		}
+	}
+
+	for userID := range allUsers {
+		usersListOutputFile.WriteString(fmt.Sprintf("%s\n", userID))
 	}
 }
