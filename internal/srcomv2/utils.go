@@ -62,7 +62,7 @@ func retryWithExponentialBackoff(URL string) (*http.Response, error) {
 			return nil, err
 		}
 
-		if response.StatusCode == 200 {
+		if response.StatusCode == http.StatusOK {
 			return response, nil
 		}
 

@@ -13,7 +13,7 @@ import (
 
 const (
 	allGameIDListV1             = "./data/v1/games-id-list.csv"
-	leaderboardOutputFilenameV1 = "./data/v1/leaderboard-data.csv"
+	leaderboardOutputFilenameV1 = "./data/v1/leaderboards-data.csv"
 )
 
 func main() {
@@ -110,9 +110,9 @@ func processLeaderboard(responseBody []byte, outputFile *os.File) error {
 
 		runValuesArray := []string{}
 		err = jsonparser.ObjectEach(runData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
-			runValuesArray = append(runValuesArray, (fmt.Sprintf("%s=%s", string(key), string(value))))
+			runValuesArray = append(runValuesArray, fmt.Sprintf("%s=%s", string(key), string(value)))
 			return nil
-		}, "players")
+		}, "values")
 		runValues := strings.Join(runValuesArray, ",")
 
 		outputFile.WriteString(fmt.Sprintf("%s,%s,%s,%s,%s,%0.2f,%s,%t,\"%s\",\"%s\"\n", runID, runGame, runCategory, runLevel, runDate, runPrimaryTime, runPlatform, runEmulated, runPlayers, runValues))
