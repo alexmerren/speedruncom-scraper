@@ -30,13 +30,13 @@ $ make all
 
 Since an order is required for each of the executables, please find an order required for each executable below:
 
-1. *games-list*: No dependencies.
-2. *games-data*: `games-list`.
-3. *world-records-data*: `games-list`.
-3. *leaderboards-data*: `games-list -> games-data`.
-4. *users-list*: `games-list -> games-data`.
-5. *users-data*: `games-list -> games-data -> users-list`.
-6. *runs-data*: `games-list -> games-data -> users-list`.
+1. **games-list**: No dependencies.
+2. **games-data**: `games-list`.
+3. **world-records-data**: `games-list`.
+3. **leaderboards-data**: `games-list -> games-data`.
+4. **users-list**: `games-list -> games-data`.
+5. **users-data**: `games-list -> games-data -> users-list`.
+6. **runs-data**: `games-list -> games-data -> users-list`.
 
 NOTE: For each executable (or, each piece of data) there is repeated API calls. A local HTTP cache has been implemented to remove repeated API calls from the rate-limited API. This cache is saved locally under `data/httpcache.db`.
 
