@@ -14,16 +14,16 @@ const (
 	allGameIDListV1          = "./data/v1/games-id-list.csv"
 	gameOutputFilenameV1     = "./data/v1/games-data.csv"
 	categoryOutputFilenameV1 = "./data/v1/categories-data.csv"
-	levelOutputFilenameV1    = "./data/v1/level-data.csv"
-	variableOutputFileV1     = "./data/v1/variable-data.csv"
-	valueOutputFileV1        = "./data/v1/value-data.csv"
+	levelOutputFilenameV1    = "./data/v1/levels-data.csv"
+	variableOutputFileV1     = "./data/v1/variables-data.csv"
+	valueOutputFileV1        = "./data/v1/values-data.csv"
 
 	allGameIDListV2          = "./data/v2/games-id-list.csv"
 	gameOutputFilenameV2     = "./data/v2/games-data.csv"
 	categoryOutputFilenameV2 = "./data/v2/categories-data.csv"
-	levelOutputFilenameV2    = "./data/v2/level-data.csv"
-	variableOutputFileV2     = "./data/v2/variable-data.csv"
-	valueOutputFileV2        = "./data/v2/value-data.csv"
+	levelOutputFilenameV2    = "./data/v2/levels-data.csv"
+	variableOutputFileV2     = "./data/v2/variables-data.csv"
+	valueOutputFileV2        = "./data/v2/values-data.csv"
 )
 
 func main() {

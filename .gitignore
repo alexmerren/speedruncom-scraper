@@ -18,6 +18,7 @@
 vendor/
 dist/
 data/
+tmp/
 
 !data/.gitkeep
 
