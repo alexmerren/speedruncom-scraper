@@ -28,7 +28,7 @@ $ make all
 ...
 ```
 
-Since an order is required for each of the executables, please find an order required for each executable below:
+For some executables, previous data is required. A specific order is required so that each executable has the required data:
 
 1. **games-list**: No dependencies.
 2. **games-data**: `games-list`.
@@ -37,6 +37,12 @@ Since an order is required for each of the executables, please find an order req
 4. **users-list**: `games-list -> games-data`.
 5. **users-data**: `games-list -> games-data -> users-list`.
 6. **runs-data**: `games-list -> games-data -> users-list`.
+
+A complete set of data from speedrun.com can therefore be obtained via the command:
+
+```bash
+$ ./dist/games-list && ./dist/games-data && ./dist/leaderboards-data && ./dist/users-list && ./dist/users-data && ./dist/runs-data && ./dist/world-records-data
+```
 
 NOTE: For each executable (or, each piece of data) there is repeated API calls. A local HTTP cache has been implemented to remove repeated API calls from the rate-limited API. This cache is saved locally under `data/httpcache.db`.
 
