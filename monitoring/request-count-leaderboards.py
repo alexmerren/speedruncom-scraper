@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import pandas as pd
+from datetime import timedelta
 
 CATEGORIES_FILE = "../data/v1/categories-data.csv"
 GAMES_FILE = "../data/v1/games-data.csv"
@@ -21,6 +22,7 @@ def main():
     games_df['total'] = games_df['numLevelCategories'] * games_df['numLevels'] + games_df['numGameCategories']
 
     print(f"Number of leaderboards-data requests: {games_df.sum()['total']}")
+    print(f"Time of all leaderboards-data requests: {str(timedelta(seconds=games_df.sum()['total']*0.7))}")
 
 if __name__ == "__main__":
     main()
