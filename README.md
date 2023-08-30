@@ -23,12 +23,13 @@ Speedruncom-scraper is written in Golang. It can be compiled and deployed to col
  1. `dist/games-list`
 
     * **Reason**: List of all games available via the speedrun.com API. This only collects the internal ID of each game, further information is collected in subsequent functions.
+    * **Requirements**: None.
     * **Number of Requests**: Approximately 35,000.
 
  2. `dist/games-data`
 
     * **Reason**: Collecting available information for each game using their internal ID. Metadata is collected on the games themselves. Furthermore, the categories, levels, variables, and values are collected and stored.
-    * **Requirements**: `dist/games-list`
+    * **Requirements**: `dist/games-list`.
     * **Number of Requests**: Approximately 35,000.
 
  3. `dist/leaderboards-data`
