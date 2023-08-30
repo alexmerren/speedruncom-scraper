@@ -33,13 +33,13 @@ func getGameAndLeaderboardDataV1() {
 	}
 	defer inputFile.Close()
 
-	gameOuptutFile, err := filesystem.CreateOutputFile(gameOutputFilenameV1)
+	gameOutputFile, err := filesystem.CreateOutputFile(gameOutputFilenameV1)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer gameOuptutFile.Close()
-	gameOuptutFile.WriteString("#ID,name,URL,releaseDate,createdDate,numCategories,numLevels\n")
+	defer gameOutputFile.Close()
+	gameOutputFile.WriteString("#ID,name,URL,releaseDate,createdDate,numCategories,numLevels\n")
 
 	categoryOutputFile, err := filesystem.CreateOutputFile(categoryOutputFilenameV1)
 	if err != nil {
@@ -73,13 +73,13 @@ func getGameAndLeaderboardDataV1() {
 	defer valueOutputFile.Close()
 	valueOutputFile.WriteString("#parentGameID,variableID,ID,label,rules\n")
 
-	leaderboardOuptutFile, err := filesystem.CreateOutputFile(leaderboardOutputFilenameV1)
+	leaderboardOutputFile, err := filesystem.CreateOutputFile(leaderboardOutputFilenameV1)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer leaderboardOuptutFile.Close()
-	leaderboardOuptutFile.WriteString("#runID,gameID,categoryID,levelID,date,primaryTime,platform,emulated,players,examiner,verifiedDate,variablesAndValues\n")
+	defer leaderboardOutputFile.Close()
+	leaderboardOutputFile.WriteString("#runID,gameID,categoryID,levelID,date,primaryTime,platform,emulated,players,examiner,verifiedDate,variablesAndValues\n")
 
 	// Scan the input file and get information for each of the game ID's in the
 	// input file. We progress to the next line using scanner.Scan()
@@ -111,7 +111,7 @@ func getGameAndLeaderboardDataV1() {
 		}
 
 		// Step 4. Process each game
-		processGame(gameID, numCategories, numLevels, response, gameOuptutFile)
+		processGame(gameID, numCategories, numLevels, response, gameOutputFile)
 
 		// Step 5. Process the leaderboard for each game.
 		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
@@ -125,7 +125,7 @@ func getGameAndLeaderboardDataV1() {
 					return
 				}
 
-				err = processLeaderboard(leaderboardResponse, leaderboardOuptutFile)
+				err = processLeaderboard(leaderboardResponse, leaderboardOutputFile)
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -143,7 +143,7 @@ func getGameAndLeaderboardDataV1() {
 						return
 					}
 
-					err = processLeaderboard(leaderboardResponse, leaderboardOuptutFile)
+					err = processLeaderboard(leaderboardResponse, leaderboardOutputFile)
 					if err != nil {
 						fmt.Println(err)
 						return

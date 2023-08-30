@@ -28,13 +28,13 @@ func getLeaderboardDataV1() {
 	}
 	defer inputFile.Close()
 
-	leaderboardOuptutFile, err := filesystem.CreateOutputFile(leaderboardOutputFilenameV1)
+	leaderboardOutputFile, err := filesystem.CreateOutputFile(leaderboardOutputFilenameV1)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer leaderboardOuptutFile.Close()
-	leaderboardOuptutFile.WriteString("#runID,gameID,categoryID,levelID,date,primaryTime,platform,emulated,players,examiner,verifiedDate,variablesAndValues\n")
+	defer leaderboardOutputFile.Close()
+	leaderboardOutputFile.WriteString("#runID,gameID,categoryID,levelID,date,primaryTime,platform,emulated,players,examiner,verifiedDate,variablesAndValues\n")
 
 	scanner := bufio.NewScanner(inputFile)
 	scanner.Scan()
@@ -60,7 +60,7 @@ func getLeaderboardDataV1() {
 					return
 				}
 
-				err = processLeaderboard(leaderboardResponse, leaderboardOuptutFile)
+				err = processLeaderboard(leaderboardResponse, leaderboardOutputFile)
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -78,7 +78,7 @@ func getLeaderboardDataV1() {
 						return
 					}
 
-					err = processLeaderboard(leaderboardResponse, leaderboardOuptutFile)
+					err = processLeaderboard(leaderboardResponse, leaderboardOutputFile)
 					if err != nil {
 						fmt.Println(err)
 						return

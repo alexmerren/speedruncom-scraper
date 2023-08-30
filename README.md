@@ -12,7 +12,7 @@ An easily deployable method of collecting various data from speedrun.com for dat
  - Want to collect data from speedrun.com? speedruncom-scraper provides an accesible method of data collection.
  - Data from speedrun.com is easily-accessible, and is formatted for applications in data science and machine learning.
 
-## ℹ️  Overview
+## ℹ️ Overview
 
 My final project and dissertation at University of Exeter required data that focused on user behaviour and cumulative culture of online speedrunning communities. This project focuses on reproducing the data used in that study, and publishing tools to recreate that dataset.
 
@@ -75,7 +75,7 @@ $ ./dist/games-list && ./dist/games-and-leaderboards-data && ./dist/users-list &
 
 NOTE: For each executable (or, each piece of data) there is repeated API calls. A local HTTP cache has been implemented to remove repeated API calls from the rate-limited API. This cache is saved locally under `data/httpcache.db`.
 
-## ⬇️  Installation
+## ⬇️ Installation
 
 The repository can be installed easily, and binaries can be compiled with the following commands:
 
@@ -91,6 +91,12 @@ This project requires:
 
  * [Golang 1.20+](https://go.dev/dl/)
  * [`gcc` Compatible Compiler](https://gcc.gnu.org)
+
+ ## 🛣️ Roadmap
+
+ - [ ] Understand and tackle rate-limiting on V2 API.
+ - [ ] Implement `world-records-data` to record world record data for every game.
+ - [ ] Run through collection script once and publish data set.
 
 ## 💭 Feedback and Contributing
 
