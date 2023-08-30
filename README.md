@@ -16,7 +16,37 @@ An easily deployable method of collecting various data from speedrun.com for dat
 
 My final project and dissertation at University of Exeter required data that focused on user behaviour and cumulative culture of online speedrunning communities. This project focuses on reproducing the data used in that study, and publishing tools to recreate that dataset.
 
-Speedruncom-scraper is written in Golang. It can be compiled and deployed to collect data continuously and is formatted to publish after collection.
+Speedruncom-scraper is written in Golang. It can be compiled and deployed to collect data continuously and is formatted to publish after collection. There are seven separate executables which collect various information:
+
+ 1. `dist/games-list`
+
+    * **Reason**: List of all games available via the speedrun.com API. This only collects the internal ID of each game, further information is collected in subsequent functions.
+    * **Number of Requests**: Approximately 35,000.
+
+ 2. `dist/games-data`
+
+    * **Reason**: Collecting available information for each game using their internal ID. Metadata is collected on the games themselves. Furthermore, the categories, levels, variables, and values are collected and stored.
+    * **Number of Requests**: Approximately 35,000.
+
+ 3. `dist/leaderboards-data`
+
+    * **Reason**: Retrieves all leaderboards for every combination of game, category, and level. Each run that conitrbutes to the leaderboards is recorded, along with each player that contributed to the run (amongst other metadata).
+    * **Number of Requests**: Approximately 640,000.
+
+ 4. `dist/users-list`
+
+    * **Reason**: Creates a list of unique users that appear in the output of the `leaderboards-data` binary.
+    * **Number of Requests**: 0.
+
+ 5. `dist/users-data`
+
+    * **Reason**: Collect metadata and run data for each user that has contributed to any given leaderboard on speedrun.com.
+    * **Number of Requests**: Approximately 350,000.
+
+ 6. `dist/runs-data`
+
+    * **Reason**:
+    * **Number of Requests**: Approximately 2.2 million.
 
 ## 🚀 Usage
 
@@ -32,7 +62,6 @@ For some executables, previous data is required. A specific order is required so
 
 1. **games-list**: No dependencies.
 2. **games-data**: `games-list`.
-3. **world-records-data**: `games-list`.
 3. **leaderboards-data**: `games-list -> games-data`.
 4. **users-list**: `games-list -> games-data`.
 5. **users-data**: `games-list -> games-data -> users-list`.
