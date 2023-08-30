@@ -44,6 +44,13 @@ Speedruncom-scraper is written in Golang. It can be compiled and deployed to col
     * **Requirements**: `dist/games-list`, `dist/games-data`.
     * **Number of Requests**: 0.
 
+ 5. `dist/games-and-leaderboards-data`
+
+    * **Reason**: Combination of the `dist/games-data` and `dist/leaderboards-data` executables.
+    * **Requirements**: `dist/games-list`
+    * **Number of Requests**: Approximately 700,000.
+
+
  5. `dist/users-data`
 
     * **Reason**: Collect metadata and run data for each user that has contributed to any given leaderboard on speedrun.com.
@@ -63,7 +70,7 @@ $ make all
 A complete set of data from speedrun.com can be obtained via the commands:
 
 ```bash
-$ ./dist/games-list && ./dist/games-data && ./dist/leaderboards-data && ./dist/users-list && ./dist/users-data 
+$ ./dist/games-list && ./dist/games-and-leaderboards-data && ./dist/users-list && ./dist/users-data 
 ```
 
 NOTE: For each executable (or, each piece of data) there is repeated API calls. A local HTTP cache has been implemented to remove repeated API calls from the rate-limited API. This cache is saved locally under `data/httpcache.db`.

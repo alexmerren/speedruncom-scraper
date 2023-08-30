@@ -93,65 +93,25 @@ func getGameAndLeaderboardDataV1() {
 			continue
 		}
 
-		// Step 1. Process each category for a game
-		numCategories := 0
-		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			numCategories += 1
-			categoryID, _, _, _ := jsonparser.Get(value, "id")
-			categoryName, _, _, _ := jsonparser.Get(value, "name")
-			categoryRules, _, _, _ := jsonparser.Get(value, "rules")
-			categoryNumPlayers, _ := jsonparser.GetInt(value, "players", "value")
-			categoryType, _, _, _ := jsonparser.Get(value, "type")
-			categoryOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",\"%s\",%s,%d\n", gameID, categoryID, categoryName, categoryRules, categoryType, categoryNumPlayers))
-		}, "data", "categories", "data")
+		numCategories, err := processCategories(gameID, response, categoryOutputFile)
 		if err != nil {
 			return
 		}
 
 		// Step 2. Process each level for a game
-		numLevels := 0
-		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			numLevels += 1
-			levelID, _, _, _ := jsonparser.Get(value, "id")
-			levelName, _, _, _ := jsonparser.Get(value, "name")
-			levelRules, _, _, _ := jsonparser.Get(value, "rules")
-			levelOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",\"%s\"\n", gameID, levelID, levelName, levelRules))
-		}, "data", "levels", "data")
+		numLevels, err := processLevels(gameID, response, levelOutputFile)
 		if err != nil {
 			return
 		}
 
 		// Step 3. Process each variable/value for a game
-		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			variableID, _, _, _ := jsonparser.Get(value, "id")
-			variableName, _, _, _ := jsonparser.Get(value, "name")
-			variableCategory, _, _, _ := jsonparser.Get(value, "category")
-			variableScope, _, _, _ := jsonparser.Get(value, "scope", "type")
-			variableIsSubcategory, _ := jsonparser.GetBoolean(value, "is-subcategory")
-			variableDefault, _, _, _ := jsonparser.Get(value, "values", "default")
-			variableOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",%s,%s,%t,%s\n", gameID, variableID, variableName, variableCategory, variableScope, variableIsSubcategory, variableDefault))
-
-			err = jsonparser.ObjectEach(value, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
-				valueID := string(key)
-				valueLabel, _, _, _ := jsonparser.Get(value, "label")
-				valueRules, _, _, _ := jsonparser.Get(value, "rules")
-				valueOutputFile.WriteString(fmt.Sprintf("%s,%s,%s,\"%s\",\"%s\"\n", gameID, variableID, valueID, valueLabel, valueRules))
-				return nil
-			}, "values", "values")
-			if err != nil {
-				return
-			}
-		}, "data", "variables", "data")
+		err = processVariablesAndValues(gameID, response, variableOutputFile, valueOutputFile)
 		if err != nil {
 			return
 		}
 
 		// Step 4. Process each game
-		gameName, _, _, _ := jsonparser.Get(response, "data", "names", "international")
-		gameURL, _, _, _ := jsonparser.Get(response, "data", "abbreviation")
-		gameReleaseDate, _, _, _ := jsonparser.Get(response, "data", "release-date")
-		gameCreatedDate, _, _, _ := jsonparser.Get(response, "data", "created")
-		gameOuptutFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,%s,%d,%d\n", gameID, gameName, gameURL, gameReleaseDate, gameCreatedDate, numCategories, numLevels))
+		processGame(gameID, numCategories, numLevels, response, gameOuptutFile)
 
 		// Step 5. Process the leaderboard for each game.
 		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
@@ -198,6 +158,64 @@ func getGameAndLeaderboardDataV1() {
 		fmt.Println(err)
 		return
 	}
+}
+
+func processCategories(gameID string, responseBody []byte, outputFile *os.File) (int, error) {
+	numCategories := 0
+	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		numCategories += 1
+		categoryID, _, _, _ := jsonparser.Get(value, "id")
+		categoryName, _, _, _ := jsonparser.Get(value, "name")
+		categoryRules, _, _, _ := jsonparser.Get(value, "rules")
+		categoryNumPlayers, _ := jsonparser.GetInt(value, "players", "value")
+		categoryType, _, _, _ := jsonparser.Get(value, "type")
+		outputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",\"%s\",%s,%d\n", gameID, categoryID, categoryName, categoryRules, categoryType, categoryNumPlayers))
+	}, "data", "categories", "data")
+	return numCategories, err
+}
+
+func processLevels(gameID string, responseBody []byte, outputFile *os.File) (int, error) {
+	numLevels := 0
+	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		numLevels += 1
+		levelID, _, _, _ := jsonparser.Get(value, "id")
+		levelName, _, _, _ := jsonparser.Get(value, "name")
+		levelRules, _, _, _ := jsonparser.Get(value, "rules")
+		outputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",\"%s\"\n", gameID, levelID, levelName, levelRules))
+	}, "data", "levels", "data")
+	return numLevels, err
+}
+
+func processVariablesAndValues(gameID string, responseBody []byte, variableOutputFile, valueOutputFile *os.File) error {
+	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		variableID, _, _, _ := jsonparser.Get(value, "id")
+		variableName, _, _, _ := jsonparser.Get(value, "name")
+		variableCategory, _, _, _ := jsonparser.Get(value, "category")
+		variableScope, _, _, _ := jsonparser.Get(value, "scope", "type")
+		variableIsSubcategory, _ := jsonparser.GetBoolean(value, "is-subcategory")
+		variableDefault, _, _, _ := jsonparser.Get(value, "values", "default")
+		variableOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",%s,%s,%t,%s\n", gameID, variableID, variableName, variableCategory, variableScope, variableIsSubcategory, variableDefault))
+
+		err = jsonparser.ObjectEach(value, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+			valueID := string(key)
+			valueLabel, _, _, _ := jsonparser.Get(value, "label")
+			valueRules, _, _, _ := jsonparser.Get(value, "rules")
+			valueOutputFile.WriteString(fmt.Sprintf("%s,%s,%s,\"%s\",\"%s\"\n", gameID, variableID, valueID, valueLabel, valueRules))
+			return nil
+		}, "values", "values")
+		if err != nil {
+			return
+		}
+	}, "data", "variables", "data")
+	return err
+}
+
+func processGame(gameID string, numCategories, numLevels int, responseBody []byte, outputFile *os.File) {
+	gameName, _, _, _ := jsonparser.Get(responseBody, "data", "names", "international")
+	gameURL, _, _, _ := jsonparser.Get(responseBody, "data", "abbreviation")
+	gameReleaseDate, _, _, _ := jsonparser.Get(responseBody, "data", "release-date")
+	gameCreatedDate, _, _, _ := jsonparser.Get(responseBody, "data", "created")
+	outputFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,%s,%d,%d\n", gameID, gameName, gameURL, gameReleaseDate, gameCreatedDate, numCategories, numLevels))
 }
 
 func processLeaderboard(responseBody []byte, outputFile *os.File) error {
