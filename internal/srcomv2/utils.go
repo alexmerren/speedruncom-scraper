@@ -3,6 +3,7 @@ package srcomv2
 import (
 	b64 "encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -53,6 +54,10 @@ func RequestSrcom(URL string) ([]byte, error) {
 func retryWithExponentialBackoff(URL string) (*http.Response, error) {
 	iterationNumber := 0
 	for {
+		if iterationNumber == 5 {
+			return nil, errors.New("maximum retry iterations exceeded")
+		}
+
 		backoffTime := exponentialBackoff(iterationNumber)
 		log.Printf("Sleeping for %s", backoffTime)
 		time.Sleep(backoffTime)
