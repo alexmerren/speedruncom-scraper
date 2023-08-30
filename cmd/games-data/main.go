@@ -53,7 +53,7 @@ func getGameDataV1() {
 		return
 	}
 	defer categoryOutputFile.Close()
-	categoryOutputFile.WriteString("#parentGameID,ID,name,rules\n")
+	categoryOutputFile.WriteString("#parentGameID,ID,name,rules,type,numPlayers\n")
 
 	levelOutputFile, err := filesystem.CreateOutputFile(levelOutputFilenameV1)
 	if err != nil {
