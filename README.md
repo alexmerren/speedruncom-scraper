@@ -35,19 +35,19 @@ Speedruncom-scraper is written in Golang. It can be compiled and deployed to col
  3. `dist/leaderboards-data`
 
     * **Reason**: Retrieves all leaderboards for every combination of game, category, and level. Each run that conitrbutes to the leaderboards is recorded, along with each player that contributed to the run (amongst other metadata).
-    * **Requirements**: `dist/games-list -> dist/games-data`.
+    * **Requirements**: `dist/games-list`, `dist/games-data`.
     * **Number of Requests**: Approximately 640,000.
 
  4. `dist/users-list`
 
     * **Reason**: Creates a list of unique users that appear in the output of the `leaderboards-data` binary.
-    * **Requirements**: `dist/games-list -> dist/games-data`.
+    * **Requirements**: `dist/games-list`, `dist/games-data`.
     * **Number of Requests**: 0.
 
  5. `dist/users-data`
 
     * **Reason**: Collect metadata and run data for each user that has contributed to any given leaderboard on speedrun.com.
-    * **Requirements**: `dist/games-list -> dist/games-data -> dist/users-list`.
+    * **Requirements**: `dist/games-list`, `dist/games-data`, `dist/users-list`.
     * **Number of Requests**: Approximately 350,000.
 
 ## 🚀 Usage
