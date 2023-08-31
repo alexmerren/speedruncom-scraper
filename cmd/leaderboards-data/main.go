@@ -92,6 +92,7 @@ func getLeaderboardDataV1() {
 func processLeaderboard(responseBody []byte, outputFile *os.File) error {
 	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		runData, _, _, _ := jsonparser.Get(value, "run")
+		runPlace, _ := jsonparser.GetInt(runData, "place")
 		runID, _ := jsonparser.GetString(runData, "id")
 		runGame, _ := jsonparser.GetString(runData, "game")
 		runCategory, _ := jsonparser.GetString(runData, "category")
@@ -117,7 +118,7 @@ func processLeaderboard(responseBody []byte, outputFile *os.File) error {
 		}, "values")
 		runValues := strings.Join(runValuesArray, ",")
 
-		outputFile.WriteString(fmt.Sprintf("%s,%s,%s,%s,%s,%0.2f,%s,%t,\"%s\",%s,%s,\"%s\"\n", runID, runGame, runCategory, runLevel, runDate, runPrimaryTime, runPlatform, runEmulated, runPlayers, runExaminer, runVerifiedDate, runValues))
+		outputFile.WriteString(fmt.Sprintf("%s,%s,%s,%s,%s,%0.2f,%d,%s,%t,\"%s\",%s,%s,\"%s\"\n", runID, runGame, runCategory, runLevel, runDate, runPrimaryTime, runPlace, runPlatform, runEmulated, runPlayers, runExaminer, runVerifiedDate, runValues))
 	}, "data", "runs")
 	if err != nil {
 		return err

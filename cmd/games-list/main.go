@@ -94,7 +94,7 @@ func getGameListV2() {
 		return
 	}
 
-	for int64(currentPage) < lastPage {
+	for int64(currentPage) <= lastPage {
 		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			gameID, _ := jsonparser.GetString(value, "id")
 			listOutputFile.WriteString(fmt.Sprintf("%s\n", gameID))
