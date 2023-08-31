@@ -15,7 +15,6 @@ const (
 	allUserIDListV1                   = "./data/v1/users-id-list.csv"
 	userOutputFilenameV1              = "./data/v1/users-data.csv"
 	userPersonalBestsOutputFilenameV1 = "./data/v1/users-personal-bests-data.csv"
-	runsOutputFilenameV1              = "./data/v1/users-runs-data.csv"
 )
 
 func main() {
@@ -36,7 +35,7 @@ func getUsersDataV1() {
 		return
 	}
 	defer userOutputFile.Close()
-	userOutputFile.WriteString("#ID,name,signupDate,location,numPersonalBests,numRuns\n")
+	userOutputFile.WriteString("#ID,name,signupDate,location,numPersonalBests\n")
 
 	userPersonalBestsOutputFile, err := filesystem.CreateOutputFile(userPersonalBestsOutputFilenameV1)
 	if err != nil {
@@ -45,14 +44,6 @@ func getUsersDataV1() {
 	}
 	defer userPersonalBestsOutputFile.Close()
 	userPersonalBestsOutputFile.WriteString("#userID,runID,game,category,level,values,place\n")
-
-	runsOutputFile, err := filesystem.CreateOutputFile(runsOutputFilenameV1)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer runsOutputFile.Close()
-	runsOutputFile.WriteString("#\n")
 
 	scanner := bufio.NewScanner(inputFile)
 	scanner.Scan()
@@ -70,14 +61,7 @@ func getUsersDataV1() {
 			return
 		}
 
-		// runsResponse, err := srcomv1.GetUserRuns(userID, 0)
-		numRuns, err := processUserRuns(userID, []byte{}, runsOutputFile)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		err = processUser(numPersonalBests, numRuns, userResponse, userOutputFile)
+		err = processUser(numPersonalBests, userResponse, userOutputFile)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -85,13 +69,13 @@ func getUsersDataV1() {
 	}
 }
 
-func processUser(numPersonalBests, numRuns int, response []byte, outputFile *os.File) error {
+func processUser(numPersonalBests int, response []byte, outputFile *os.File) error {
 	userData, _, _, _ := jsonparser.Get(response, "data", "[0]", "players", "data", "[0]")
 	userID, _, _, _ := jsonparser.Get(userData, "id")
 	userName, _, _, _ := jsonparser.Get(userData, "names", "international")
 	userSignup, _, _, _ := jsonparser.Get(userData, "signup")
 	userLocation, _, _, _ := jsonparser.Get(userData, "location", "country", "code")
-	outputFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,%d,%d\n", userID, userName, userSignup, userLocation, numPersonalBests, numRuns))
+	outputFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,%d\n", userID, userName, userSignup, userLocation, numPersonalBests))
 	return nil
 }
 
