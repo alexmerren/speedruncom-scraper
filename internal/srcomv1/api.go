@@ -13,7 +13,7 @@ const (
 	categoryFunction                     = "categories/%s"
 	levelFunction                        = "levels/%s"
 	userFunction                         = "users/%s/personal-bests?embed=game,players"
-	runsFunction                         = "runs?user=%s&embed=game,players&max=200&offset=%d"
+	runsFunction                         = "runs?user=%s&embed=players&max=200&offset=%d"
 	developerFunction                    = "developers/%s"
 	gameCategoryLeaderboardFunction      = "leaderboards/%s/category/%s?embed=game,category,level,players,variables"
 	gameCategoryLevelLeaderboardFunction = "leaderboards/%s/level/%s/%s"

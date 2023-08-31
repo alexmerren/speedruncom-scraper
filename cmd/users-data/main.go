@@ -3,20 +3,23 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
 	"github.com/alexmerren/speedruncom-scraper/internal/srcomv1"
+	"github.com/buger/jsonparser"
 )
 
 const (
-	allUserIDListV1      = "./data/v1/users-id-list.csv"
-	userOutputFilenameV1 = "./data/v1/users-data.csv"
+	allUserIDListV1                   = "./data/v1/users-id-list.csv"
+	userOutputFilenameV1              = "./data/v1/users-data.csv"
+	userPersonalBestsOutputFilenameV1 = "./data/v1/users-personal-bests-data.csv"
+	runsOutputFilenameV1              = "./data/v1/users-runs-data.csv"
 )
 
 func main() {
-	response, _ := srcomv1.GetUser("zxznzp0x")
-	fmt.Println(string(response))
-	// getUsersDataV1()
+	getUsersDataV1()
 }
 
 func getUsersDataV1() {
@@ -33,35 +36,90 @@ func getUsersDataV1() {
 		return
 	}
 	defer userOutputFile.Close()
-	userOutputFile.WriteString("#")
+	userOutputFile.WriteString("#ID,name,signupDate,location,numPersonalBests,numRuns\n")
+
+	userPersonalBestsOutputFile, err := filesystem.CreateOutputFile(userPersonalBestsOutputFilenameV1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer userPersonalBestsOutputFile.Close()
+	userPersonalBestsOutputFile.WriteString("#userID,runID,game,category,level,values,place\n")
+
+	runsOutputFile, err := filesystem.CreateOutputFile(runsOutputFilenameV1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer runsOutputFile.Close()
+	runsOutputFile.WriteString("#\n")
 
 	scanner := bufio.NewScanner(inputFile)
 	scanner.Scan()
 	for scanner.Scan() {
-		fmt.Printf("%s\n", scanner.Text())
 		userID := scanner.Text()
-
-		runsResponse, err := srcomv1.GetUserRuns(userID, 0)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		fmt.Println(string(runsResponse))
-
-		// loop through the runsResponse(s) until we get information about every run that a user has done.
-		// we want the information about the status, when they did the run, what game, category, level, and variables.
-		// also get the reviewer for the run. Sum the number of runs so we can include that in a metadata.
-
 		userResponse, err := srcomv1.GetUser(userID)
 		if err != nil {
 			fmt.Println(err)
-			continue
+			return
 		}
 
-		fmt.Println(string(userResponse))
+		numPersonalBests, err := processUserPersonalBests(userID, userResponse, userPersonalBestsOutputFile)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
-		// process the user response to get user metadata, personal bests and their place.
-		// sum the number of personal bests so we can include that in the metadata.
+		// runsResponse, err := srcomv1.GetUserRuns(userID, 0)
+		numRuns, err := processUserRuns(userID, []byte{}, runsOutputFile)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		err = processUser(numPersonalBests, numRuns, userResponse, userOutputFile)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
+}
+
+func processUser(numPersonalBests, numRuns int, response []byte, outputFile *os.File) error {
+	userData, _, _, _ := jsonparser.Get(response, "data", "[0]", "players", "data", "[0]")
+	userID, _, _, _ := jsonparser.Get(userData, "id")
+	userName, _, _, _ := jsonparser.Get(userData, "names", "international")
+	userSignup, _, _, _ := jsonparser.Get(userData, "signup")
+	userLocation, _, _, _ := jsonparser.Get(userData, "location", "country", "code")
+	outputFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,%d,%d\n", userID, userName, userSignup, userLocation, numPersonalBests, numRuns))
+	return nil
+}
+
+func processUserPersonalBests(userID string, response []byte, outputFile *os.File) (int, error) {
+	numPersonalBests := 0
+	_, err := jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		numPersonalBests += 1
+		runData, _, _, _ := jsonparser.Get(value, "run")
+		runPlace, _ := jsonparser.GetInt(value, "place")
+		runID, _, _, _ := jsonparser.Get(runData, "id")
+		runGame, _, _, _ := jsonparser.Get(runData, "game")
+		runCategory, _, _, _ := jsonparser.Get(runData, "category")
+		runLevel, _, _, _ := jsonparser.Get(runData, "level")
+		runValuesArray := []string{}
+		err = jsonparser.ObjectEach(runData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+			runValuesArray = append(runValuesArray, fmt.Sprintf("%s=%s", string(key), string(value)))
+			return nil
+		}, "values")
+		runValues := strings.Join(runValuesArray, ",")
+
+		outputFile.WriteString(fmt.Sprintf("%s,%s,%s,%s,%s,\"%s\",%d\n", userID, runID, runGame, runCategory, runLevel, runValues, runPlace))
+	}, "data")
+	if err != nil {
+		return 0, err
+	}
+	return numPersonalBests, nil
+}
+
+func processUserRuns(userID string, response []byte, runsOutputFile *os.File) (int, error) {
+	return 0, nil
 }
