@@ -91,8 +91,8 @@ func getLeaderboardDataV1() {
 
 func processLeaderboard(responseBody []byte, outputFile *os.File) error {
 	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		runPlace, _ := jsonparser.GetInt(value, "place")
 		runData, _, _, _ := jsonparser.Get(value, "run")
-		runPlace, _ := jsonparser.GetInt(runData, "place")
 		runID, _ := jsonparser.GetString(runData, "id")
 		runGame, _ := jsonparser.GetString(runData, "game")
 		runCategory, _ := jsonparser.GetString(runData, "category")
