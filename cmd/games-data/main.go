@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
@@ -194,14 +195,16 @@ func getGameDataV2() {
 		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			gameID, _ := jsonparser.GetString(value, "id")
 			gameName, _ := jsonparser.GetString(value, "name")
+			gameNameFormatted := strings.ReplaceAll(gameName, "\"", "'")
 			gameURL, _ := jsonparser.GetString(value, "url")
 			gameType, _ := jsonparser.GetString(value, "type")
 			gameReleaseDate, _ := jsonparser.GetInt(value, "releaseDate")
 			gameAddedDate, _ := jsonparser.GetInt(value, "addedDate")
 			gameRunCount, _ := jsonparser.GetInt(value, "runCount")
 			gamePlayerCount, _ := jsonparser.GetInt(value, "totalPlayerCount")
-			gameRules, _, _, _ := jsonparser.Get(value, "rules")
-			gameOutputFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,\"%s\",%d,%d,%d,%d\n", gameID, gameName, gameURL, gameType, gameRules, gameReleaseDate, gameAddedDate, gameRunCount, gamePlayerCount))
+			gameRules, _ := jsonparser.GetString(value, "rules")
+			gameRulesFormatted := strings.ReplaceAll(gameRules, "\"", "'")
+			gameOutputFile.WriteString(fmt.Sprintf("%s,%q,%s,%s,%q,%d,%d,%d,%d\n", gameID, gameNameFormatted, gameURL, gameType, gameRulesFormatted, gameReleaseDate, gameAddedDate, gameRunCount, gamePlayerCount))
 		}, "gameList")
 		if err != nil {
 			fmt.Println(err)
