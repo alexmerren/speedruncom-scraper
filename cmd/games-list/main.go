@@ -11,10 +11,12 @@ import (
 )
 
 const (
-	maxSizeAPIv1 = 1000
+	listOutputFilenameV1 = "./data/v1/games-id-list.csv"
 
-	outputFilenameV1 = "./data/v1/games-id-list.csv"
-	outputFilenameV2 = "./data/v2/games-id-list.csv"
+	listOutputFilenameV2 = "./data/v2/games-id-list.csv"
+	gameOutputFilenameV2 = "./data/v2/games-data.csv"
+
+	maxSizeAPIv1 = 1000
 )
 
 func main() {
@@ -37,18 +39,24 @@ func main() {
 
 //nolint:errcheck// Not worth checking for an error for every file write -- that's the whole point of the file.
 func getGameListV1() {
-	outputFile, err := filesystem.CreateOutputFile(outputFilenameV1)
+	outputFile, err := filesystem.CreateOutputFile(listOutputFilenameV1)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	defer outputFile.Close()
 	outputFile.WriteString("#gameID\n")
-	currentPage := 1
+
+	currentPage := 0
 
 	for {
-		request, _ := srcomv1.GetGameList(currentPage)
-		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		request, err := srcomv1.GetGameList(currentPage)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		_, err = jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			gameID, _ := jsonparser.GetString(value, "id")
 			outputFile.WriteString(fmt.Sprintf("%s\n", gameID))
 		}, "data")
@@ -58,7 +66,7 @@ func getGameListV1() {
 		}
 
 		// The pagination size should always be at 1000, unless we get to last page then
-		// it will be some random integer such that: 0 <= x <= 1000.
+		// it will be some random integer such that: 0 <= x < 1000.
 		size, _ := jsonparser.GetInt(request, "pagination", "size")
 		if size < maxSizeAPIv1 {
 			return
@@ -70,7 +78,15 @@ func getGameListV1() {
 
 //nolint:errcheck// Not worth checking for an error for every file write -- that's the whole point of the file.
 func getGameListV2() {
-	currentPage := 1
+	listOutputFile, err := filesystem.CreateOutputFile(listOutputFilenameV2)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer listOutputFile.Close()
+	listOutputFile.WriteString("#gameID\n")
+
+	currentPage := 0
 	request, _ := srcomv2.GetGameList(currentPage)
 	lastPage, err := jsonparser.GetInt(request, "pagination", "pages")
 	if err != nil {
@@ -78,24 +94,22 @@ func getGameListV2() {
 		return
 	}
 
-	outputFile, err := filesystem.CreateOutputFile(outputFilenameV2)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer outputFile.Close()
-	outputFile.WriteString("#gameID\n")
-
-	for int64(currentPage) <= lastPage {
+	for int64(currentPage) < lastPage {
 		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			gameID, _ := jsonparser.GetString(value, "id")
-			outputFile.WriteString(fmt.Sprintf("%s\n", gameID))
+			listOutputFile.WriteString(fmt.Sprintf("%s\n", gameID))
 		}, "gameList")
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
+
 		currentPage += 1
-		request, _ = srcomv2.GetGameList(currentPage)
+
+		request, err = srcomv2.GetGameList(currentPage)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 }

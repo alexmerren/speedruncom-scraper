@@ -115,8 +115,8 @@ func getGameAndLeaderboardDataV1() {
 
 		// Step 5. Process the leaderboard for each game.
 		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			categoryID, _, _, _ := jsonparser.Get(value, "id")
-			categoryType, _, _, _ := jsonparser.Get(value, "type")
+			categoryID, _ := jsonparser.GetString(value, "id")
+			categoryType, _ := jsonparser.GetString(value, "type")
 
 			if string(categoryType) == "per-game" {
 				leaderboardResponse, err := srcomv1.GetGameCategoryLeaderboard(gameID, string(categoryID))
@@ -136,7 +136,7 @@ func getGameAndLeaderboardDataV1() {
 			// of the levels to retrieve their respective leaderboard.
 			if string(categoryType) == "per-level" {
 				_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-					levelID, _, _, _ := jsonparser.Get(value, "id")
+					levelID, _ := jsonparser.GetString(value, "id")
 					leaderboardResponse, err := srcomv1.GetGameCategoryLevelLeaderboard(gameID, string(categoryID), string(levelID))
 					if err != nil {
 						fmt.Println(err)
@@ -164,11 +164,11 @@ func processCategories(gameID string, responseBody []byte, outputFile *os.File) 
 	numCategories := 0
 	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		numCategories += 1
-		categoryID, _, _, _ := jsonparser.Get(value, "id")
-		categoryName, _, _, _ := jsonparser.Get(value, "name")
-		categoryRules, _, _, _ := jsonparser.Get(value, "rules")
+		categoryID, _ := jsonparser.GetString(value, "id")
+		categoryName, _ := jsonparser.GetString(value, "name")
+		categoryRules, _ := jsonparser.GetString(value, "rules")
 		categoryNumPlayers, _ := jsonparser.GetInt(value, "players", "value")
-		categoryType, _, _, _ := jsonparser.Get(value, "type")
+		categoryType, _ := jsonparser.GetString(value, "type")
 		outputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",\"%s\",%s,%d\n", gameID, categoryID, categoryName, categoryRules, categoryType, categoryNumPlayers))
 	}, "data", "categories", "data")
 	return numCategories, err
@@ -178,9 +178,9 @@ func processLevels(gameID string, responseBody []byte, outputFile *os.File) (int
 	numLevels := 0
 	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		numLevels += 1
-		levelID, _, _, _ := jsonparser.Get(value, "id")
-		levelName, _, _, _ := jsonparser.Get(value, "name")
-		levelRules, _, _, _ := jsonparser.Get(value, "rules")
+		levelID, _ := jsonparser.GetString(value, "id")
+		levelName, _ := jsonparser.GetString(value, "name")
+		levelRules, _ := jsonparser.GetString(value, "rules")
 		outputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",\"%s\"\n", gameID, levelID, levelName, levelRules))
 	}, "data", "levels", "data")
 	return numLevels, err
@@ -188,18 +188,18 @@ func processLevels(gameID string, responseBody []byte, outputFile *os.File) (int
 
 func processVariablesAndValues(gameID string, responseBody []byte, variableOutputFile, valueOutputFile *os.File) error {
 	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-		variableID, _, _, _ := jsonparser.Get(value, "id")
-		variableName, _, _, _ := jsonparser.Get(value, "name")
-		variableCategory, _, _, _ := jsonparser.Get(value, "category")
-		variableScope, _, _, _ := jsonparser.Get(value, "scope", "type")
+		variableID, _ := jsonparser.GetString(value, "id")
+		variableName, _ := jsonparser.GetString(value, "name")
+		variableCategory, _ := jsonparser.GetString(value, "category")
+		variableScope, _ := jsonparser.GetString(value, "scope", "type")
 		variableIsSubcategory, _ := jsonparser.GetBoolean(value, "is-subcategory")
-		variableDefault, _, _, _ := jsonparser.Get(value, "values", "default")
+		variableDefault, _ := jsonparser.GetString(value, "values", "default")
 		variableOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",%s,%s,%t,%s\n", gameID, variableID, variableName, variableCategory, variableScope, variableIsSubcategory, variableDefault))
 
 		err = jsonparser.ObjectEach(value, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 			valueID := string(key)
-			valueLabel, _, _, _ := jsonparser.Get(value, "label")
-			valueRules, _, _, _ := jsonparser.Get(value, "rules")
+			valueLabel, _ := jsonparser.GetString(value, "label")
+			valueRules, _ := jsonparser.GetString(value, "rules")
 			valueOutputFile.WriteString(fmt.Sprintf("%s,%s,%s,\"%s\",\"%s\"\n", gameID, variableID, valueID, valueLabel, valueRules))
 			return nil
 		}, "values", "values")
@@ -211,30 +211,30 @@ func processVariablesAndValues(gameID string, responseBody []byte, variableOutpu
 }
 
 func processGame(gameID string, numCategories, numLevels int, responseBody []byte, outputFile *os.File) {
-	gameName, _, _, _ := jsonparser.Get(responseBody, "data", "names", "international")
-	gameURL, _, _, _ := jsonparser.Get(responseBody, "data", "abbreviation")
-	gameReleaseDate, _, _, _ := jsonparser.Get(responseBody, "data", "release-date")
-	gameCreatedDate, _, _, _ := jsonparser.Get(responseBody, "data", "created")
+	gameName, _ := jsonparser.GetString(responseBody, "data", "names", "international")
+	gameURL, _ := jsonparser.GetString(responseBody, "data", "abbreviation")
+	gameReleaseDate, _ := jsonparser.GetString(responseBody, "data", "release-date")
+	gameCreatedDate, _ := jsonparser.GetString(responseBody, "data", "created")
 	outputFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,%s,%d,%d\n", gameID, gameName, gameURL, gameReleaseDate, gameCreatedDate, numCategories, numLevels))
 }
 
 func processLeaderboard(responseBody []byte, outputFile *os.File) error {
 	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		runData, _, _, _ := jsonparser.Get(value, "run")
-		runID, _, _, _ := jsonparser.Get(runData, "id")
-		runGame, _, _, _ := jsonparser.Get(runData, "game")
-		runCategory, _, _, _ := jsonparser.Get(runData, "category")
-		runLevel, _, _, _ := jsonparser.Get(runData, "level")
-		runDate, _, _, _ := jsonparser.Get(runData, "date")
+		runID, _ := jsonparser.GetString(runData, "id")
+		runGame, _ := jsonparser.GetString(runData, "game")
+		runCategory, _ := jsonparser.GetString(runData, "category")
+		runLevel, _ := jsonparser.GetString(runData, "level")
+		runDate, _ := jsonparser.GetString(runData, "date")
 		runPrimaryTime, _ := jsonparser.GetFloat(runData, "times", "primary_t")
-		runPlatform, _, _, _ := jsonparser.Get(runData, "system", "platform")
+		runPlatform, _ := jsonparser.GetString(runData, "system", "platform")
 		runEmulated, _ := jsonparser.GetBoolean(runData, "system", "emulated")
-		runVerifiedDate, _, _, _ := jsonparser.Get(runData, "status", "verify-date")
-		runExaminer, _, _, _ := jsonparser.Get(runData, "status", "examiner")
+		runVerifiedDate, _ := jsonparser.GetString(runData, "status", "verify-date")
+		runExaminer, _ := jsonparser.GetString(runData, "status", "examiner")
 
 		playerIDArray := []string{}
 		_, err = jsonparser.ArrayEach(runData, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			playerID, _, _, _ := jsonparser.Get(value, "id")
+			playerID, _ := jsonparser.GetString(value, "id")
 			playerIDArray = append(playerIDArray, string(playerID))
 		}, "players")
 		runPlayers := strings.Join(playerIDArray, ",")

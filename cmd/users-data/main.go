@@ -71,10 +71,10 @@ func getUsersDataV1() {
 
 func processUser(numPersonalBests int, response []byte, outputFile *os.File) error {
 	userData, _, _, _ := jsonparser.Get(response, "data", "[0]", "players", "data", "[0]")
-	userID, _, _, _ := jsonparser.Get(userData, "id")
-	userName, _, _, _ := jsonparser.Get(userData, "names", "international")
-	userSignup, _, _, _ := jsonparser.Get(userData, "signup")
-	userLocation, _, _, _ := jsonparser.Get(userData, "location", "country", "code")
+	userID, _ := jsonparser.GetString(userData, "id")
+	userName, _ := jsonparser.GetString(userData, "names", "international")
+	userSignup, _ := jsonparser.GetString(userData, "signup")
+	userLocation, _ := jsonparser.GetString(userData, "location", "country", "code")
 	outputFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,%d\n", userID, userName, userSignup, userLocation, numPersonalBests))
 	return nil
 }
@@ -85,10 +85,10 @@ func processUserPersonalBests(userID string, response []byte, outputFile *os.Fil
 		numPersonalBests += 1
 		runData, _, _, _ := jsonparser.Get(value, "run")
 		runPlace, _ := jsonparser.GetInt(value, "place")
-		runID, _, _, _ := jsonparser.Get(runData, "id")
-		runGame, _, _, _ := jsonparser.Get(runData, "game")
-		runCategory, _, _, _ := jsonparser.Get(runData, "category")
-		runLevel, _, _, _ := jsonparser.Get(runData, "level")
+		runID, _ := jsonparser.GetString(runData, "id")
+		runGame, _ := jsonparser.GetString(runData, "game")
+		runCategory, _ := jsonparser.GetString(runData, "category")
+		runLevel, _ := jsonparser.GetString(runData, "level")
 		runValuesArray := []string{}
 		err = jsonparser.ObjectEach(runData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 			runValuesArray = append(runValuesArray, fmt.Sprintf("%s=%s", string(key), string(value)))

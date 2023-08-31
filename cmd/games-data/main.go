@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"sync"
 
 	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
 	"github.com/alexmerren/speedruncom-scraper/internal/srcomv1"
@@ -27,7 +28,20 @@ const (
 )
 
 func main() {
-	getGameDataV1()
+	wg := &sync.WaitGroup{}
+
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		getGameDataV1()
+	}()
+
+	go func() {
+		defer wg.Done()
+		getGameDataV2()
+	}()
+
+	wg.Wait()
 }
 
 //nolint:errcheck// Not worth checking for an error for every file write.
@@ -95,11 +109,11 @@ func getGameDataV1() {
 		numCategories := 0
 		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			numCategories += 1
-			categoryID, _, _, _ := jsonparser.Get(value, "id")
-			categoryName, _, _, _ := jsonparser.Get(value, "name")
-			categoryRules, _, _, _ := jsonparser.Get(value, "rules")
+			categoryID, _ := jsonparser.GetString(value, "id")
+			categoryName, _ := jsonparser.GetString(value, "name")
+			categoryRules, _ := jsonparser.GetString(value, "rules")
 			categoryNumPlayers, _ := jsonparser.GetInt(value, "players", "value")
-			categoryType, _, _, _ := jsonparser.Get(value, "type")
+			categoryType, _ := jsonparser.GetString(value, "type")
 			categoryOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",\"%s\",%s,%d\n", gameID, categoryID, categoryName, categoryRules, categoryType, categoryNumPlayers))
 		}, "data", "categories", "data")
 		if err != nil {
@@ -110,9 +124,9 @@ func getGameDataV1() {
 		numLevels := 0
 		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			numLevels += 1
-			levelID, _, _, _ := jsonparser.Get(value, "id")
-			levelName, _, _, _ := jsonparser.Get(value, "name")
-			levelRules, _, _, _ := jsonparser.Get(value, "rules")
+			levelID, _ := jsonparser.GetString(value, "id")
+			levelName, _ := jsonparser.GetString(value, "name")
+			levelRules, _ := jsonparser.GetString(value, "rules")
 			levelOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",\"%s\"\n", gameID, levelID, levelName, levelRules))
 		}, "data", "levels", "data")
 		if err != nil {
@@ -121,18 +135,18 @@ func getGameDataV1() {
 
 		// Step 3. Process each variable/value for a game
 		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			variableID, _, _, _ := jsonparser.Get(value, "id")
-			variableName, _, _, _ := jsonparser.Get(value, "name")
-			variableCategory, _, _, _ := jsonparser.Get(value, "category")
-			variableScope, _, _, _ := jsonparser.Get(value, "scope", "type")
+			variableID, _ := jsonparser.GetString(value, "id")
+			variableName, _ := jsonparser.GetString(value, "name")
+			variableCategory, _ := jsonparser.GetString(value, "category")
+			variableScope, _ := jsonparser.GetString(value, "scope", "type")
 			variableIsSubcategory, _ := jsonparser.GetBoolean(value, "is-subcategory")
-			variableDefault, _, _, _ := jsonparser.Get(value, "values", "default")
+			variableDefault, _ := jsonparser.GetString(value, "values", "default")
 			variableOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",%s,%s,%t,%s\n", gameID, variableID, variableName, variableCategory, variableScope, variableIsSubcategory, variableDefault))
 
 			err = jsonparser.ObjectEach(value, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 				valueID := string(key)
-				valueLabel, _, _, _ := jsonparser.Get(value, "label")
-				valueRules, _, _, _ := jsonparser.Get(value, "rules")
+				valueLabel, _ := jsonparser.GetString(value, "label")
+				valueRules, _ := jsonparser.GetString(value, "rules")
 				valueOutputFile.WriteString(fmt.Sprintf("%s,%s,%s,\"%s\",\"%s\"\n", gameID, variableID, valueID, valueLabel, valueRules))
 				return nil
 			}, "values", "values")
@@ -145,10 +159,10 @@ func getGameDataV1() {
 		}
 
 		// Step N. Process each game
-		gameName, _, _, _ := jsonparser.Get(response, "data", "names", "international")
-		gameURL, _, _, _ := jsonparser.Get(response, "data", "abbreviation")
-		gameReleaseDate, _, _, _ := jsonparser.Get(response, "data", "release-date")
-		gameCreatedDate, _, _, _ := jsonparser.Get(response, "data", "created")
+		gameName, _ := jsonparser.GetString(response, "data", "names", "international")
+		gameURL, _ := jsonparser.GetString(response, "data", "abbreviation")
+		gameReleaseDate, _ := jsonparser.GetString(response, "data", "release-date")
+		gameCreatedDate, _ := jsonparser.GetString(response, "data", "created")
 		gameOutputFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,%s,%d,%d\n", gameID, gameName, gameURL, gameReleaseDate, gameCreatedDate, numCategories, numLevels))
 	}
 
@@ -160,131 +174,46 @@ func getGameDataV1() {
 
 //nolint:errcheck// Not worth checking for an error for every file write.
 func getGameDataV2() {
-	inputFile, err := filesystem.OpenInputFile(allGameIDListV2)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer inputFile.Close()
-
 	gameOutputFile, err := filesystem.CreateOutputFile(gameOutputFilenameV2)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	defer gameOutputFile.Close()
-	gameOutputFile.WriteString("#ID,name,URL,type,rules,releaseDate,addedDate,runCount,playerCount,numCategories,numLevels,emulator\n")
+	gameOutputFile.WriteString("#ID,name,URL,type,rules,releaseDate,addedDate,runCount,playerCount\n")
 
-	categoryOutputFile, err := filesystem.CreateOutputFile(categoryOutputFilenameV2)
+	currentPage := 0
+	request, _ := srcomv2.GetGameList(currentPage)
+	lastPage, err := jsonparser.GetInt(request, "pagination", "pages")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer categoryOutputFile.Close()
-	categoryOutputFile.WriteString("#parentGameID,ID,name,rules,numPlayers\n")
 
-	levelOutputFile, err := filesystem.CreateOutputFile(levelOutputFilenameV2)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer levelOutputFile.Close()
-	levelOutputFile.WriteString("#parentGameID,ID,name,rules,numPlayers\n")
-
-	variableOutputFile, err := filesystem.CreateOutputFile(variableOutputFileV2)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer variableOutputFile.Close()
-	variableOutputFile.WriteString("#parentGameID,ID,name,category,scope\n")
-
-	valueOutputFile, err := filesystem.CreateOutputFile(valueOutputFileV2)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer valueOutputFile.Close()
-	valueOutputFile.WriteString("#parentGameID,variableID,ID,label,rules\n")
-
-	// Scan the input file and get information for each of the game ID's in the
-	// input file. We progress to the next line using scanner.Scan()
-	scanner := bufio.NewScanner(inputFile)
-	scanner.Scan()
-	for scanner.Scan() {
-		response, err := srcomv2.GetGameData(scanner.Text())
+	for int64(currentPage) < lastPage {
+		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			gameID, _ := jsonparser.GetString(value, "id")
+			gameName, _ := jsonparser.GetString(value, "name")
+			gameURL, _ := jsonparser.GetString(value, "url")
+			gameType, _ := jsonparser.GetString(value, "type")
+			gameReleaseDate, _ := jsonparser.GetInt(value, "releaseDate")
+			gameAddedDate, _ := jsonparser.GetInt(value, "addedDate")
+			gameRunCount, _ := jsonparser.GetInt(value, "runCount")
+			gamePlayerCount, _ := jsonparser.GetInt(value, "totalPlayerCount")
+			gameRules, _, _, _ := jsonparser.Get(value, "rules")
+			gameOutputFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,\"%s\",%d,%d,%d,%d\n", gameID, gameName, gameURL, gameType, gameRules, gameReleaseDate, gameAddedDate, gameRunCount, gamePlayerCount))
+		}, "gameList")
 		if err != nil {
-			continue
-		}
-
-		gameID, _, _, _ := jsonparser.Get(response, "game", "id")
-
-		// Step 1. Process each category for a game
-		numCategories := 0
-		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			numCategories += 1
-			categoryID, _, _, _ := jsonparser.Get(value, "id")
-			categoryName, _, _, _ := jsonparser.Get(value, "name")
-			categoryRules, _, _, _ := jsonparser.Get(value, "rules")
-			categoryNumPlayers, _ := jsonparser.GetInt(value, "numPlayers")
-			categoryOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",\"%s\",%d\n", gameID, categoryID, categoryName, categoryRules, categoryNumPlayers))
-		}, "categories")
-		if err != nil {
+			fmt.Println(err)
 			return
 		}
 
-		// Step 2. Process each level for a game
-		numLevels := 0
-		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			numLevels += 1
-			levelID, _, _, _ := jsonparser.Get(value, "id")
-			levelName, _, _, _ := jsonparser.Get(value, "name")
-			levelRules, _, _, _ := jsonparser.Get(value, "rules")
-			levelNumPlayers, _ := jsonparser.GetInt(value, "numPlayers")
-			levelOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",\"%s\",%d\n", gameID, levelID, levelName, levelRules, levelNumPlayers))
-		}, "levels")
+		currentPage += 1
+
+		request, err = srcomv2.GetGameList(currentPage)
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
-
-		// Step 3. Process each variable/value for a game
-		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			variableID, _, _, _ := jsonparser.Get(value, "id")
-			variableName, _, _, _ := jsonparser.Get(value, "name")
-			variableCategory, _, _, _ := jsonparser.Get(value, "categordId")
-			variableScope, _, _, _ := jsonparser.Get(value, "categoryScope")
-			variableOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",%s,%s\n", gameID, variableID, variableName, variableCategory, variableScope))
-		}, "variables")
-		if err != nil {
-			return
-		}
-
-		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			valueID, _, _, _ := jsonparser.Get(value, "id")
-			variableID, _, _, _ := jsonparser.Get(value, "variableId")
-			valueLabel, _, _, _ := jsonparser.Get(value, "name")
-			valueRules, _, _, _ := jsonparser.Get(value, "rules")
-			valueOutputFile.WriteString(fmt.Sprintf("%s,%s,%s,\"%s\",\"%s\"\n", gameID, variableID, valueID, valueLabel, valueRules))
-		}, "values")
-		if err != nil {
-			return
-		}
-
-		// Step N. Process each game
-		gameName, _, _, _ := jsonparser.Get(response, "game", "name")
-		gameURL, _, _, _ := jsonparser.Get(response, "game", "url")
-		gameType, _, _, _ := jsonparser.Get(response, "game", "type")
-		gameEmulator, _ := jsonparser.GetInt(response, "game", "emulator")
-		gameReleaseDate, _ := jsonparser.GetInt(response, "game", "releaseDate")
-		gameAddedDate, _ := jsonparser.GetInt(response, "game", "addedDate")
-		gameRunCount, _ := jsonparser.GetInt(response, "game", "runCount")
-		gamePlayerCount, _ := jsonparser.GetInt(response, "game", "totalPlayerCount")
-		gameRules, _, _, _ := jsonparser.Get(response, "game", "rules")
-		gameOutputFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,\"%s\",%d,%d,%d,%d,%d,%d,%d\n", gameID, gameName, gameURL, gameType, gameRules, gameReleaseDate, gameAddedDate, gameRunCount, gamePlayerCount, numCategories, numLevels, gameEmulator))
-	}
-
-	if err := scanner.Err(); err != nil {
-		fmt.Println(err)
-		return
 	}
 }
