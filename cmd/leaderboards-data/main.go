@@ -28,13 +28,13 @@ func getLeaderboardDataV1() {
 	}
 	defer inputFile.Close()
 
-	leaderboardOuptutFile, err := filesystem.CreateOutputFile(leaderboardOutputFilenameV1)
+	leaderboardOutputFile, err := filesystem.CreateOutputFile(leaderboardOutputFilenameV1)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer leaderboardOuptutFile.Close()
-	leaderboardOuptutFile.WriteString("#runID,gameID,categoryID,levelID,date,primaryTime,platform,emulated,players,variablesAndValues\n")
+	defer leaderboardOutputFile.Close()
+	leaderboardOutputFile.WriteString("#runID,gameID,categoryID,levelID,date,primaryTime,platform,emulated,players,examiner,verifiedDate,variablesAndValues\n")
 
 	scanner := bufio.NewScanner(inputFile)
 	scanner.Scan()
@@ -60,7 +60,7 @@ func getLeaderboardDataV1() {
 					return
 				}
 
-				err = processLeaderboard(leaderboardResponse, leaderboardOuptutFile)
+				err = processLeaderboard(leaderboardResponse, leaderboardOutputFile)
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -78,7 +78,7 @@ func getLeaderboardDataV1() {
 						return
 					}
 
-					err = processLeaderboard(leaderboardResponse, leaderboardOuptutFile)
+					err = processLeaderboard(leaderboardResponse, leaderboardOutputFile)
 					if err != nil {
 						fmt.Println(err)
 						return
@@ -100,6 +100,8 @@ func processLeaderboard(responseBody []byte, outputFile *os.File) error {
 		runPrimaryTime, _ := jsonparser.GetFloat(runData, "times", "primary_t")
 		runPlatform, _, _, _ := jsonparser.Get(runData, "system", "platform")
 		runEmulated, _ := jsonparser.GetBoolean(runData, "system", "emulated")
+		runVerifiedDate, _, _, _ := jsonparser.Get(runData, "status", "verify-date")
+		runExaminer, _, _, _ := jsonparser.Get(runData, "status", "examiner")
 
 		playerIDArray := []string{}
 		_, err = jsonparser.ArrayEach(runData, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
@@ -115,7 +117,7 @@ func processLeaderboard(responseBody []byte, outputFile *os.File) error {
 		}, "values")
 		runValues := strings.Join(runValuesArray, ",")
 
-		outputFile.WriteString(fmt.Sprintf("%s,%s,%s,%s,%s,%0.2f,%s,%t,\"%s\",\"%s\"\n", runID, runGame, runCategory, runLevel, runDate, runPrimaryTime, runPlatform, runEmulated, runPlayers, runValues))
+		outputFile.WriteString(fmt.Sprintf("%s,%s,%s,%s,%s,%0.2f,%s,%t,\"%s\",%s,%s,\"%s\"\n", runID, runGame, runCategory, runLevel, runDate, runPrimaryTime, runPlatform, runEmulated, runPlayers, runExaminer, runVerifiedDate, runValues))
 	}, "data", "runs")
 	if err != nil {
 		return err

@@ -53,6 +53,10 @@ func RequestSrcom(URL string) ([]byte, error) {
 func retryWithExponentialBackoff(URL string) (*http.Response, error) {
 	iterationNumber := 0
 	for {
+		if iterationNumber == 5 {
+			return nil, fmt.Errorf("srcom: maximum retry iterations exceeded for url %s", URL)
+		}
+
 		backoffTime := exponentialBackoff(iterationNumber)
 		log.Printf("Sleeping for %s", backoffTime)
 		time.Sleep(backoffTime)

@@ -39,13 +39,13 @@ func getGameDataV1() {
 	}
 	defer inputFile.Close()
 
-	gameOuptutFile, err := filesystem.CreateOutputFile(gameOutputFilenameV1)
+	gameOutputFile, err := filesystem.CreateOutputFile(gameOutputFilenameV1)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer gameOuptutFile.Close()
-	gameOuptutFile.WriteString("#ID,name,URL,releaseDate,createdDate,numCategories,numLevels\n")
+	defer gameOutputFile.Close()
+	gameOutputFile.WriteString("#ID,name,URL,releaseDate,createdDate,numCategories,numLevels\n")
 
 	categoryOutputFile, err := filesystem.CreateOutputFile(categoryOutputFilenameV1)
 	if err != nil {
@@ -53,7 +53,7 @@ func getGameDataV1() {
 		return
 	}
 	defer categoryOutputFile.Close()
-	categoryOutputFile.WriteString("#parentGameID,ID,name,rules\n")
+	categoryOutputFile.WriteString("#parentGameID,ID,name,rules,type,numPlayers\n")
 
 	levelOutputFile, err := filesystem.CreateOutputFile(levelOutputFilenameV1)
 	if err != nil {
@@ -149,7 +149,7 @@ func getGameDataV1() {
 		gameURL, _, _, _ := jsonparser.Get(response, "data", "abbreviation")
 		gameReleaseDate, _, _, _ := jsonparser.Get(response, "data", "release-date")
 		gameCreatedDate, _, _, _ := jsonparser.Get(response, "data", "created")
-		gameOuptutFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,%s,%d,%d\n", gameID, gameName, gameURL, gameReleaseDate, gameCreatedDate, numCategories, numLevels))
+		gameOutputFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,%s,%d,%d\n", gameID, gameName, gameURL, gameReleaseDate, gameCreatedDate, numCategories, numLevels))
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -167,13 +167,13 @@ func getGameDataV2() {
 	}
 	defer inputFile.Close()
 
-	gameOuptutFile, err := filesystem.CreateOutputFile(gameOutputFilenameV2)
+	gameOutputFile, err := filesystem.CreateOutputFile(gameOutputFilenameV2)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer gameOuptutFile.Close()
-	gameOuptutFile.WriteString("#ID,name,URL,type,rules,releaseDate,addedDate,runCount,playerCount,numCategories,numLevels,emulator\n")
+	defer gameOutputFile.Close()
+	gameOutputFile.WriteString("#ID,name,URL,type,rules,releaseDate,addedDate,runCount,playerCount,numCategories,numLevels,emulator\n")
 
 	categoryOutputFile, err := filesystem.CreateOutputFile(categoryOutputFilenameV2)
 	if err != nil {
@@ -280,7 +280,7 @@ func getGameDataV2() {
 		gameRunCount, _ := jsonparser.GetInt(response, "game", "runCount")
 		gamePlayerCount, _ := jsonparser.GetInt(response, "game", "totalPlayerCount")
 		gameRules, _, _, _ := jsonparser.Get(response, "game", "rules")
-		gameOuptutFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,\"%s\",%d,%d,%d,%d,%d,%d,%d\n", gameID, gameName, gameURL, gameType, gameRules, gameReleaseDate, gameAddedDate, gameRunCount, gamePlayerCount, numCategories, numLevels, gameEmulator))
+		gameOutputFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,\"%s\",%d,%d,%d,%d,%d,%d,%d\n", gameID, gameName, gameURL, gameType, gameRules, gameReleaseDate, gameAddedDate, gameRunCount, gamePlayerCount, numCategories, numLevels, gameEmulator))
 	}
 
 	if err := scanner.Err(); err != nil {
