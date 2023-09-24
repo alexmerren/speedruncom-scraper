@@ -79,7 +79,7 @@ func getGameAndLeaderboardDataV1() {
 		return
 	}
 	defer leaderboardOutputFile.Close()
-	leaderboardOutputFile.WriteString("#runID,gameID,categoryID,levelID,date,primaryTime,platform,emulated,players,examiner,verifiedDate,variablesAndValues\n")
+	leaderboardOutputFile.WriteString("#runID,gameID,categoryID,levelID,date,primaryTime,place,platform,emulated,players,examiner,verifiedDate,variablesAndValues\n")
 
 	// Scan the input file and get information for each of the game ID's in the
 	// input file. We progress to the next line using scanner.Scan()
@@ -234,14 +234,14 @@ func processLeaderboard(responseBody []byte, outputFile *os.File) error {
 		runExaminer, _ := jsonparser.GetString(runData, "status", "examiner")
 
 		playerIDArray := []string{}
-		_, err = jsonparser.ArrayEach(runData, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		jsonparser.ArrayEach(runData, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			playerID, _ := jsonparser.GetString(value, "id")
 			playerIDArray = append(playerIDArray, string(playerID))
 		}, "players")
 		runPlayers := strings.Join(playerIDArray, ",")
 
 		runValuesArray := []string{}
-		err = jsonparser.ObjectEach(runData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+		jsonparser.ObjectEach(runData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 			runValuesArray = append(runValuesArray, fmt.Sprintf("%s=%s", string(key), string(value)))
 			return nil
 		}, "values")

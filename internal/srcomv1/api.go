@@ -3,7 +3,7 @@ package srcomv1
 import (
 	"fmt"
 
-	"github.com/alexmerren/speedruncom-scraper/internal/srcomv2"
+	"github.com/alexmerren/speedruncom-scraper/internal/requests"
 )
 
 const (
@@ -25,43 +25,43 @@ const (
 func GetUserRuns(userID string, pageNumber int) ([]byte, error) {
 	header := fmt.Sprintf(runsFunction, userID, pageNumber*runsListNumberPerPage)
 	URL := fmt.Sprintf(baseApiUrl, header)
-	return srcomv2.RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetUser(userID string) ([]byte, error) {
 	header := fmt.Sprintf(userFunction, userID)
 	URL := fmt.Sprintf(baseApiUrl, header)
-	return srcomv2.RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetGame(gameID string) ([]byte, error) {
 	header := fmt.Sprintf(gameFunction, gameID)
 	URL := fmt.Sprintf(baseApiUrl, header)
-	return srcomv2.RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetCategory(categoryID string) ([]byte, error) {
 	header := fmt.Sprintf(categoryFunction, categoryID)
 	URL := fmt.Sprintf(baseApiUrl, header)
-	return srcomv2.RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetLevel(levelID string) ([]byte, error) {
 	header := fmt.Sprintf(levelFunction, levelID)
 	URL := fmt.Sprintf(baseApiUrl, header)
-	return srcomv2.RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetDeveloper(developerID string) ([]byte, error) {
 	header := fmt.Sprintf(developerFunction, developerID)
 	URL := fmt.Sprintf(baseApiUrl, header)
-	return srcomv2.RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetGameList(pageNumber int) ([]byte, error) {
 	header := fmt.Sprintf(gameListFunction, pageNumber*gameListNumberPerPage)
 	URL := fmt.Sprintf(baseApiUrl, header)
-	return srcomv2.RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetGameCategoryLeaderboard(gameID, categoryID string) ([]byte, error) {
@@ -69,7 +69,7 @@ func GetGameCategoryLeaderboard(gameID, categoryID string) ([]byte, error) {
 		gameID, categoryID,
 	)
 	URL := fmt.Sprintf(baseApiUrl, header)
-	return srcomv2.RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetGameCategoryLevelLeaderboard(gameID, categoryID, levelID string) ([]byte, error) {
@@ -77,5 +77,5 @@ func GetGameCategoryLevelLeaderboard(gameID, categoryID, levelID string) ([]byte
 		gameID, levelID, categoryID,
 	)
 	URL := fmt.Sprintf(baseApiUrl, header)
-	return srcomv2.RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }

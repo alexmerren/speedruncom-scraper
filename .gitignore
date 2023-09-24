@@ -22,6 +22,7 @@ tmp/
 monitor/
 
 !data/.gitkeep
+httpcache.db
 
 # Go workspace file
 go.work

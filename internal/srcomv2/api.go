@@ -1,5 +1,7 @@
 package srcomv2
 
+import "github.com/alexmerren/speedruncom-scraper/internal/requests"
+
 const (
 	baseApiUrl = "https://www.speedrun.com/api/v2/%s?_r=%s"
 
@@ -27,7 +29,7 @@ func GetUserData(userID string) ([]byte, error) {
 		return nil, err
 	}
 
-	return RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetGameData(gameID string) ([]byte, error) {
@@ -40,7 +42,7 @@ func GetGameData(gameID string) ([]byte, error) {
 		return nil, err
 	}
 
-	return RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetGameSummary(gameURL string) ([]byte, error) {
@@ -53,7 +55,7 @@ func GetGameSummary(gameURL string) ([]byte, error) {
 		return nil, err
 	}
 
-	return RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetGameList(pageNumber int) ([]byte, error) {
@@ -66,7 +68,7 @@ func GetGameList(pageNumber int) ([]byte, error) {
 		return nil, err
 	}
 
-	return RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetGameCategoryLeaderboard(gameID, categoryID string, pageNumber int) ([]byte, error) {
@@ -86,7 +88,7 @@ func GetGameCategoryLeaderboard(gameID, categoryID string, pageNumber int) ([]by
 		return nil, err
 	}
 
-	return RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetGameCategoryVariableValueLeaderboard(
@@ -115,7 +117,7 @@ func GetGameCategoryVariableValueLeaderboard(
 		return nil, err
 	}
 
-	return RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetGameCategoryWorldRecordHistory(gameID, categoryID string) ([]byte, error) {
@@ -131,7 +133,7 @@ func GetGameCategoryWorldRecordHistory(gameID, categoryID string) ([]byte, error
 		return nil, err
 	}
 
-	return RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetGameCategoryLevelWorldRecordHistory(gameID, categoryID, levelID string) ([]byte, error) {
@@ -148,7 +150,7 @@ func GetGameCategoryLevelWorldRecordHistory(gameID, categoryID, levelID string) 
 		return nil, err
 	}
 
-	return RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }
 
 func GetSearch(query string) ([]byte, error) {
@@ -167,5 +169,5 @@ func GetSearch(query string) ([]byte, error) {
 		return nil, err
 	}
 
-	return RequestSrcom(URL)
+	return requests.RequestSrcom(URL)
 }

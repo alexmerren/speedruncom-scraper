@@ -34,7 +34,7 @@ func getLeaderboardDataV1() {
 		return
 	}
 	defer leaderboardOutputFile.Close()
-	leaderboardOutputFile.WriteString("#runID,gameID,categoryID,levelID,date,primaryTime,platform,emulated,players,examiner,verifiedDate,variablesAndValues\n")
+	leaderboardOutputFile.WriteString("#runID,gameID,categoryID,levelID,date,primaryTime,place,platform,emulated,players,examiner,verifiedDate,variablesAndValues\n")
 
 	scanner := bufio.NewScanner(inputFile)
 	scanner.Scan()
@@ -49,7 +49,7 @@ func getLeaderboardDataV1() {
 		// Iterate through all the categories of a game. Retrieve 'per-game'
 		// categories' leaderboards normally, then 'per-level' categories
 		// leaderboards can be retrieved via each level.
-		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			categoryID, _ := jsonparser.GetString(value, "id")
 			categoryType, _ := jsonparser.GetString(value, "type")
 
@@ -70,7 +70,7 @@ func getLeaderboardDataV1() {
 			// The levels are embedded so we can immediately iterate over each
 			// of the levels to retrieve their respective leaderboard.
 			if string(categoryType) == "per-level" {
-				_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+				jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 					levelID, _ := jsonparser.GetString(value, "id")
 					leaderboardResponse, err := srcomv1.GetGameCategoryLevelLeaderboard(gameID, string(categoryID), string(levelID))
 					if err != nil {
@@ -105,14 +105,14 @@ func processLeaderboard(responseBody []byte, outputFile *os.File) error {
 		runExaminer, _ := jsonparser.GetString(runData, "status", "examiner")
 
 		playerIDArray := []string{}
-		_, err = jsonparser.ArrayEach(runData, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		jsonparser.ArrayEach(runData, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			playerID, _ := jsonparser.GetString(value, "id")
 			playerIDArray = append(playerIDArray, string(playerID))
 		}, "players")
 		runPlayers := strings.Join(playerIDArray, ",")
 
 		runValuesArray := []string{}
-		err = jsonparser.ObjectEach(runData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+		jsonparser.ObjectEach(runData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 			runValuesArray = append(runValuesArray, fmt.Sprintf("%s=%s", string(key), string(value)))
 			return nil
 		}, "values")
