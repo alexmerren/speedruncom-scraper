@@ -18,6 +18,7 @@ func main() {
 	getUsersListV1()
 }
 
+//nolint:errcheck // Don't need to check for errors.
 func getUsersListV1() {
 	inputFile, err := filesystem.OpenInputFile(leaderboardDataFilenameV1)
 	if err != nil {

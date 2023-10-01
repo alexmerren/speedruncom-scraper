@@ -7,12 +7,7 @@ import (
 )
 
 func OpenInputFile(filename string) (*os.File, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	return file, err
+	return os.Open(filename)
 }
 
 func CreateOutputFile(filename string) (*os.File, error) {

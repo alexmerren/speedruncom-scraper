@@ -7,7 +7,7 @@ DIST_DIR := $(CURDIR)/dist
 INTERNAL_DIR := $(CURDIR)/internal
 CMD_DIR := $(CURDIR)/cmd
 
-TEST_MODULES := $(shell $(GO) list $(INTERNAL_DIR)/... $(PKG_DIR)/...)
+TEST_MODULES := $(shell $(GO) list $(INTERNAL_DIR)/...)
 
 GOFLAGS :=
 # Set to 1 to use static linking for all builds (including tests).
@@ -46,7 +46,7 @@ lint:
 ## test: Run the unit tests for the project 
 .PHONY: test
 test:
-	@$(GO) test $(TEST_MODULES) -coverprofile=$(CURDIR)/coverage.out coverpkg=$(INTERNAL_DIR)/...
+	@$(GO) test $(TEST_MODULES) -coverprofile=$(CURDIR)/coverage.out coverpkg=$(INTERNAL_DIR)
 	@$(GO) tool cover -html=$(CURDIR)/coverage.out -o $(CURDIR)/test-coverage.html
 	@$(GO) tool cover -func=$(CURDIR)/coverage.out \
 		| awk '$$1 == "total:" {printf("Total coverage: %.2f%% of statements\n", $$3)}'

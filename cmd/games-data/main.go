@@ -45,7 +45,7 @@ func main() {
 	wg.Wait()
 }
 
-//nolint:errcheck// Not worth checking for an error for every file write.
+//nolint:errcheck // Don't need to check for errors.
 func getGameDataV1() {
 	inputFile, err := filesystem.OpenInputFile(allGameIDListV1)
 	if err != nil {
@@ -135,7 +135,7 @@ func getGameDataV1() {
 		}
 
 		// Step 3. Process each variable/value for a game
-		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 			variableID, _ := jsonparser.GetString(value, "id")
 			variableName, _ := jsonparser.GetString(value, "name")
 			variableCategory, _ := jsonparser.GetString(value, "category")
@@ -152,10 +152,12 @@ func getGameDataV1() {
 				return nil
 			}, "values", "values")
 			if err != nil {
+				fmt.Println(err)
 				return
 			}
 		}, "data", "variables", "data")
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
 
@@ -173,7 +175,7 @@ func getGameDataV1() {
 	}
 }
 
-//nolint:errcheck// Not worth checking for an error for every file write.
+//nolint:errcheck // Don't need to check for errors.
 func getGameDataV2() {
 	gameOutputFile, err := filesystem.CreateOutputFile(gameOutputFilenameV2)
 	if err != nil {
@@ -192,7 +194,7 @@ func getGameDataV2() {
 	}
 
 	for int64(currentPage) < lastPage {
-		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 			gameID, _ := jsonparser.GetString(value, "id")
 			gameName, _ := jsonparser.GetString(value, "name")
 			gameNameFormatted := strings.ReplaceAll(gameName, "\"", "'")

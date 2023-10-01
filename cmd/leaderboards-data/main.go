@@ -20,6 +20,7 @@ func main() {
 	getLeaderboardDataV1()
 }
 
+//nolint:errcheck // Don't need to check for errors.
 func getLeaderboardDataV1() {
 	inputFile, err := filesystem.OpenInputFile(allGameIDListV1)
 	if err != nil {
@@ -49,7 +50,7 @@ func getLeaderboardDataV1() {
 		// Iterate through all the categories of a game. Retrieve 'per-game'
 		// categories' leaderboards normally, then 'per-level' categories
 		// leaderboards can be retrieved via each level.
-		jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 			categoryID, _ := jsonparser.GetString(value, "id")
 			categoryType, _ := jsonparser.GetString(value, "type")
 
@@ -70,7 +71,7 @@ func getLeaderboardDataV1() {
 			// The levels are embedded so we can immediately iterate over each
 			// of the levels to retrieve their respective leaderboard.
 			if string(categoryType) == "per-level" {
-				jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+				_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 					levelID, _ := jsonparser.GetString(value, "id")
 					leaderboardResponse, err := srcomv1.GetGameCategoryLevelLeaderboard(gameID, string(categoryID), string(levelID))
 					if err != nil {
@@ -84,11 +85,20 @@ func getLeaderboardDataV1() {
 						return
 					}
 				}, "data", "levels", "data")
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
 			}
 		}, "data", "categories", "data")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 }
 
+//nolint:errcheck // Don't need to check for errors.
 func processLeaderboard(responseBody []byte, outputFile *os.File) error {
 	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		runPlace, _ := jsonparser.GetInt(value, "place")

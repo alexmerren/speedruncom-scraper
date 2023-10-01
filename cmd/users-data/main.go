@@ -21,6 +21,7 @@ func main() {
 	getUsersDataV1()
 }
 
+//nolint:errcheck // Don't need to check for errors.
 func getUsersDataV1() {
 	inputFile, err := filesystem.OpenInputFile(allUserIDListV1)
 	if err != nil {
@@ -69,6 +70,7 @@ func getUsersDataV1() {
 	}
 }
 
+//nolint:errcheck // Don't need to check for errors.
 func processUser(numPersonalBests int, response []byte, outputFile *os.File) error {
 	userData, _, _, _ := jsonparser.Get(response, "data", "[0]", "players", "data", "[0]")
 	userID, _ := jsonparser.GetString(userData, "id")
@@ -79,6 +81,7 @@ func processUser(numPersonalBests int, response []byte, outputFile *os.File) err
 	return nil
 }
 
+//nolint:errcheck // Don't need to check for errors.
 func processUserPersonalBests(userID string, response []byte, outputFile *os.File) (int, error) {
 	numPersonalBests := 0
 	_, err := jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
@@ -90,7 +93,7 @@ func processUserPersonalBests(userID string, response []byte, outputFile *os.Fil
 		runCategory, _ := jsonparser.GetString(runData, "category")
 		runLevel, _ := jsonparser.GetString(runData, "level")
 		runValuesArray := []string{}
-		err = jsonparser.ObjectEach(runData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+		jsonparser.ObjectEach(runData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 			runValuesArray = append(runValuesArray, fmt.Sprintf("%s=%s", string(key), string(value)))
 			return nil
 		}, "values")
@@ -102,8 +105,4 @@ func processUserPersonalBests(userID string, response []byte, outputFile *os.Fil
 		return 0, err
 	}
 	return numPersonalBests, nil
-}
-
-func processUserRuns(userID string, response []byte, runsOutputFile *os.File) (int, error) {
-	return 0, nil
 }

@@ -25,6 +25,7 @@ func main() {
 	getGameAndLeaderboardDataV1()
 }
 
+//nolint:errcheck // Don't need to check for errors.
 func getGameAndLeaderboardDataV1() {
 	inputFile, err := filesystem.OpenInputFile(allGameIDListV1)
 	if err != nil {
@@ -114,7 +115,7 @@ func getGameAndLeaderboardDataV1() {
 		processGame(gameID, numCategories, numLevels, response, gameOutputFile)
 
 		// Step 5. Process the leaderboard for each game.
-		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 			categoryID, _ := jsonparser.GetString(value, "id")
 			categoryType, _ := jsonparser.GetString(value, "type")
 
@@ -135,7 +136,7 @@ func getGameAndLeaderboardDataV1() {
 			// The levels are embedded so we can immediately iterate over each
 			// of the levels to retrieve their respective leaderboard.
 			if string(categoryType) == "per-level" {
-				_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+				_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 					levelID, _ := jsonparser.GetString(value, "id")
 					leaderboardResponse, err := srcomv1.GetGameCategoryLevelLeaderboard(gameID, string(categoryID), string(levelID))
 					if err != nil {
@@ -149,9 +150,17 @@ func getGameAndLeaderboardDataV1() {
 						return
 					}
 				}, "data", "levels", "data")
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
 			}
-		}, "data", "categories", "data")
 
+		}, "data", "categories", "data")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -160,9 +169,10 @@ func getGameAndLeaderboardDataV1() {
 	}
 }
 
+//nolint:errcheck // Don't need to check for errors.
 func processCategories(gameID string, responseBody []byte, outputFile *os.File) (int, error) {
 	numCategories := 0
-	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 		numCategories += 1
 		categoryID, _ := jsonparser.GetString(value, "id")
 		categoryName, _ := jsonparser.GetString(value, "name")
@@ -174,9 +184,10 @@ func processCategories(gameID string, responseBody []byte, outputFile *os.File) 
 	return numCategories, err
 }
 
+//nolint:errcheck // Don't need to check for errors.
 func processLevels(gameID string, responseBody []byte, outputFile *os.File) (int, error) {
 	numLevels := 0
-	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 		numLevels += 1
 		levelID, _ := jsonparser.GetString(value, "id")
 		levelName, _ := jsonparser.GetString(value, "name")
@@ -186,8 +197,9 @@ func processLevels(gameID string, responseBody []byte, outputFile *os.File) (int
 	return numLevels, err
 }
 
+//nolint:errcheck // Don't need to check for errors.
 func processVariablesAndValues(gameID string, responseBody []byte, variableOutputFile, valueOutputFile *os.File) error {
-	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 		variableID, _ := jsonparser.GetString(value, "id")
 		variableName, _ := jsonparser.GetString(value, "name")
 		variableCategory, _ := jsonparser.GetString(value, "category")
@@ -196,7 +208,7 @@ func processVariablesAndValues(gameID string, responseBody []byte, variableOutpu
 		variableDefault, _ := jsonparser.GetString(value, "values", "default")
 		variableOutputFile.WriteString(fmt.Sprintf("%s,%s,\"%s\",%s,%s,%t,%s\n", gameID, variableID, variableName, variableCategory, variableScope, variableIsSubcategory, variableDefault))
 
-		err = jsonparser.ObjectEach(value, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+		err := jsonparser.ObjectEach(value, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 			valueID := string(key)
 			valueLabel, _ := jsonparser.GetString(value, "label")
 			valueRules, _ := jsonparser.GetString(value, "rules")
@@ -210,6 +222,7 @@ func processVariablesAndValues(gameID string, responseBody []byte, variableOutpu
 	return err
 }
 
+//nolint:errcheck // Don't need to check for errors.
 func processGame(gameID string, numCategories, numLevels int, responseBody []byte, outputFile *os.File) {
 	gameName, _ := jsonparser.GetString(responseBody, "data", "names", "international")
 	gameURL, _ := jsonparser.GetString(responseBody, "data", "abbreviation")
@@ -218,8 +231,9 @@ func processGame(gameID string, numCategories, numLevels int, responseBody []byt
 	outputFile.WriteString(fmt.Sprintf("%s,\"%s\",%s,%s,%s,%d,%d\n", gameID, gameName, gameURL, gameReleaseDate, gameCreatedDate, numCategories, numLevels))
 }
 
+//nolint:errcheck // Don't need to check for errors.
 func processLeaderboard(responseBody []byte, outputFile *os.File) error {
-	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+	_, err := jsonparser.ArrayEach(responseBody, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 		runPlace, _ := jsonparser.GetInt(value, "place")
 		runData, _, _, _ := jsonparser.Get(value, "run")
 		runID, _ := jsonparser.GetString(runData, "id")

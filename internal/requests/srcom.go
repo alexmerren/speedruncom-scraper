@@ -13,8 +13,9 @@ import (
 )
 
 const (
-	exponentialBackoffStartInt   = 500
-	exponentialBackoffMultiplier = 2
+	exponentialBackoffStartInt     = 500
+	exponentialBackoffMultiplier   = 2
+	exponentialBackoffEndIteration = 5
 )
 
 var unrecovableStatusCodes = []int{
@@ -50,14 +51,11 @@ func RequestSrcom(URL string) ([]byte, error) {
 func retryWithExponentialBackoff(URL string) (*http.Response, error) {
 	iterationNumber := 0
 	for {
-		if iterationNumber == 5 {
-			return nil, fmt.Errorf("srcom: maximum retry iterations exceeded for url %s", URL)
+		if iterationNumber == exponentialBackoffEndIteration {
+			return nil, fmt.Errorf("maximum retry iterations exceeded for url %s", URL)
 		}
 
-		backoffTime := exponentialBackoff(iterationNumber)
-		log.Printf("Sleeping for %s", backoffTime)
-		time.Sleep(backoffTime)
-
+		time.Sleep(exponentialBackoff(iterationNumber))
 		response, err := httpcache.DefaultClient.Get(URL)
 		if err != nil {
 			return nil, err
@@ -72,6 +70,6 @@ func retryWithExponentialBackoff(URL string) (*http.Response, error) {
 }
 
 func exponentialBackoff(iteration int) time.Duration {
-	newTime := exponentialBackoffStartInt * math.Pow(exponentialBackoffMultiplier, float64(iteration))
-	return time.Duration(newTime) * time.Millisecond
+	backoffTime := exponentialBackoffStartInt * math.Pow(exponentialBackoffMultiplier, float64(iteration))
+	return time.Duration(backoffTime) * time.Millisecond
 }
