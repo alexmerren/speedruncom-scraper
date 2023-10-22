@@ -23,7 +23,7 @@ func CreateOutputFile(filename string) (*os.File, error) {
 		}
 	}
 
-	file, err := os.OpenFile(filename, os.O_CREATE|os.O_RDWR, os.ModePerm)
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
 		return nil, err
 	}

@@ -25,42 +25,49 @@ const (
 func GetUserRuns(userID string, pageNumber int) ([]byte, error) {
 	header := fmt.Sprintf(runsFunction, userID, pageNumber*runsListNumberPerPage)
 	URL := fmt.Sprintf(baseApiUrl, header)
+
 	return requests.RequestSrcom(URL)
 }
 
 func GetUser(userID string) ([]byte, error) {
 	header := fmt.Sprintf(userFunction, userID)
 	URL := fmt.Sprintf(baseApiUrl, header)
+
 	return requests.RequestSrcom(URL)
 }
 
 func GetGame(gameID string) ([]byte, error) {
 	header := fmt.Sprintf(gameFunction, gameID)
 	URL := fmt.Sprintf(baseApiUrl, header)
+
 	return requests.RequestSrcom(URL)
 }
 
 func GetCategory(categoryID string) ([]byte, error) {
 	header := fmt.Sprintf(categoryFunction, categoryID)
 	URL := fmt.Sprintf(baseApiUrl, header)
+
 	return requests.RequestSrcom(URL)
 }
 
 func GetLevel(levelID string) ([]byte, error) {
 	header := fmt.Sprintf(levelFunction, levelID)
 	URL := fmt.Sprintf(baseApiUrl, header)
+
 	return requests.RequestSrcom(URL)
 }
 
 func GetDeveloper(developerID string) ([]byte, error) {
 	header := fmt.Sprintf(developerFunction, developerID)
 	URL := fmt.Sprintf(baseApiUrl, header)
+
 	return requests.RequestSrcom(URL)
 }
 
 func GetGameList(pageNumber int) ([]byte, error) {
 	header := fmt.Sprintf(gameListFunction, pageNumber*gameListNumberPerPage)
 	URL := fmt.Sprintf(baseApiUrl, header)
+
 	return requests.RequestSrcom(URL)
 }
 
@@ -69,6 +76,7 @@ func GetGameCategoryLeaderboard(gameID, categoryID string) ([]byte, error) {
 		gameID, categoryID,
 	)
 	URL := fmt.Sprintf(baseApiUrl, header)
+
 	return requests.RequestSrcom(URL)
 }
 
@@ -77,5 +85,6 @@ func GetGameCategoryLevelLeaderboard(gameID, categoryID, levelID string) ([]byte
 		gameID, levelID, categoryID,
 	)
 	URL := fmt.Sprintf(baseApiUrl, header)
+
 	return requests.RequestSrcom(URL)
 }
