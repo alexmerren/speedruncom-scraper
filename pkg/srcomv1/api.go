@@ -3,7 +3,7 @@ package srcomv1
 import (
 	"fmt"
 
-	"github.com/alexmerren/speedruncom-scraper/internal/requests"
+	"github.com/alexmerren/speedruncom-scraper/pkg/requests"
 )
 
 const (

@@ -1,6 +1,6 @@
 package srcomv2
 
-import "github.com/alexmerren/speedruncom-scraper/internal/requests"
+import "github.com/alexmerren/speedruncom-scraper/pkg/requests"
 
 const (
 	baseApiUrl = "https://www.speedrun.com/api/v2/%s?_r=%s"

@@ -29,3 +29,5 @@ go.work
 
 # MacOS Specifics
 .DS_Store
+test-coverage.html
+coverage.out
