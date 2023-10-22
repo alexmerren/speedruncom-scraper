@@ -6,8 +6,9 @@ GOFMT := gofmt
 DIST_DIR := $(CURDIR)/dist
 INTERNAL_DIR := $(CURDIR)/internal
 CMD_DIR := $(CURDIR)/cmd
+PKG_DIR := $(CURDIR)/pkg
 
-TEST_MODULES := $(shell $(GO) list $(INTERNAL_DIR)/...)
+TEST_MODULES := $(shell $(GO) list $(INTERNAL_DIR)/... $(PKG_DIR)/...)
 
 GOFLAGS :=
 # Set to 1 to use static linking for all builds (including tests).

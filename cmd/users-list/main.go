@@ -1,64 +1,42 @@
 package main
 
 import (
-	"encoding/csv"
 	"fmt"
-	"strings"
+	"os"
 
 	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
+	"github.com/alexmerren/speedruncom-scraper/internal/srcomv1"
 )
 
 const (
 	leaderboardDataFilenameV1 = "./data/v1/leaderboards-data.csv"
 	usersListOutputFilenameV1 = "./data/v1/users-id-list.csv"
-	usersFieldIndex           = 8
 )
 
 func main() {
-	getUsersListV1()
+	if err := getUsersListV1(); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
 }
 
-//nolint:errcheck // Don't need to check for errors.
-func getUsersListV1() {
+func getUsersListV1() error {
 	inputFile, err := filesystem.OpenInputFile(leaderboardDataFilenameV1)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	defer inputFile.Close()
 
 	usersListOutputFile, err := filesystem.CreateOutputFile(usersListOutputFilenameV1)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	defer usersListOutputFile.Close()
-	usersListOutputFile.WriteString("#userID\n")
 
-	// We use a struct to reduce the amount of memory to store all the user IDs.
-	allUsers := make(map[string]struct{})
-
-	// Call reader.Read() to not read the header line into the records variable.
-	reader := csv.NewReader(inputFile)
-	reader.Read()
-	records, err := reader.ReadAll()
+	err = srcomv1.ProcessUsersList(inputFile, usersListOutputFile)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
-	for _, record := range records {
-		if record[usersFieldIndex] == "" || record[usersFieldIndex] == "," {
-			continue
-		}
-
-		users := strings.Split(record[usersFieldIndex], ",")
-		for _, user := range users {
-			allUsers[user] = struct{}{}
-		}
-	}
-
-	for userID := range allUsers {
-		usersListOutputFile.WriteString(fmt.Sprintf("%s\n", userID))
-	}
+	return nil
 }
