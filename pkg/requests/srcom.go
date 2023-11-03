@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	exponentialBackoffStartInt     = 500
+	exponentialBackoffStartInt     = 250
 	exponentialBackoffMultiplier   = 2
 	exponentialBackoffEndIteration = 5
 )
