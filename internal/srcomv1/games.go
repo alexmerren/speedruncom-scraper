@@ -173,10 +173,15 @@ func processGame(
 	numCategories,
 	numLevels int,
 ) error {
-	gameName, _ := jsonparser.GetString(gameResponse, "data", "names", "international")
-	gameURL, _ := jsonparser.GetString(gameResponse, "data", "abbreviation")
-	gameReleaseDate, _ := jsonparser.GetString(gameResponse, "data", "release-date")
-	gameCreatedDate, _ := jsonparser.GetString(gameResponse, "data", "created")
+	gameData, _, _, err := jsonparser.Get(gameResponse, "data")
+	if err != nil {
+		return err
+	}
+
+	gameName, _ := jsonparser.GetString(gameData, "names", "international")
+	gameURL, _ := jsonparser.GetString(gameData, "abbreviation")
+	gameReleaseDate, _ := jsonparser.GetString(gameData, "release-date")
+	gameCreatedDate, _ := jsonparser.GetString(gameData, "created")
 
 	gameOutputFile.WriteString(fmt.Sprintf("%s,%q,%s,%s,%s,%d,%d\n", gameID, gameName, gameURL, gameReleaseDate, gameCreatedDate, numCategories, numLevels))
 

@@ -58,7 +58,7 @@ func ProcessLeaderboardsAndGamesData(
 			categoryType, _ := jsonparser.GetString(value, "type")
 
 			if string(categoryType) == "per-game" {
-				leaderboardResponse, _ := srcomv1.GetGameCategoryLeaderboard(gameID, string(categoryID))
+				leaderboardResponse, _ := srcomv1.GetGameCategoryLeaderboard(gameID, categoryID)
 				processLeaderboard(leaderboardsOutputFile, leaderboardResponse)
 			}
 
@@ -67,7 +67,7 @@ func ProcessLeaderboardsAndGamesData(
 			if string(categoryType) == "per-level" {
 				_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 					levelID, _ := jsonparser.GetString(value, "id")
-					leaderboardResponse, _ := srcomv1.GetGameCategoryLevelLeaderboard(gameID, string(categoryID), string(levelID))
+					leaderboardResponse, _ := srcomv1.GetGameCategoryLevelLeaderboard(gameID, categoryID, levelID)
 					processLeaderboard(leaderboardsOutputFile, leaderboardResponse)
 				}, "data", "levels", "data")
 			}

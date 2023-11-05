@@ -21,7 +21,6 @@ const (
 
 func ProcessUsersList(gameListInputFile, usersListOutputFile *os.File) error {
 	allUsers := make(map[string]struct{})
-
 	reader := csv.NewReader(gameListInputFile)
 	reader.Read()
 	records, err := reader.ReadAll()
@@ -83,7 +82,11 @@ func ProcessUsersData(
 }
 
 func processUser(numPersonalBests int, response []byte, outputFile *os.File) error {
-	userData, _, _, _ := jsonparser.Get(response, "data", "[0]", "players", "data", "[0]")
+	userData, _, _, err := jsonparser.Get(response, "data", "[0]", "players", "data", "[0]")
+	if err != nil {
+		return err
+	}
+
 	userID, _ := jsonparser.GetString(userData, "id")
 	userName, _ := jsonparser.GetString(userData, "names", "international")
 	userSignup, _ := jsonparser.GetString(userData, "signup")
