@@ -12,8 +12,8 @@ const (
 	gameFunction                         = "games/%s?embed=levels,categories,developers,platforms,genres,variables"
 	categoryFunction                     = "categories/%s"
 	levelFunction                        = "levels/%s"
-	userFunction                         = "users/%s/personal-bests?embed=game,players"
-	runsFunction                         = "runs?user=%s&embed=players&max=200&offset=%d"
+	userFunction                         = "users/%s"
+	runsFunction                         = "runs?user=%s&embed=players&max=%d&offset=%d"
 	developerFunction                    = "developers/%s"
 	gameCategoryLeaderboardFunction      = "leaderboards/%s/category/%s?embed=game,category,level,players,variables"
 	gameCategoryLevelLeaderboardFunction = "leaderboards/%s/level/%s/%s"
@@ -23,7 +23,12 @@ const (
 )
 
 func GetUserRuns(userID string, pageNumber int) ([]byte, error) {
-	header := fmt.Sprintf(runsFunction, userID, pageNumber*runsListNumberPerPage)
+	header := fmt.Sprintf(
+		runsFunction,
+		userID,
+		runsListNumberPerPage,
+		pageNumber*runsListNumberPerPage,
+	)
 	URL := fmt.Sprintf(baseApiUrl, header)
 
 	return requests.RequestSrcom(URL)
@@ -81,8 +86,11 @@ func GetGameCategoryLeaderboard(gameID, categoryID string) ([]byte, error) {
 }
 
 func GetGameCategoryLevelLeaderboard(gameID, categoryID, levelID string) ([]byte, error) {
-	header := fmt.Sprintf(gameCategoryLevelLeaderboardFunction,
-		gameID, levelID, categoryID,
+	header := fmt.Sprintf(
+		gameCategoryLevelLeaderboardFunction,
+		gameID,
+		levelID,
+		categoryID,
 	)
 	URL := fmt.Sprintf(baseApiUrl, header)
 

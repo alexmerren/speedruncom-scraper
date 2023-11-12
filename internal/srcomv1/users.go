@@ -12,16 +12,20 @@ import (
 )
 
 const (
-	usersFieldIndex = 8
+	usersFieldIndex    = 9
+	examinerFieldIndex = 10
+	maxRunsPerPage     = 200
 
-	usersListOutputFileHeader          = "#userID\n"
-	usersDataOutputFileHeader          = "#ID,name,signupDate,location,numPersonalBests\n"
-	usersPersonalBestsOutputFileHeader = "#userID,runID,game,category,level,values,place\n"
+	usersListOutputFileHeader = "#userID\n"
+	usersDataOutputFileHeader = "#ID,name,signupDate,location,numRuns\n"
+	usersRunsOutputFileHeader = "#ID,gameID,categoryID,levelID,date,primaryTime,platform,emulated,players,examiner,values,status,statusReason,verifiedDate\n"
 )
 
-func ProcessUsersList(gameListInputFile, usersListOutputFile *os.File) error {
+func ProcessUsersList(leaderboardInputFile, usersListOutputFile *os.File) error {
+	usersListOutputFile.WriteString(usersListOutputFileHeader)
+
 	allUsers := make(map[string]struct{})
-	reader := csv.NewReader(gameListInputFile)
+	reader := csv.NewReader(leaderboardInputFile)
 	reader.Read()
 	records, err := reader.ReadAll()
 	if err != nil {
@@ -36,6 +40,7 @@ func ProcessUsersList(gameListInputFile, usersListOutputFile *os.File) error {
 		users := strings.Split(record[usersFieldIndex], ",")
 		for _, user := range users {
 			allUsers[user] = struct{}{}
+			allUsers[record[examinerFieldIndex]] = struct{}{}
 		}
 	}
 
@@ -49,10 +54,10 @@ func ProcessUsersList(gameListInputFile, usersListOutputFile *os.File) error {
 func ProcessUsersData(
 	usersListInputFile,
 	usersDataOutputFile,
-	usersPersonalBestsOutputFile *os.File,
+	usersRunsOutputFile *os.File,
 ) error {
 	usersDataOutputFile.WriteString(usersDataOutputFileHeader)
-	usersPersonalBestsOutputFile.WriteString(usersPersonalBestsOutputFileHeader)
+	usersRunsOutputFile.WriteString(usersRunsOutputFileHeader)
 
 	scanner := bufio.NewScanner(usersListInputFile)
 	scanner.Scan()
@@ -60,15 +65,15 @@ func ProcessUsersData(
 		userID := scanner.Text()
 		userResponse, err := srcomv1.GetUser(userID)
 		if err != nil {
-			return err
+			continue
 		}
 
-		numPersonalBests, err := processUserPersonalBests(userID, userResponse, usersPersonalBestsOutputFile)
+		numRuns, err := processUserRuns(userID, usersRunsOutputFile)
 		if err != nil {
 			return err
 		}
 
-		err = processUser(numPersonalBests, userResponse, usersDataOutputFile)
+		err = processUser(userID, numRuns, userResponse, usersDataOutputFile)
 		if err != nil {
 			return err
 		}
@@ -81,44 +86,74 @@ func ProcessUsersData(
 	return nil
 }
 
-func processUser(numPersonalBests int, response []byte, outputFile *os.File) error {
-	userData, _, _, err := jsonparser.Get(response, "data", "[0]", "players", "data", "[0]")
+func processUser(userID string, numRuns int, response []byte, outputFile *os.File) error {
+	userData, _, _, err := jsonparser.Get(response, "data")
 	if err != nil {
 		return err
 	}
 
-	userID, _ := jsonparser.GetString(userData, "id")
 	userName, _ := jsonparser.GetString(userData, "names", "international")
 	userSignup, _ := jsonparser.GetString(userData, "signup")
 	userLocation, _ := jsonparser.GetString(userData, "location", "country", "code")
 
-	outputFile.WriteString(fmt.Sprintf("%s,%q,%s,%s,%d\n", userID, userName, userSignup, userLocation, numPersonalBests))
+	outputFile.WriteString(fmt.Sprintf("%s,%q,%s,%s,%d\n", userID, userName, userSignup, userLocation, numRuns))
 
 	return nil
 }
 
-func processUserPersonalBests(userID string, response []byte, outputFile *os.File) (int, error) {
-	numPersonalBests := 0
-	_, err := jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-		numPersonalBests += 1
-		runData, _, _, _ := jsonparser.Get(value, "run")
-		runPlace, _ := jsonparser.GetInt(value, "place")
-		runID, _ := jsonparser.GetString(runData, "id")
-		runGame, _ := jsonparser.GetString(runData, "game")
-		runCategory, _ := jsonparser.GetString(runData, "category")
-		runLevel, _ := jsonparser.GetString(runData, "level")
-		runValuesArray := []string{}
-		jsonparser.ObjectEach(runData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
-			runValuesArray = append(runValuesArray, fmt.Sprintf("%s=%s", string(key), string(value)))
-			return nil
-		}, "values")
-		runValues := strings.Join(runValuesArray, ",")
+func processUserRuns(userID string, outputFile *os.File) (int, error) {
+	numRuns := 0
+	currentPage := 0
 
-		outputFile.WriteString(fmt.Sprintf("%s,%s,%s,%s,%s,%q,%d\n", userID, runID, runGame, runCategory, runLevel, runValues, runPlace))
-	}, "data")
-	if err != nil {
-		return 0, err
+	for {
+		response, err := srcomv1.GetUserRuns(userID, currentPage)
+		if err != nil {
+			break
+		}
+
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			runID, _ := jsonparser.GetString(value, "id")
+			gameID, _ := jsonparser.GetString(value, "game")
+			categoryID, _ := jsonparser.GetString(value, "category")
+			levelID, _ := jsonparser.GetString(value, "level")
+			date, _ := jsonparser.GetString(value, "date")
+			primaryTime, _ := jsonparser.GetFloat(value, "times", "primary_t")
+			platform, _ := jsonparser.GetString(value, "system", "platform")
+			emulated, _ := jsonparser.GetBoolean(value, "system", "emulated")
+
+			statusData, _, _, _ := jsonparser.Get(value, "status")
+			status, _ := jsonparser.GetString(statusData, "status")
+			examiner, _ := jsonparser.GetString(statusData, "examiner")
+			statusReason, _ := jsonparser.GetString(statusData, "reason")
+			verifiedDate, _ := jsonparser.GetString(statusData, "verify-date")
+
+			playerIDArray := []string{}
+			jsonparser.ArrayEach(value, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+				playerID, _ := jsonparser.GetString(value, "id")
+				playerIDArray = append(playerIDArray, string(playerID))
+			}, "players")
+			players := strings.Join(playerIDArray, ",")
+
+			runValuesArray := []string{}
+			jsonparser.ObjectEach(value, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+				runValuesArray = append(runValuesArray, fmt.Sprintf("%s=%s", string(key), string(value)))
+				return nil
+			}, "values")
+			values := strings.Join(runValuesArray, ",")
+
+			outputFile.WriteString(fmt.Sprintf("%s,%s,%s,%s,%s,%0.2f,%s,%t,%q,%s,%q,%s,%q,%s\n", runID, gameID, categoryID, levelID, date, primaryTime, platform, emulated, players, examiner, values, status, statusReason, verifiedDate))
+		}, "data")
+		if err != nil {
+			return 0, err
+		}
+
+		size, _ := jsonparser.GetInt(response, "pagination", "size")
+		if size < maxRunsPerPage {
+			return numRuns, nil
+		}
+
+		currentPage += 1
 	}
 
-	return numPersonalBests, nil
+	return numRuns, nil
 }

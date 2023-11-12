@@ -32,7 +32,7 @@ func RequestSrcom(URL string) ([]byte, error) {
 	}
 
 	if slices.Contains(unrecovableStatusCodes, response.StatusCode) {
-		return nil, fmt.Errorf("unrecoverable error for url %s", URL)
+		return nil, fmt.Errorf("response code %d for url %s", response.StatusCode, URL)
 	}
 
 	if response.StatusCode != http.StatusOK {

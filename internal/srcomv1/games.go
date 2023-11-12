@@ -25,12 +25,12 @@ func ProcessGamesList(gameListOutputFile *os.File) error {
 	currentPage := 0
 
 	for {
-		request, err := srcomv1.GetGameList(currentPage)
+		response, err := srcomv1.GetGameList(currentPage)
 		if err != nil {
 			return err
 		}
 
-		_, err = jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			gameID, _ := jsonparser.GetString(value, "id")
 			gameListOutputFile.WriteString(fmt.Sprintf("%s\n", gameID))
 		}, "data")
@@ -39,7 +39,7 @@ func ProcessGamesList(gameListOutputFile *os.File) error {
 		}
 
 		// Exit condition.
-		size, _ := jsonparser.GetInt(request, "pagination", "size")
+		size, _ := jsonparser.GetInt(response, "pagination", "size")
 		if size < maxSizeAPIv1 {
 			return nil
 		}

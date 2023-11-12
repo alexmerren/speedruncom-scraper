@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	allUserIDListV1                    = "./data/v1/users-id-list.csv"
-	usersDataOutputFilenameV1          = "./data/v1/users-data.csv"
-	usersPersonalBestsOutputFilenameV1 = "./data/v1/users-personal-bests-data.csv"
+	allUserIDListV1           = "./data/v1/users-id-list.csv"
+	usersDataOutputFilenameV1 = "./data/v1/users-data.csv"
+	usersRunsOutputFilenameV1 = "./data/v1/users-runs-data.csv"
 )
 
 func main() {
@@ -34,13 +34,13 @@ func getUsersDataV1() error {
 	}
 	defer usersDataOutputFile.Close()
 
-	usersPersonalBestsOutputFile, err := filesystem.CreateOutputFile(usersPersonalBestsOutputFilenameV1)
+	usersRunsOutputFile, err := filesystem.CreateOutputFile(usersRunsOutputFilenameV1)
 	if err != nil {
 		return err
 	}
-	defer usersPersonalBestsOutputFile.Close()
+	defer usersRunsOutputFile.Close()
 
-	err = srcomv1.ProcessUsersData(inputFile, usersDataOutputFile, usersPersonalBestsOutputFile)
+	err = srcomv1.ProcessUsersData(inputFile, usersDataOutputFile, usersRunsOutputFile)
 	if err != nil {
 		return err
 	}
