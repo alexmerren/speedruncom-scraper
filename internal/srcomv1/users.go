@@ -112,6 +112,7 @@ func processUserRuns(userID string, outputFile *os.File) (int, error) {
 		}
 
 		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			numRuns += 1
 			runID, _ := jsonparser.GetString(value, "id")
 			gameID, _ := jsonparser.GetString(value, "game")
 			categoryID, _ := jsonparser.GetString(value, "category")
@@ -131,7 +132,7 @@ func processUserRuns(userID string, outputFile *os.File) (int, error) {
 			jsonparser.ArrayEach(value, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 				playerID, _ := jsonparser.GetString(value, "id")
 				playerIDArray = append(playerIDArray, string(playerID))
-			}, "players")
+			}, "players", "data")
 			players := strings.Join(playerIDArray, ",")
 
 			runValuesArray := []string{}
