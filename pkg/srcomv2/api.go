@@ -5,17 +5,13 @@ import "github.com/alexmerren/speedruncom-scraper/pkg/requests"
 const (
 	baseApiUrl = "https://www.speedrun.com/api/v2/%s?_r=%s"
 
-	searchFunction                               = "GetSearch"
-	userDataFunction                             = "GetUserLeaderboard"
-	userSummaryFunction                          = "GetUserSummary"
-	gameDataFunction                             = "GetGameData"
-	gameSummaryFunction                          = "GetGameSummary"
-	gameListFunction                             = "GetGameList"
-	gameCategoryLeaderboardFunction              = "GetGameLeaderboard2"
-	gameCategoryVariableValueLeaderboardFunction = "GetGameLeaderboard2"
-	gameCategoryWorldRecordHistory               = "GetGameRecordHistory"
-
-	searchResultLimit = 15
+	userDataFunction               = "GetUserLeaderboard"
+	userSummaryFunction            = "GetUserSummary"
+	gameDataFunction               = "GetGameData"
+	gameSummaryFunction            = "GetGameSummary"
+	gameListFunction               = "GetGameList"
+	gameLeaderboardFunction        = "GetGameLeaderboard2"
+	gameWorldRecordHistoryFunction = "GetGameRecordHistory"
 )
 
 func GetUserData(userID string) ([]byte, error) {
@@ -83,7 +79,7 @@ func GetGameCategoryLeaderboard(gameID, categoryID string, pageNumber int) ([]by
 		"page": pageNumber,
 	}
 
-	URL, err := formatHeader(data, gameListFunction)
+	URL, err := formatHeader(data, gameLeaderboardFunction)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +108,7 @@ func GetGameCategoryVariableValueLeaderboard(
 		"page": pageNumber,
 	}
 
-	URL, err := formatHeader(data, gameListFunction)
+	URL, err := formatHeader(data, gameLeaderboardFunction)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +124,7 @@ func GetGameCategoryWorldRecordHistory(gameID, categoryID string) ([]byte, error
 		},
 	}
 
-	URL, err := formatHeader(data, gameListFunction)
+	URL, err := formatHeader(data, gameWorldRecordHistoryFunction)
 	if err != nil {
 		return nil, err
 	}
@@ -145,26 +141,7 @@ func GetGameCategoryLevelWorldRecordHistory(gameID, categoryID, levelID string) 
 		},
 	}
 
-	URL, err := formatHeader(data, gameListFunction)
-	if err != nil {
-		return nil, err
-	}
-
-	return requests.RequestSrcom(URL)
-}
-
-func GetSearch(query string) ([]byte, error) {
-	data := map[string]interface{}{
-		"query":         query,
-		"limit":         searchResultLimit,
-		"includeGames":  true,
-		"includeNews":   true,
-		"includePages":  true,
-		"includeSeries": true,
-		"includeUsers":  true,
-	}
-
-	URL, err := formatHeader(data, searchFunction)
+	URL, err := formatHeader(data, gameWorldRecordHistoryFunction)
 	if err != nil {
 		return nil, err
 	}
