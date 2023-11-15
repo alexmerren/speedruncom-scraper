@@ -2,13 +2,14 @@ package srcomv1
 
 import (
 	"bufio"
+	"encoding/csv"
 	"os"
 
 	"github.com/alexmerren/speedruncom-scraper/pkg/srcomv1"
 	"github.com/buger/jsonparser"
 )
 
-func ProcessLeaderboardsAndGamesData(
+func ProcessGamesAndLeaderboardsData(
 	gameListInputFile,
 	gamesOutputFile,
 	categoriesOutputFile,
@@ -18,11 +19,28 @@ func ProcessLeaderboardsAndGamesData(
 	leaderboardsOutputFile *os.File,
 ) error {
 	gamesOutputFile.WriteString(gamesOutputFileHeader)
+	gamesCsvWriter := csv.NewWriter(gamesOutputFile)
+	defer gamesCsvWriter.Flush()
+
 	categoriesOutputFile.WriteString(categoriesOutputFileHeader)
+	categoriesCsvWriter := csv.NewWriter(categoriesOutputFile)
+	defer categoriesCsvWriter.Flush()
+
 	levelsOutputFile.WriteString(levelsOutputFileHeader)
+	levelsCsvWriter := csv.NewWriter(levelsOutputFile)
+	defer levelsCsvWriter.Flush()
+
 	variablesOutputFile.WriteString(variablesOutputFileHeader)
+	variablesCsvWriter := csv.NewWriter(variablesOutputFile)
+	defer variablesCsvWriter.Flush()
+
 	valuesOutputFile.WriteString(valuesOutputFileHeader)
+	valuesCsvWriter := csv.NewWriter(valuesOutputFile)
+	defer valuesCsvWriter.Flush()
+
 	leaderboardsOutputFile.WriteString(leaderboardsOutputFileHeader)
+	leaderboardsCsvWriter := csv.NewWriter(leaderboardsOutputFile)
+	defer leaderboardsCsvWriter.Flush()
 
 	scanner := bufio.NewScanner(gameListInputFile)
 	scanner.Scan()
@@ -33,22 +51,22 @@ func ProcessLeaderboardsAndGamesData(
 			continue
 		}
 
-		numCategories, err := processCategory(categoriesOutputFile, response, gameID)
+		numCategories, err := processCategory(categoriesCsvWriter, response, gameID)
 		if err != nil {
 			return err
 		}
 
-		numLevels, err := processLevel(levelsOutputFile, response, gameID)
+		numLevels, err := processLevel(levelsCsvWriter, response, gameID)
 		if err != nil {
 			return err
 		}
 
-		err = processVariableValue(variablesOutputFile, valuesOutputFile, response, gameID)
+		err = processVariableValue(variablesCsvWriter, valuesCsvWriter, response, gameID)
 		if err != nil {
 			return err
 		}
 
-		err = processGame(gamesOutputFile, response, gameID, numCategories, numLevels)
+		err = processGame(gamesCsvWriter, response, gameID, numCategories, numLevels)
 		if err != nil {
 			return err
 		}
@@ -59,7 +77,7 @@ func ProcessLeaderboardsAndGamesData(
 
 			if string(categoryType) == "per-game" {
 				leaderboardResponse, _ := srcomv1.GetGameCategoryLeaderboard(gameID, categoryID)
-				processLeaderboard(leaderboardsOutputFile, leaderboardResponse)
+				processLeaderboard(leaderboardsCsvWriter, leaderboardResponse)
 			}
 
 			// The levels are embedded so we can immediately iterate over each
@@ -68,7 +86,7 @@ func ProcessLeaderboardsAndGamesData(
 				_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 					levelID, _ := jsonparser.GetString(value, "id")
 					leaderboardResponse, _ := srcomv1.GetGameCategoryLevelLeaderboard(gameID, categoryID, levelID)
-					processLeaderboard(leaderboardsOutputFile, leaderboardResponse)
+					processLeaderboard(leaderboardsCsvWriter, leaderboardResponse)
 				}, "data", "levels", "data")
 			}
 

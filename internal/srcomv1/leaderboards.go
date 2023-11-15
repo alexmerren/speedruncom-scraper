@@ -2,8 +2,10 @@ package srcomv1
 
 import (
 	"bufio"
+	"encoding/csv"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/alexmerren/speedruncom-scraper/pkg/srcomv1"
@@ -17,6 +19,8 @@ func ProcessLeaderboardsData(
 	leaderboardsOutputFile *os.File,
 ) error {
 	leaderboardsOutputFile.WriteString(leaderboardsOutputFileHeader)
+	leaderboardsCsvWriter := csv.NewWriter(leaderboardsOutputFile)
+	defer leaderboardsCsvWriter.Flush()
 
 	scanner := bufio.NewScanner(gameListInputFile)
 	scanner.Scan()
@@ -33,7 +37,7 @@ func ProcessLeaderboardsData(
 
 			if string(categoryType) == "per-game" {
 				leaderboardResponse, _ := srcomv1.GetGameCategoryLeaderboard(gameID, categoryID)
-				processLeaderboard(leaderboardsOutputFile, leaderboardResponse)
+				processLeaderboard(leaderboardsCsvWriter, leaderboardResponse)
 			}
 
 			// The levels are embedded so we can immediately iterate over each
@@ -42,7 +46,7 @@ func ProcessLeaderboardsData(
 				_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 					levelID, _ := jsonparser.GetString(value, "id")
 					leaderboardResponse, _ := srcomv1.GetGameCategoryLevelLeaderboard(gameID, categoryID, levelID)
-					processLeaderboard(leaderboardsOutputFile, leaderboardResponse)
+					processLeaderboard(leaderboardsCsvWriter, leaderboardResponse)
 				}, "data", "levels", "data")
 			}
 		}, "data", "categories", "data")
@@ -55,7 +59,7 @@ func ProcessLeaderboardsData(
 	return nil
 }
 
-func processLeaderboard(leaderboardsOutputFile *os.File, leaderboardResponse []byte) error {
+func processLeaderboard(leaderboardsOutputFile *csv.Writer, leaderboardResponse []byte) error {
 	_, err := jsonparser.ArrayEach(leaderboardResponse, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 		runPlace, _ := jsonparser.GetInt(value, "place")
 		runData, _, _, _ := jsonparser.Get(value, "run")
@@ -84,7 +88,7 @@ func processLeaderboard(leaderboardsOutputFile *os.File, leaderboardResponse []b
 		}, "values")
 		runValues := strings.Join(runValuesArray, ",")
 
-		leaderboardsOutputFile.WriteString(fmt.Sprintf("%s,%s,%s,%s,%s,%0.2f,%d,%s,%t,%q,%s,%s,%q\n", runID, runGame, runCategory, runLevel, runDate, runPrimaryTime, runPlace, runPlatform, runEmulated, runPlayers, runExaminer, runVerifiedDate, runValues))
+		leaderboardsOutputFile.Write([]string{runID, runGame, runCategory, runLevel, runDate, strconv.FormatFloat(runPrimaryTime, 'g', 2, 64), strconv.Itoa(int(runPlace)), runPlatform, strconv.FormatBool(runEmulated), runPlayers, runExaminer, runVerifiedDate, runValues})
 
 	}, "data", "runs")
 

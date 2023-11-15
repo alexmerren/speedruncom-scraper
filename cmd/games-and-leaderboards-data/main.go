@@ -68,7 +68,7 @@ func getGameAndLeaderboardDataV1() error {
 	}
 	defer LeaderboardsOutputFile.Close()
 
-	err = srcomv1.ProcessLeaderboardsAndGamesData(inputFile, gamesOutputFile, categoriesOutputFile, levelsOutputFile, variablesOutputFile, valuesOutputFile, LeaderboardsOutputFile)
+	err = srcomv1.ProcessGamesAndLeaderboardsData(inputFile, gamesOutputFile, categoriesOutputFile, levelsOutputFile, variablesOutputFile, valuesOutputFile, LeaderboardsOutputFile)
 	if err != nil {
 		return err
 	}

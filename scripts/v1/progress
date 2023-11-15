@@ -1,3 +1,0 @@
-#!/usr/bin/env zsh
-
-find ./data/v1 -type f -exec wc -l {} \;

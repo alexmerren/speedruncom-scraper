@@ -31,3 +31,5 @@ go.work
 .DS_Store
 test-coverage.html
 coverage.out
+
+scripts/venv/

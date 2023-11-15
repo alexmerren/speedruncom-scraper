@@ -11,6 +11,7 @@ import (
 const (
 	allUserIDListV1           = "./data/v1/users-id-list.csv"
 	usersDataOutputFilenameV1 = "./data/v1/users-data.csv"
+	usersRunsOutputFilenameV1 = "./data/v1/runs-data.csv"
 )
 
 func main() {
@@ -33,7 +34,13 @@ func getUsersDataV1() error {
 	}
 	defer usersDataOutputFile.Close()
 
-	err = srcomv1.ProcessUsersData(inputFile, usersDataOutputFile)
+	usersRunsOutputFile, err := filesystem.CreateOutputFile(usersRunsOutputFilenameV1)
+	if err != nil {
+		return err
+	}
+	defer usersRunsOutputFile.Close()
+
+	err = srcomv1.ProcessUsersAndRunsData(inputFile, usersDataOutputFile, usersRunsOutputFile)
 	if err != nil {
 		return err
 	}
