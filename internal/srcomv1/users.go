@@ -90,7 +90,7 @@ func processUser(outputFile *csv.Writer, userID string, numRuns int, response []
 	userSignup, _ := jsonparser.GetString(userData, "signup")
 	userLocation, _ := jsonparser.GetString(userData, "location", "country", "code")
 
-	outputFile.Write([]string{userID, fmt.Sprintf("%q", userName), userSignup, userLocation, strconv.Itoa(numRuns)})
+	outputFile.Write([]string{userID, userName, userSignup, userLocation, strconv.Itoa(numRuns)})
 
 	return nil
 }

@@ -3,10 +3,10 @@ package srcomv1
 import (
 	"bufio"
 	"encoding/csv"
-	"fmt"
 	"os"
 	"strconv"
 
+	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
 	"github.com/alexmerren/speedruncom-scraper/pkg/srcomv1"
 	"github.com/buger/jsonparser"
 )
@@ -132,7 +132,7 @@ func processCategory(
 		categoryNumPlayers, _ := jsonparser.GetInt(value, "players", "value")
 		categoryType, _ := jsonparser.GetString(value, "type")
 
-		categoryOutputFile.Write([]string{gameID, categoryID, fmt.Sprintf("%q", categoryName), fmt.Sprintf("%q", categoryRules), categoryType, strconv.Itoa(int(categoryNumPlayers))})
+		categoryOutputFile.Write([]string{gameID, categoryID, categoryName, filesystem.FormatStringForCsv(categoryRules), categoryType, strconv.Itoa(int(categoryNumPlayers))})
 	}, "data", "categories", "data")
 
 	return numCategories, err
@@ -150,7 +150,7 @@ func processLevel(
 		levelName, _ := jsonparser.GetString(value, "name")
 		levelRules, _ := jsonparser.GetString(value, "rules")
 
-		levelOutputFile.Write([]string{gameID, levelID, fmt.Sprintf("%q", levelName), fmt.Sprintf("%q", levelRules)})
+		levelOutputFile.Write([]string{gameID, levelID, levelName, filesystem.FormatStringForCsv(levelRules)})
 	}, "data", "levels", "data")
 
 	return numLevels, err
@@ -177,7 +177,7 @@ func processVariableValue(
 			valueLabel, _ := jsonparser.GetString(value, "label")
 			valueRules, _ := jsonparser.GetString(value, "rules")
 
-			valueOutputFile.Write([]string{gameID, variableID, valueID, fmt.Sprintf("%q", valueLabel), fmt.Sprintf("%q", valueRules)})
+			valueOutputFile.Write([]string{gameID, variableID, valueID, valueLabel, filesystem.FormatStringForCsv(valueRules)})
 			return nil
 		}, "values", "values")
 	}, "data", "variables", "data")
@@ -202,7 +202,7 @@ func processGame(
 	gameReleaseDate, _ := jsonparser.GetString(gameData, "release-date")
 	gameCreatedDate, _ := jsonparser.GetString(gameData, "created")
 
-	gameOutputFile.Write([]string{gameID, fmt.Sprintf("%q", gameName), gameURL, gameReleaseDate, gameCreatedDate, strconv.Itoa(numCategories), strconv.Itoa(numLevels)})
+	gameOutputFile.Write([]string{gameID, gameName, gameURL, gameReleaseDate, gameCreatedDate, strconv.Itoa(numCategories), strconv.Itoa(numLevels)})
 
 	return nil
 }

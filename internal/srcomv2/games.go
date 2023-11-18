@@ -40,7 +40,7 @@ func ProcessGamesList(gameListOutputFile *os.File) error {
 
 			gameListCsvWriter.Write([]string{
 				id,
-				fmt.Sprintf("%q", name),
+				name,
 				url,
 				gameType,
 				strconv.Itoa(int(releaseDate)),

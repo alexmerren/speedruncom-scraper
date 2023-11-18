@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
 	"github.com/alexmerren/speedruncom-scraper/pkg/srcomv1"
 	"github.com/buger/jsonparser"
 )
@@ -84,7 +85,7 @@ func processUserRuns(outputFile *csv.Writer, userID string) (int, error) {
 			}, "values")
 			values := strings.Join(runValuesArray, ",")
 
-			outputFile.Write([]string{runID, gameID, categoryID, levelID, date, strconv.FormatFloat(primaryTime, 'g', 2, 64), platform, strconv.FormatBool(emulated), players, examiner, values, status, fmt.Sprintf("%q", statusReason), verifiedDate})
+			outputFile.Write([]string{runID, gameID, categoryID, levelID, date, strconv.FormatFloat(primaryTime, 'f', -1, 64), platform, strconv.FormatBool(emulated), players, examiner, values, status, filesystem.FormatStringForCsv(statusReason), verifiedDate})
 		}, "data")
 		if err != nil {
 			return 0, err
