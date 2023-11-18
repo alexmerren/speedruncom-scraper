@@ -88,7 +88,7 @@ func processLeaderboard(leaderboardsOutputFile *csv.Writer, leaderboardResponse 
 		}, "values")
 		runValues := strings.Join(runValuesArray, ",")
 
-		leaderboardsOutputFile.Write([]string{runID, runGame, runCategory, runLevel, runDate, strconv.FormatFloat(runPrimaryTime, 'g', 2, 64), strconv.Itoa(int(runPlace)), runPlatform, strconv.FormatBool(runEmulated), runPlayers, runExaminer, runVerifiedDate, runValues})
+		leaderboardsOutputFile.Write([]string{runID, runGame, runCategory, runLevel, runDate, strconv.FormatFloat(runPrimaryTime, 'f', -1, 64), strconv.Itoa(int(runPlace)), runPlatform, strconv.FormatBool(runEmulated), runPlayers, runExaminer, runVerifiedDate, runValues})
 
 	}, "data", "runs")
 
