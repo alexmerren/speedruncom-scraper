@@ -67,7 +67,7 @@ func ProcessUsersData(
 			continue
 		}
 
-		err = processUser(usersDataCsvWriter, userID, 0, userResponse)
+		err = processUser(usersDataCsvWriter, userID, -1, userResponse)
 		if err != nil {
 			return err
 		}
@@ -90,7 +90,11 @@ func processUser(outputFile *csv.Writer, userID string, numRuns int, response []
 	userSignup, _ := jsonparser.GetString(userData, "signup")
 	userLocation, _ := jsonparser.GetString(userData, "location", "country", "code")
 
-	outputFile.Write([]string{userID, userName, userSignup, userLocation, strconv.Itoa(numRuns)})
+	if numRuns < 0 {
+		outputFile.Write([]string{userID, userName, userSignup, userLocation})
+	} else {
+		outputFile.Write([]string{userID, userName, userSignup, userLocation, strconv.Itoa(numRuns)})
+	}
 
 	return nil
 }

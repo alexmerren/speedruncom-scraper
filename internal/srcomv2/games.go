@@ -2,10 +2,10 @@ package srcomv2
 
 import (
 	"encoding/csv"
-	"fmt"
 	"os"
 	"strconv"
 
+	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
 	"github.com/alexmerren/speedruncom-scraper/pkg/srcomv2"
 	"github.com/buger/jsonparser"
 )
@@ -47,7 +47,7 @@ func ProcessGamesList(gameListOutputFile *os.File) error {
 				strconv.Itoa(int(addedDate)),
 				strconv.Itoa(int(runCount)),
 				strconv.Itoa(int(playerCount)),
-				fmt.Sprintf("%q", rules),
+				filesystem.FormatStringForCsv(rules),
 			})
 		}, "gameList")
 		if err != nil {
