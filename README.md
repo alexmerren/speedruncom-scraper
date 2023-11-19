@@ -12,7 +12,7 @@ An easily deployable method of collecting various data from speedrun.com for dat
  - Want to collect data from speedrun.com? speedruncom-scraper provides an accesible method of data collection.
  - Data from speedrun.com is easily-accessible, and is formatted for applications in data science and machine learning.
 
-## ℹ️ Overview
+## ℹ️  Overview
 
 My final project and dissertation at University of Exeter required data that focused on user behaviour and cumulative culture of online speedrunning communities. This project focuses on reproducing the data used in that study, and publishing tools to recreate that dataset.
 
@@ -20,42 +20,46 @@ Speedruncom-scraper is written in Golang. It can be compiled and deployed to col
 
 ## 💨 Executables
 
- 1. `dist/games-list`
+ 1. [`games-list`](./cmd/games-list/main.go)
 
     * **Reason**: List of all games available via the speedrun.com API. This only collects the internal ID of each game, further information is collected in subsequent functions.
     * **Requirements**: None.
-    * **Number of Requests**: Approximately 35,000.
 
- 2. `dist/games-data`
+ 2. [`games-data`](./cmd/games-data/main.go)
 
     * **Reason**: Collecting available information for each game using their internal ID. Metadata is collected on the games themselves. Furthermore, the categories, levels, variables, and values are collected and stored.
-    * **Requirements**: `dist/games-list`.
-    * **Number of Requests**: Approximately 35,000.
+    * **Requirements**: `games-list`.
 
- 3. `dist/leaderboards-data`
+ 3. [`leaderboards-data`](./cmd/leaderboards-data/main.go)
 
     * **Reason**: Retrieves all leaderboards for every combination of game, category, and level. Each run that conitrbutes to the leaderboards is recorded, along with each player that contributed to the run (amongst other metadata).
-    * **Requirements**: `dist/games-list`, `dist/games-data`.
-    * **Number of Requests**: Approximately 640,000.
+    * **Requirements**: `games-list`, `games-data`.
 
- 4. `dist/users-list`
+ 4. [`games-and-leaderboards-data`](./cmd/games-and-leaderboards-data/main.go)
+
+    * **Reason**: Combination of the `games-data` and `leaderboards-data` executables.
+    * **Requirements**: `games-list`
+
+ 5. [`users-list`](./cmd/users-list/main.go)
 
     * **Reason**: Creates a list of unique users that appear in the output of the `leaderboards-data` binary.
-    * **Requirements**: `dist/games-list`, `dist/games-data`.
-    * **Number of Requests**: 0.
+    * **Requirements**: `games-list`, `games-data`.
 
- 5. `dist/games-and-leaderboards-data`
-
-    * **Reason**: Combination of the `dist/games-data` and `dist/leaderboards-data` executables.
-    * **Requirements**: `dist/games-list`
-    * **Number of Requests**: Approximately 700,000.
-
-
- 5. `dist/users-data`
+ 6. [`users-data`](./cmd/users-data/main.go)
 
     * **Reason**: Collect metadata and run data for each user that has contributed to any given leaderboard on speedrun.com.
-    * **Requirements**: `dist/games-list`, `dist/games-data`, `dist/users-list`.
-    * **Number of Requests**: Approximately 350,000.
+    * **Requirements**: `games-list`, `games-data`, `users-list`.
+ 
+ 7. [`runs-data`](./cmd/runs-data/main.go)
+
+    * **Reason**: Retrieves all leaderboards for every combination of game, category, and level. Each run that conitrbutes to the leaderboards is recorded, along with each player that contributed to the run (amongst other metadata).
+    * **Requirements**: `games-list`, `games-data`, `users-list`.
+
+ 8. [`users-and-runs-data`](./cmd/users-and-runs-data/main.go)
+
+    * **Reason**: Combination of the `users-data` and `runs-data` executables.
+    * **Requirements**: `games-list`, `leaderboards-data`, `users-list`.
+
 
 ## 🚀 Usage
 
@@ -70,12 +74,12 @@ $ make all
 A complete set of data from speedrun.com can be obtained via the commands:
 
 ```bash
-$ ./dist/games-list && ./dist/games-and-leaderboards-data && ./dist/users-list && ./dist/users-data 
+$ ./dist/games-list && ./dist/games-and-leaderboards-data && ./dist/users-list && ./dist/users-and-runs-data
 ```
 
-NOTE: For each executable (or, each piece of data) there is repeated API calls. A local HTTP cache has been implemented to remove repeated API calls from the rate-limited API. This cache is saved locally under `data/httpcache.db`.
+NOTE: For each executable (or, each piece of data) there is repeated API calls. A local HTTP cache has been implemented to remove repeated API calls from the rate-limited API. This cache is saved locally under `httpcache.db`.
 
-## ⬇️ Installation
+## ⬇️  Installation
 
 The repository can be installed easily, and binaries can be compiled with the following commands:
 
@@ -92,11 +96,23 @@ This project requires:
  * [Golang 1.20+](https://go.dev/dl/)
  * [`gcc` Compatible Compiler](https://gcc.gnu.org)
 
- ## 🛣️ Roadmap
+## Previous Collections
 
- - [ ] Understand and tackle rate-limiting on V2 API.
- - [ ] Implement `world-records-data` to record world record data for every game.
- - [ ] Run through collection script once and publish data set.
+The last full data collection occurred in November 2023, here are the number of lines generated for each executable:
+
+```
+  390286 ./data/v1/users-data.csv
+  391092 ./data/v1/users-id-list.csv
+ 1847581 ./data/v1/leaderboards-data.csv
+ 3995740 ./data/v1/runs-data.csv
+   37249 ./data/v1/games-data.csv
+   56721 ./data/v1/variables-data.csv
+  252642 ./data/v1/values-data.csv
+  266380 ./data/v1/levels-data.csv
+   37251 ./data/v1/games-id-list.csv
+  147959 ./data/v1/categories-data.csv
+   37870 ./data/v2/games-id-list.csv
+```
 
 ## 💭 Feedback and Contributing
 
