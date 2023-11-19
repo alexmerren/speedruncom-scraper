@@ -14,12 +14,12 @@ import (
 const (
 	maxSizeAPIv1 = 1000
 
-	gameListOutputFileHeader   = "#gameID\n"
-	gamesOutputFileHeader      = "#ID,name,URL,releaseDate,createdDate,numCategories,numLevels\n"
-	categoriesOutputFileHeader = "#parentGameID,ID,name,rules,type,numPlayers\n"
-	levelsOutputFileHeader     = "#parentGameID,ID,name,rules\n"
-	variablesOutputFileHeader  = "#parentGameID,ID,name,category,scope,isSubcategory,defaultValue\n"
-	valuesOutputFileHeader     = "#parentGameID,variableID,ID,label,rules\n"
+	gameListOutputFileHeader   = "gameID\n"
+	gamesOutputFileHeader      = "ID,name,URL,releaseDate,createdDate,numCategories,numLevels\n"
+	categoriesOutputFileHeader = "parentGameID,ID,name,rules,type,numPlayers\n"
+	levelsOutputFileHeader     = "parentGameID,ID,name,rules\n"
+	variablesOutputFileHeader  = "parentGameID,ID,name,category,scope,isSubcategory,defaultValue\n"
+	valuesOutputFileHeader     = "parentGameID,variableID,ID,label,rules\n"
 )
 
 func ProcessGamesList(gameListOutputFile *os.File) error {

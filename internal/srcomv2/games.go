@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	gameListOutputFileHeader = "#ID,name,URL,type,releaseDate,addedDate,runCount,playerCount,rules\n"
+	gameListOutputFileHeader = "ID,name,URL,type,releaseDate,addedDate,runCount,playerCount,rules\n"
 )
 
 func ProcessGamesList(gameListOutputFile *os.File) error {

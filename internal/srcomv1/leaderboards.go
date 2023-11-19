@@ -12,7 +12,7 @@ import (
 	"github.com/buger/jsonparser"
 )
 
-const leaderboardsOutputFileHeader = "#runID,gameID,categoryID,levelID,date,primaryTime,place,platform,emulated,players,examiner,verifiedDate,variablesAndValues\n"
+const leaderboardsOutputFileHeader = "runID,gameID,categoryID,levelID,date,primaryTime,place,platform,emulated,players,examiner,verifiedDate,variablesAndValues\n"
 
 func ProcessLeaderboardsData(
 	gameListInputFile,

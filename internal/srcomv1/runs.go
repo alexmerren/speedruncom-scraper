@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	usersRunsOutputFileHeader = "#ID,gameID,categoryID,levelID,date,primaryTime,platform,emulated,players,examiner,values,status,statusReason,verifiedDate\n"
+	usersRunsOutputFileHeader = "ID,gameID,categoryID,levelID,date,primaryTime,platform,emulated,players,examiner,values,status,statusReason,verifiedDate\n"
 
 	maxRunsPerPage = 200
 )

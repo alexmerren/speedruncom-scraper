@@ -16,8 +16,8 @@ const (
 	usersFieldIndex    = 9
 	examinerFieldIndex = 10
 
-	usersListOutputFileHeader = "#userID\n"
-	usersDataOutputFileHeader = "#ID,name,signupDate,location,numRuns\n"
+	usersListOutputFileHeader = "userID\n"
+	usersDataOutputFileHeader = "ID,name,signupDate,location,numRuns\n"
 )
 
 func ProcessUsersList(leaderboardInputFile, usersListOutputFile *os.File) error {
