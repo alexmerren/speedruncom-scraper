@@ -3,9 +3,12 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/alexmerren/speedruncom-scraper)](https://goreportcard.com/report/github.com/alexmerren/speedruncom-scraper)
 ![Go Version](https://img.shields.io/badge/go%20version-%3E=1.20-61CFDD.svg?style=flat-square)
 
-An easily deployable method of collecting various data from speedrun.com for data science and machine learning applications.
+A system to collect data from speedrun.com for machine learning and data science applications.
 
 > Let us know what other data that needs to be collected from speedrun.com! Open a [GitHub Issue](https://github.com/alexmerren/speedruncom-scraper/issues) today.
+
+
+Find the published dataset [here](https://www.kaggle.com/datasets/alexmerren1/speedrun-com-data)!
 
 ## 🌟 Highlights
 
