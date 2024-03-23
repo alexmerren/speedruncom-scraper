@@ -1,41 +1,57 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os"
+	"strings"
 
-	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
-	"github.com/alexmerren/speedruncom-scraper/internal/srcomv1"
+	"github.com/alexmerren/speedruncom-scraper/internal"
 )
 
 const (
-	leaderboardDataFilenameV1 = "./data/v1/leaderboards-data.csv"
-	usersListOutputFilenameV1 = "./data/v1/users-id-list.csv"
+	usersFieldIndex    = 9
+	examinerFieldIndex = 10
 )
 
 func main() {
-	if err := getUsersListV1(); err != nil {
+	if err := generateUsersListV1(); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func getUsersListV1() error {
-	inputFile, err := filesystem.OpenInputFile(leaderboardDataFilenameV1)
-	if err != nil {
-		return err
-	}
-	defer inputFile.Close()
+func generateUsersListV1() error {
+	leaderboardsDataFile, closeFunc, _ := internal.NewCsvReader(internal.LeaderboardsDataFilenameV1)
+	defer closeFunc()
 
-	usersListOutputFile, err := filesystem.CreateOutputFile(usersListOutputFilenameV1)
-	if err != nil {
-		return err
-	}
-	defer usersListOutputFile.Close()
+	usersIdListFile, closeFunc, _ := internal.NewCsvWriter(internal.UsersIdListFilenameV1)
+	usersIdListFile.Write(internal.FileHeaders[internal.UsersIdListFilenameV1])
+	defer closeFunc()
 
-	err = srcomv1.ProcessUsersList(inputFile, usersListOutputFile)
-	if err != nil {
-		return err
+	allUsers := make(map[string]struct{})
+	leaderboardsDataFile.Read()
+
+	for {
+		record, err := leaderboardsDataFile.Read()
+		if err != nil && errors.Is(err, io.EOF) {
+			break
+		}
+
+		if record[usersFieldIndex] == "" || record[usersFieldIndex] == "," {
+			continue
+		}
+
+		users := strings.Split(record[usersFieldIndex], ",")
+		for _, user := range users {
+			allUsers[user] = struct{}{}
+			allUsers[record[examinerFieldIndex]] = struct{}{}
+		}
+	}
+
+	for userID := range allUsers {
+		usersIdListFile.Write([]string{userID})
 	}
 
 	return nil
