@@ -49,7 +49,7 @@ func openFile(filename string) (*os.File, error) {
 			return nil, err
 		}
 
-		err = os.MkdirAll(directory, os.ModeDir)
+		err = os.MkdirAll(directory, os.ModePerm)
 		if err != nil {
 			return nil, err
 		}

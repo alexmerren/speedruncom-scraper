@@ -1,5 +1,7 @@
 package http_client
 
+import "net/http"
+
 func WithRetry(retryDelay, retryMaximum int) func(*HttpClient) {
 	return func(c *HttpClient) {
 		c.retryDelay = retryDelay
@@ -8,9 +10,12 @@ func WithRetry(retryDelay, retryMaximum int) func(*HttpClient) {
 	}
 }
 
-// TODO Set the httpClient to have a cache around the roundtripper
-func WithCacheRequests() func(*HttpClient) {
-	return func(c *HttpClient) {}
+func WithCache(cachedTransport http.RoundTripper) func(*HttpClient) {
+	return func(c *HttpClient) {
+		c.httpClient = &http.Client{
+			Transport: cachedTransport,
+		}
+	}
 }
 
 func WithDelay(requestDelay int) func(*HttpClient) {

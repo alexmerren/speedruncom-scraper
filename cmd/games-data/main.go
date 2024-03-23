@@ -7,25 +7,34 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"sync"
 
 	"github.com/alexmerren/speedruncom-scraper/internal"
 	"github.com/buger/jsonparser"
 )
 
 func main() {
+	var wg sync.WaitGroup
+
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		if err := generateGamesDataV1(); err != nil {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
 		}
 	}()
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		if err := generateGamesDataV2(); err != nil {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
 		}
 	}()
+
+	wg.Wait()
 }
 
 func generateGamesDataV1() error {
@@ -67,22 +76,22 @@ func generateGamesDataV1() error {
 			continue
 		}
 
-		numCategories, err := processCategory(categoriesDataFile, response)
+		numCategories, err := processCategory(categoriesDataFile, response, gameId)
 		if err != nil {
 			return err
 		}
 
-		numLevels, err := processLevel(levelsDataFile, response)
+		numLevels, err := processLevel(levelsDataFile, response, gameId)
 		if err != nil {
 			return err
 		}
 
-		err = processVariableValue(variablesDataFile, valuesDataFile, response)
+		err = processVariableValue(variablesDataFile, valuesDataFile, response, gameId)
 		if err != nil {
 			return err
 		}
 
-		err = processGame(gamesDataFile, response, numCategories, numLevels)
+		err = processGame(gamesDataFile, response, numCategories, numLevels, gameId)
 		if err != nil {
 			return err
 		}
@@ -91,11 +100,10 @@ func generateGamesDataV1() error {
 	return nil
 }
 
-func processCategory(categoriesDataFile *csv.Writer, gameResponse []byte) (int, error) {
+func processCategory(categoriesDataFile *csv.Writer, gameResponse []byte, gameId string) (int, error) {
 	numCategories := 0
 	_, err := jsonparser.ArrayEach(gameResponse, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		numCategories += 1
-		gameId := "gameId?" // TODO Retrieve gameId from response
 		categoryId, _ := jsonparser.GetString(value, "id")
 		categoryName, _ := jsonparser.GetString(value, "name")
 		categoryRules, _ := jsonparser.GetString(value, "rules")
@@ -115,11 +123,10 @@ func processCategory(categoriesDataFile *csv.Writer, gameResponse []byte) (int, 
 	return numCategories, err
 }
 
-func processLevel(levelsDataFile *csv.Writer, gameResponse []byte) (int, error) {
+func processLevel(levelsDataFile *csv.Writer, gameResponse []byte, gameId string) (int, error) {
 	numLevels := 0
 	_, err := jsonparser.ArrayEach(gameResponse, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		numLevels += 1
-		gameId := "gameId?" // TODO Retrieve gameId from response
 		levelId, _ := jsonparser.GetString(value, "id")
 		levelName, _ := jsonparser.GetString(value, "name")
 		levelRules, _ := jsonparser.GetString(value, "rules")
@@ -130,9 +137,8 @@ func processLevel(levelsDataFile *csv.Writer, gameResponse []byte) (int, error) 
 	return numLevels, err
 }
 
-func processVariableValue(variableOutputFile, valueOutputFile *csv.Writer, gameResponse []byte) error {
+func processVariableValue(variablesDataFile, valuesDataFile *csv.Writer, gameResponse []byte, gameId string) error {
 	_, err := jsonparser.ArrayEach(gameResponse, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
-		gameId := "gameId?" // TODO Retrieve gameId from response
 		variableId, _ := jsonparser.GetString(value, "id")
 		variableName, _ := jsonparser.GetString(value, "name")
 		variableCategory, _ := jsonparser.GetString(value, "category")
@@ -140,7 +146,7 @@ func processVariableValue(variableOutputFile, valueOutputFile *csv.Writer, gameR
 		variableIsSubcategory, _ := jsonparser.GetBoolean(value, "is-subcategory")
 		variableDefault, _ := jsonparser.GetString(value, "values", "default")
 
-		variableOutputFile.Write([]string{
+		variablesDataFile.Write([]string{
 			gameId,
 			variableId,
 			variableName,
@@ -155,7 +161,7 @@ func processVariableValue(variableOutputFile, valueOutputFile *csv.Writer, gameR
 			valueLabel, _ := jsonparser.GetString(value, "label")
 			valueRules, _ := jsonparser.GetString(value, "rules")
 
-			valueOutputFile.Write([]string{
+			valuesDataFile.Write([]string{
 				gameId,
 				variableId,
 				valueId,
@@ -169,19 +175,18 @@ func processVariableValue(variableOutputFile, valueOutputFile *csv.Writer, gameR
 	return err
 }
 
-func processGame(gameOutputFile *csv.Writer, gameResponse []byte, numCategories, numLevels int) error {
+func processGame(gamesDataFile *csv.Writer, gameResponse []byte, numCategories, numLevels int, gameId string) error {
 	gameData, _, _, err := jsonparser.Get(gameResponse, "data")
 	if err != nil {
 		return err
 	}
 
-	gameId := "gameId?" // TODO Retrieve gameId from response
 	gameName, _ := jsonparser.GetString(gameData, "names", "international")
 	gameURL, _ := jsonparser.GetString(gameData, "abbreviation")
 	gameReleaseDate, _ := jsonparser.GetString(gameData, "release-date")
 	gameCreatedDate, _ := jsonparser.GetString(gameData, "created")
 
-	gameOutputFile.Write([]string{
+	gamesDataFile.Write([]string{
 		gameId,
 		gameName,
 		gameURL,
