@@ -1,8 +1,6 @@
-github.com/alexmerren/httpcache v0.0.0-20230913203636-d048679834a1 h1:8ABqJp3IoFViA5OTomX+QHo3SQeKp/WhRhUBoy2eIIU=
-github.com/alexmerren/httpcache v0.0.0-20230913203636-d048679834a1/go.mod h1:QedPNUGvSb7ajOiMBDVHlIGSofhm6rAZd4Q/ZY0iDMk=
+github.com/alexmerren/httpcache v0.0.0-20240323204617-c869defe2edb h1:Hp4doDliCZvHs2HzoHpp4RrxC47J/CmCg0tommV2uRc=
+github.com/alexmerren/httpcache v0.0.0-20240323204617-c869defe2edb/go.mod h1:QedPNUGvSb7ajOiMBDVHlIGSofhm6rAZd4Q/ZY0iDMk=
 github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMUs=
 github.com/buger/jsonparser v1.1.1/go.mod h1:6RYKKt7H4d4+iWqouImQ9R2FZql3VbhNgx27UK13J/0=
 github.com/mattn/go-sqlite3 v1.14.17 h1:mCRHCLDUBXgpKAqIKsaAaAsrAlbkeomtRFKXh2L6YIM=
 github.com/mattn/go-sqlite3 v1.14.17/go.mod h1:2eHXhiwb8IkHr+BDWZGa96P6+rkvnG63S2DGjv9HUNg=
-golang.org/x/exp v0.0.0-20230905200255-921286631fa9 h1:GoHiUyI/Tp2nVkLI2mCxVkOjsbSXD66ic0XW0js0R9g=
-golang.org/x/exp v0.0.0-20230905200255-921286631fa9/go.mod h1:S2oDrQGGwySpoQPVqRShND87VCbxmc6bL1Yd2oYrm6k=

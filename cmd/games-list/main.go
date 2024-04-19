@@ -4,53 +4,46 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/alexmerren/speedruncom-scraper/internal/filesystem"
-	"github.com/alexmerren/speedruncom-scraper/internal/srcomv1"
-	"github.com/alexmerren/speedruncom-scraper/internal/srcomv2"
-)
-
-const (
-	gamesListOutputFilenameV1 = "./data/v1/games-id-list.csv"
-	gamesListOutputFilenameV2 = "./data/v2/games-id-list.csv"
+	"github.com/alexmerren/speedruncom-scraper/internal"
+	"github.com/buger/jsonparser"
 )
 
 func main() {
-	if err := getGameListV1(); err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
-	}
-
-	if err := getGameListV2(); err != nil {
+	if err := generateGamesListV1(); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func getGameListV1() error {
-	outputFile, err := filesystem.CreateOutputFile(gamesListOutputFilenameV1)
-	if err != nil {
-		return err
-	}
-	defer outputFile.Close()
+func generateGamesListV1() error {
+	client := internal.NewSrcomV1Client()
 
-	err = srcomv1.ProcessGamesList(outputFile)
-	if err != nil {
-		return err
-	}
+	gamesIdListFile, closeFunc, _ := internal.NewCsvWriter(internal.GamesIdListFilenameV1)
+	gamesIdListFile.Write(internal.FileHeaders[internal.GamesDataFilenameV1])
+	defer closeFunc()
 
-	return nil
-}
+	currentPage := 0
 
-func getGameListV2() error {
-	outputFile, err := filesystem.CreateOutputFile(gamesListOutputFilenameV2)
-	if err != nil {
-		return err
-	}
-	defer outputFile.Close()
+	for {
+		response, err := client.GetGameList(currentPage)
+		if err != nil {
+			return err
+		}
 
-	err = srcomv2.ProcessGamesList(outputFile)
-	if err != nil {
-		return err
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			gameID, _ := jsonparser.GetString(value, "id")
+			gamesIdListFile.Write([]string{gameID})
+		}, "data")
+		if err != nil {
+			return err
+		}
+
+		size, _ := jsonparser.GetInt(response, "pagination", "size")
+		if size < 1000 {
+			break
+		}
+
+		currentPage += 1
 	}
 
 	return nil
