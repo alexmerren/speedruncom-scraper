@@ -7,7 +7,6 @@ A system to collect data from speedrun.com for machine learning and data science
 
 > Let us know what other data that needs to be collected from speedrun.com! Open a [GitHub Issue](https://github.com/alexmerren/speedruncom-scraper/issues) today.
 
-
 Find the published dataset [here](https://www.kaggle.com/datasets/alexmerren1/speedrun-com-data)!
 
 ## 🌟 Highlights
@@ -23,46 +22,19 @@ Speedruncom-scraper is written in Golang. It can be compiled and deployed to col
 
 ## 💨 Executables
 
- 1. [`games-list`](./cmd/games-list/main.go)
+ * [`games-list`](./cmd/games-list/main.go)
 
-    * **Reason**: List of all games available via the speedrun.com API. This only collects the internal ID of each game, further information is collected in subsequent functions.
-    * **Requirements**: None.
+ * [`games-data`](./cmd/games-data/main.go)
 
- 2. [`games-data`](./cmd/games-data/main.go)
+ * [`leaderboards-data`](./cmd/leaderboards-data/main.go)
 
-    * **Reason**: Collecting available information for each game using their internal ID. Metadata is collected on the games themselves. Furthermore, the categories, levels, variables, and values are collected and stored.
-    * **Requirements**: `games-list`.
+ * [`games-and-leaderboards-data`](./cmd/games-and-leaderboards-data/main.go)
 
- 3. [`leaderboards-data`](./cmd/leaderboards-data/main.go)
+ * [`users-list`](./cmd/users-list/main.go)
 
-    * **Reason**: Retrieves all leaderboards for every combination of game, category, and level. Each run that conitrbutes to the leaderboards is recorded, along with each player that contributed to the run (amongst other metadata).
-    * **Requirements**: `games-list`, `games-data`.
+ * [`users-and-runs-data`](./cmd/users-and-runs-data/main.go)
 
- 4. [`games-and-leaderboards-data`](./cmd/games-and-leaderboards-data/main.go)
-
-    * **Reason**: Combination of the `games-data` and `leaderboards-data` executables.
-    * **Requirements**: `games-list`
-
- 5. [`users-list`](./cmd/users-list/main.go)
-
-    * **Reason**: Creates a list of unique users that appear in the output of the `leaderboards-data` binary.
-    * **Requirements**: `games-list`, `games-data`.
-
- 6. [`users-data`](./cmd/users-data/main.go)
-
-    * **Reason**: Collect metadata and run data for each user that has contributed to any given leaderboard on speedrun.com.
-    * **Requirements**: `games-list`, `games-data`, `users-list`.
- 
- 7. [`runs-data`](./cmd/runs-data/main.go)
-
-    * **Reason**: Retrieves all leaderboards for every combination of game, category, and level. Each run that conitrbutes to the leaderboards is recorded, along with each player that contributed to the run (amongst other metadata).
-    * **Requirements**: `games-list`, `games-data`, `users-list`.
-
- 8. [`users-and-runs-data`](./cmd/users-and-runs-data/main.go)
-
-    * **Reason**: Combination of the `users-data` and `runs-data` executables.
-    * **Requirements**: `games-list`, `leaderboards-data`, `users-list`.
-
+ * [`world-record-history-data`](./cmd/world-record-history-data/main.go) (WIP)
 
 ## 🚀 Usage
 
