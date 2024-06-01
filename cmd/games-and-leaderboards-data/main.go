@@ -110,6 +110,7 @@ func getGamesAndLeaderboardsV1() error {
 	return nil
 }
 
+// Processing functions taken from cmd/leaderboards-data/main.go
 func processLeaderboard(leaderboardsOutputFile *csv.Writer, leaderboardResponse []byte) error {
 	_, err := jsonparser.ArrayEach(leaderboardResponse, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 		place, _ := jsonparser.GetInt(value, "place")
