@@ -64,22 +64,22 @@ func getGamesAndLeaderboardsV1() error {
 		}
 
 		// Process categories, levels, variables, values, and game (taken from cmd/games-data/main.go)
-		numCategories, err := processCategory(categoriesDataFile, response, gameId)
+		numCategories, err := processCategory(categoriesDataFile, gameResponse, gameId)
 		if err != nil {
 			return err
 		}
 
-		numLevels, err := processLevel(levelsDataFile, response, gameId)
+		numLevels, err := processLevel(levelsDataFile, gameResponse, gameId)
 		if err != nil {
 			return err
 		}
 
-		err = processVariableValue(variablesDataFile, valuesDataFile, response, gameId)
+		err = processVariableValue(variablesDataFile, valuesDataFile, gameResponse, gameId)
 		if err != nil {
 			return err
 		}
 
-		err = processGame(gamesDataFile, response, numCategories, numLevels, gameId)
+		err = processGame(gamesDataFile, gameResponse, numCategories, numLevels, gameId)
 		if err != nil {
 			return err
 		}
