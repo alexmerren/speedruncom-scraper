@@ -1,11 +1,13 @@
 package main
 
 import (
-	"encoding/json"
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/alexmerren/speedruncom-scraper/internal"
 	"github.com/buger/jsonparser"
@@ -81,14 +83,11 @@ func generateHybridData() error {
 		// if err != nil {
 		// 	return err
 		// }
-		fmt.Println(gameId)
+
 		leaderboard, err := generateLeaderboardMap(gameResponse)
 		if err != nil {
 			return err
 		}
-
-		t, _ := json.MarshalIndent(leaderboard, "", "\t")
-		fmt.Println(string(t))
 
 		// Process leaderboards for both categories and levels.
 		// Iterate over leaderboardMap here.
@@ -98,73 +97,78 @@ func generateHybridData() error {
 }
 
 // Processing functions taken from cmd/leaderboards-data/main.go
-// func processLeaderboard(leaderboardsOutputFile *csv.Writer, leaderboardResponse []byte) error {
-// 	_, err := jsonparser.ArrayEach(leaderboardResponse, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
-// 		place, _ := jsonparser.GetInt(value, "place")
-// 		runData, _, _, _ := jsonparser.Get(value, "run")
-// 		runId, _ := jsonparser.GetString(runData, "id")
-// 		gameId, _ := jsonparser.GetString(runData, "game")
-// 		categoryId, _ := jsonparser.GetString(runData, "category")
-// 		levelId, _ := jsonparser.GetString(runData, "level")
-// 		runDate, _ := jsonparser.GetString(runData, "date")
-// 		runPrimaryTime, _ := jsonparser.GetFloat(runData, "times", "primary_t")
-// 		runPlatform, _ := jsonparser.GetString(runData, "system", "platform")
-// 		runEmulated, _ := jsonparser.GetBoolean(runData, "system", "emulated")
-// 		runVerifiedDate, _ := jsonparser.GetString(runData, "status", "verify-date")
-// 		runExaminer, _ := jsonparser.GetString(runData, "status", "examiner")
+func processLeaderboard(leaderboardsOutputFile *csv.Writer, leaderboardResponse []byte) error {
+	_, err := jsonparser.ArrayEach(leaderboardResponse, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
+		place, _ := jsonparser.GetInt(value, "place")
+		runData, _, _, _ := jsonparser.Get(value, "run")
+		runId, _ := jsonparser.GetString(runData, "id")
+		gameId, _ := jsonparser.GetString(runData, "game")
+		categoryId, _ := jsonparser.GetString(runData, "category")
+		levelId, _ := jsonparser.GetString(runData, "level")
+		runDate, _ := jsonparser.GetString(runData, "date")
+		runPrimaryTime, _ := jsonparser.GetFloat(runData, "times", "primary_t")
+		runPlatform, _ := jsonparser.GetString(runData, "system", "platform")
+		runEmulated, _ := jsonparser.GetBoolean(runData, "system", "emulated")
+		runVerifiedDate, _ := jsonparser.GetString(runData, "status", "verify-date")
+		runExaminer, _ := jsonparser.GetString(runData, "status", "examiner")
 
-// 		playerIDArray := []string{}
-// 		jsonparser.ArrayEach(runData, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-// 			playerID, _ := jsonparser.GetString(value, "id")
-// 			playerIDArray = append(playerIDArray, string(playerID))
-// 		}, "players")
-// 		runPlayers := strings.Join(playerIDArray, ",")
+		playerIDArray := []string{}
+		jsonparser.ArrayEach(runData, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			playerID, _ := jsonparser.GetString(value, "id")
+			playerIDArray = append(playerIDArray, string(playerID))
+		}, "players")
+		runPlayers := strings.Join(playerIDArray, ",")
 
-// 		runValuesArray := []string{}
-// 		jsonparser.ObjectEach(runData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
-// 			runValuesArray = append(runValuesArray, fmt.Sprintf("%s=%s", string(key), string(value)))
-// 			return nil
-// 		}, "values")
-// 		runValues := strings.Join(runValuesArray, ",")
+		runValuesArray := []string{}
+		jsonparser.ObjectEach(runData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+			runValuesArray = append(runValuesArray, fmt.Sprintf("%s=%s", string(key), string(value)))
+			return nil
+		}, "values")
+		runValues := strings.Join(runValuesArray, ",")
 
-// 		leaderboardsOutputFile.Write([]string{
-// 			runId,
-// 			gameId,
-// 			categoryId,
-// 			levelId,
-// 			strconv.Itoa(int(place)),
-// 			runDate,
-// 			strconv.FormatFloat(runPrimaryTime, 'f', -1, 64),
-// 			runPlatform,
-// 			strconv.FormatBool(runEmulated),
-// 			runPlayers,
-// 			runExaminer,
-// 			runVerifiedDate,
-// 			runValues,
-// 		})
-// 	}, "data", "runs")
+		leaderboardsOutputFile.Write([]string{
+			runId,
+			gameId,
+			categoryId,
+			levelId,
+			strconv.Itoa(int(place)),
+			runDate,
+			strconv.FormatFloat(runPrimaryTime, 'f', -1, 64),
+			runPlatform,
+			strconv.FormatBool(runEmulated),
+			runPlayers,
+			runExaminer,
+			runVerifiedDate,
+			runValues,
+		})
+	}, "data", "runs")
 
-// 	return err
-// }
+	return err
+}
 
-type leaderboardMap map[string]map[string]map[string][]string
-type leaderboardMapSub1 map[string]map[string][]string
-type leaderboardMapSub2 map[string][]string
+type leaderboardMap map[string]categoryToVariables
+type categoryToVariables map[string]variableToValues
+type variableToValues map[string][]string
 
 func generateLeaderboardMap(gameResponse []byte) (leaderboardMap, error) {
 	result := make(leaderboardMap)
-	result["per-level"] = make(leaderboardMapSub1)
-	result["per-game"] = make(leaderboardMapSub1)
+	result["per-level"] = make(categoryToVariables)
+	result["per-game"] = make(categoryToVariables)
 
+	// Collect all combinations of category type and category ID. This is used later
+	// to determine if a categoryType/categoryId combination is valid.
 	_, err := jsonparser.ArrayEach(gameResponse, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		categoryId, _ := jsonparser.GetString(value, "id")
 		categoryType, _ := jsonparser.GetString(value, "type")
-		result[categoryType][categoryId] = make(leaderboardMapSub2)
+		result[categoryType][categoryId] = make(variableToValues)
 	}, "data", "categories", "data")
 	if err != nil {
 		return nil, err
 	}
 
+	// Variables are scoped differently to how categories are typed, so this maps from one to the other.
+	// This can be seen here: https://github.com/speedruncomorg/api/blob/master/version1/variables.md#structure
+	// I've deliberately ignored mapping the "single-level" type here to save time.
 	variableScopeToCategoryType := map[string][]string{
 		"global":       {"per-game", "per-level"},
 		"full-game":    {"per-game"},
@@ -172,7 +176,9 @@ func generateLeaderboardMap(gameResponse []byte) (leaderboardMap, error) {
 		"single-level": {},
 	}
 
-	_, err = jsonparser.ArrayEach(gameResponse, func(variableData []byte, dataType jsonparser.ValueType, offset int, err error) {
+	_, err = jsonparser.ArrayEach(gameResponse, func(variableData []byte, dataType jsonparser.ValueType, offset int, _ error) {
+		categoryType, _ := jsonparser.GetString(variableData, "scope", "type")
+		categoryId, categoryIdErr := jsonparser.GetString(variableData, "category")
 		variableId, _ := jsonparser.GetString(variableData, "id")
 		valueIds := make([]string, 0)
 		jsonparser.ObjectEach(variableData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
@@ -180,17 +186,22 @@ func generateLeaderboardMap(gameResponse []byte) (leaderboardMap, error) {
 			return nil
 		}, "values", "choices")
 
-		categoryType, _ := jsonparser.GetString(variableData, "scope", "type")
-		categoryId, err := jsonparser.GetString(variableData, "category")
-
+		// For "global" variables we must add it to all "per-game" and "per-level" categories.
+		// The category in a variable can be `null`. In this case we add it to all
+		// category IDs for the type of category we get from the mapping. A variable can
+		// also be global, but have a category that is only "per-game" or "per-level".
+		// In this case we only add it to where the category exists already.
 		for _, categoryMapping := range variableScopeToCategoryType[categoryType] {
-			categoryIds := make([]string, 0)
-			if err != nil {
+			categoryIds := []string{}
+
+			// if we do not find a categoryId then we try and add the variable/values
+			// to all categories for a category type.
+			if categoryIdErr != nil {
+				categoryIds = []string{categoryId}
+			} else {
 				for key := range result[categoryMapping] {
 					categoryIds = append(categoryIds, key)
 				}
-			} else {
-				categoryIds = append(categoryIds, categoryId)
 			}
 
 			for _, categoryId := range categoryIds {
