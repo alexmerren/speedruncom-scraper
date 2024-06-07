@@ -19,7 +19,7 @@ func generateGamesListV1() error {
 	client := internal.NewSrcomV1Client()
 
 	gamesIdListFile, closeFunc, _ := internal.NewCsvWriter(internal.GamesIdListFilenameV1)
-	gamesIdListFile.Write(internal.FileHeaders[internal.GamesDataFilenameV1])
+	gamesIdListFile.Write(internal.FileHeaders[internal.GamesIdListFilenameV1])
 	defer closeFunc()
 
 	currentPage := 0
