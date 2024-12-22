@@ -18,10 +18,11 @@ func FormatCsvString(s string) string {
 	return s
 }
 
-// openOrCreate will open a file if it already exists. If a file does not exist,
-// then we create the file and write the specified values from `FileComments` and
-// `FileHeaders` to the file, provided we have a filename that matches a key in
-// those maps.
+// openOrCreate will open a file if it already exists. If a file does not exist, then
+//   - Create the file;
+//   - Write the values from `FileComments` and `FileHeaders` (provided we have a
+//     filename that matches a key in those maps);
+//   - Open the file.
 func openOrCreate(filename string) (*os.File, error) {
 	err := createFileIfNotExists(filename)
 	if err != nil && errors.Is(err, os.ErrExist) {
