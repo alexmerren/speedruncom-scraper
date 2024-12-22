@@ -35,7 +35,8 @@ The compiled binaries can be executed to collect data from the [speedrun.com API
 ./dist/games-list && ./dist/games-data && ./dist/leaderboards-data && ./dist/users-list && ./dist/users-data && ./dist/runs-data
 ```
 
-Alternatively, there is an identical Makefile target:
+Alternatively, there is a Makefile target to run all executables in order:
+
 ```bash
 make run-all
 ```
