@@ -7,6 +7,10 @@ A series of executables to collect all data available from speedrun.com. The dat
 
 ## ⬇️  Installation
 
+<p align="center">
+  <img src="docs/speedrun_com_logo.png" />
+</p>
+
 The repository can be installed easily, and binaries can be compiled with the following commands:
 
 ```bash
@@ -34,9 +38,9 @@ NOTE: For each executable there are repeated API calls. A local HTTP cache has b
 
 ## 🏃 Executables
 
-| Path                       | Reason                               | Requirements            |
-|----------------------------|--------------------------------------|-------------------------|
-| `./dist/games-list`        | | None |
+| Path                       | Description | Pre-requisite(s)           |
+|----------------------------|-------------|----------------------------|
+| `./dist/games-list`        | | None                       |
 | `./dist/games-data`        | | `./dist/games-list`        |
 | `./dist/leaderboards-data` | | `./dist/games-data`        |
 | `./dist/users-list`        | | `./dist/leaderboards-data` |
