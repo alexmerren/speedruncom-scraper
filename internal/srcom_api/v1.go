@@ -5,21 +5,24 @@ import (
 )
 
 const (
-	v1ApiUrl                                = "https://www.speedrun.com/api/v1/%s"
-	v1GameListQuery                         = "games?_bulk=yes&max=1000&orderby=released&direction=asc&offset=%d"
-	v1GameDataQuery                         = "games/%s?embed=levels,categories,developers,platforms,genres,variables"
-	v1GameCategoryQuery                     = "categories/%s"
-	v1GameLevelQuery                        = "levels/%s"
-	v1GameDeveloperQuery                    = "developers/%s"
-	v1GameLeaderboardWithCategoryQuery      = "leaderboards/%s/category/%s?embed=game,category,level,players,variables"
-	v1GameLeaderboardWithLevelCategoryQuery = "leaderboards/%s/level/%s/%s"
-	v1UserDataQuery                         = "users/%s"
-	v1UserRunsQuery                         = "runs?user=%s&embed=players&max=%d&offset=%d"
+	apiUrl                            = "https://www.speedrun.com/api/v1/%s"
+	gameQuery                         = "games/%s?embed=levels,categories,developers,platforms,genres,variables,publishers"
+	categoryQuery                     = "categories/%s"
+	levelQuery                        = "levels/%s"
+	developerQuery                    = "developers/%s"
+	leaderboardWithCategoryQuery      = "leaderboards/%s/category/%s"
+	leaderboardWithLevelCategoryQuery = "leaderboards/%s/level/%s/%s"
+	userQuery                         = "users/%s"
+	runListQuery                      = "runs?user=%s&embed=players&max=%d&offset=%d"
+	gameListQuery                     = "games?_bulk=yes&max=%d&orderby=released&direction=asc&offset=%d"
+	platformListQuery                 = "platforms?max=%d&offset=%d"
+	publisherListQuery                = "publishers?max=%d&offset=%d"
+	genreListQuery                    = "genres?max=%d&offset=%d"
 )
 
 const (
-	v1GameListMaxPerPage = 1000
-	v1RunsListMaxPerPage = 200
+	bulkEndpointMaximumPagination = 1000
+	maximumPagination             = 200
 )
 
 type SrcomV1Client struct {
@@ -32,77 +35,79 @@ func NewSrcomV1Client(client HttpClient) *SrcomV1Client {
 	}
 }
 
-func (c *SrcomV1Client) GetRunsByUser(userId string, pageNumber int) ([]byte, error) {
-	header := fmt.Sprintf(
-		v1UserRunsQuery,
-		userId,
-		v1RunsListMaxPerPage,
-		pageNumber*v1RunsListMaxPerPage,
-	)
-	url := fmt.Sprintf(v1ApiUrl, header)
-
-	return c.client.Get(url)
-}
-
 func (c *SrcomV1Client) GetUser(userId string) ([]byte, error) {
-	header := fmt.Sprintf(v1UserDataQuery, userId)
-	url := fmt.Sprintf(v1ApiUrl, header)
-
-	return c.client.Get(url)
+	requestPath := fmt.Sprintf(userQuery, userId)
+	return c.get(requestPath)
 }
 
 func (c *SrcomV1Client) GetGame(gameId string) ([]byte, error) {
-	header := fmt.Sprintf(v1GameDataQuery, gameId)
-	url := fmt.Sprintf(v1ApiUrl, header)
-
-	return c.client.Get(url)
+	requestPath := fmt.Sprintf(gameQuery, gameId)
+	return c.get(requestPath)
 }
 
 func (c *SrcomV1Client) GetCategory(categoryId string) ([]byte, error) {
-	header := fmt.Sprintf(v1GameCategoryQuery, categoryId)
-	url := fmt.Sprintf(v1ApiUrl, header)
-
-	return c.client.Get(url)
+	requestPath := fmt.Sprintf(categoryQuery, categoryId)
+	return c.get(requestPath)
 }
 
 func (c *SrcomV1Client) GetLevel(levelId string) ([]byte, error) {
-	header := fmt.Sprintf(v1GameLevelQuery, levelId)
-	url := fmt.Sprintf(v1ApiUrl, header)
-
-	return c.client.Get(url)
+	requestPath := fmt.Sprintf(levelQuery, levelId)
+	return c.get(requestPath)
 }
 
 func (c *SrcomV1Client) GetDeveloper(developerId string) ([]byte, error) {
-	header := fmt.Sprintf(v1GameDeveloperQuery, developerId)
-	url := fmt.Sprintf(v1ApiUrl, header)
-
-	return c.client.Get(url)
-}
-
-func (c *SrcomV1Client) GetGameList(pageNumber int) ([]byte, error) {
-	header := fmt.Sprintf(v1GameListQuery, pageNumber*v1GameListMaxPerPage)
-	url := fmt.Sprintf(v1ApiUrl, header)
-
-	return c.client.Get(url)
+	requestPath := fmt.Sprintf(developerQuery, developerId)
+	return c.get(requestPath)
 }
 
 func (c *SrcomV1Client) GetGameCategoryLeaderboard(gameId, categoryId string) ([]byte, error) {
-	header := fmt.Sprintf(v1GameLeaderboardWithCategoryQuery,
+	requestPath := fmt.Sprintf(leaderboardWithCategoryQuery,
 		gameId, categoryId,
 	)
-	url := fmt.Sprintf(v1ApiUrl, header)
-
-	return c.client.Get(url)
+	return c.get(requestPath)
 }
 
 func (c *SrcomV1Client) GetGameLevelCategoryLeaderboard(gameId, levelId, categoryId string) ([]byte, error) {
-	header := fmt.Sprintf(
-		v1GameLeaderboardWithLevelCategoryQuery,
+	requestPath := fmt.Sprintf(
+		leaderboardWithLevelCategoryQuery,
 		gameId,
 		levelId,
 		categoryId,
 	)
-	url := fmt.Sprintf(v1ApiUrl, header)
+	return c.get(requestPath)
+}
 
+func (c *SrcomV1Client) GetRunsByUser(userId string, pageNumber int) ([]byte, error) {
+	requestPath := fmt.Sprintf(
+		runListQuery,
+		userId,
+		maximumPagination,
+		pageNumber*maximumPagination,
+	)
+	return c.get(requestPath)
+}
+
+func (c *SrcomV1Client) GetGameList(pageNumber int) ([]byte, error) {
+	requestPath := fmt.Sprintf(gameListQuery, bulkEndpointMaximumPagination, pageNumber*bulkEndpointMaximumPagination)
+	return c.get(requestPath)
+}
+
+func (c *SrcomV1Client) GetPlatformList(pageNumber int) ([]byte, error) {
+	requestPath := fmt.Sprintf(platformListQuery, maximumPagination, pageNumber*maximumPagination)
+	return c.get(requestPath)
+}
+
+func (c *SrcomV1Client) GetPublisherList(pageNumber int) ([]byte, error) {
+	requestPath := fmt.Sprintf(publisherListQuery, maximumPagination, pageNumber*maximumPagination)
+	return c.get(requestPath)
+}
+
+func (c *SrcomV1Client) GetGenreList(pageNumber int) ([]byte, error) {
+	requestPath := fmt.Sprintf(genreListQuery, maximumPagination, pageNumber*maximumPagination)
+	return c.get(requestPath)
+}
+
+func (c *SrcomV1Client) get(requestPath string) ([]byte, error) {
+	url := fmt.Sprintf(apiUrl, requestPath)
 	return c.client.Get(url)
 }

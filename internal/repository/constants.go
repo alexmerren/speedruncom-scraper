@@ -17,14 +17,14 @@ var (
 	FileColumnDefinitions = map[string][]string{
 		GamesIdListFilename:      {"gameId"},
 		UsersIdListFilename:      {"userId"},
-		GamesDataFilename:        {"gameId", "gameName", "url", "releaseDate", "createdDate", "numCategories", "numLevels"},
+		GamesDataFilename:        {"gameId", "gameName", "url", "releaseDate", "createdDate"},
 		CategoriesDataFilename:   {"parentGameId", "categoryId", "categoryName", "rules", "type", "numPlayers"},
 		LevelsDataFilename:       {"parentGameId", "levelId", "levelName", "rules"},
 		VariablesDataFilename:    {"parentGameId", "variableId", "variableName", "category", "scope", "isSubcategory", "defaultValue"},
 		ValuesDataFilename:       {"parentGameId", "variableId", "valueId", "label", "rules"},
 		LeaderboardsDataFilename: {"runId", "gameId", "categoryId", "levelId", "place", "date", "primaryTime", "platform", "isEmulated", "players", "examiner", "verifiedDate", "variablesAndValues"},
 		RunsDataFilename:         {"runId", "gameId", "categoryId", "levelId", "date", "primaryTime", "platform", "isEmulated", "players", "examiner", "verifiedDate", "variablesAndValues", "status", "statusReason"},
-		UsersDataFilename:        {"userId", "username", "signupDate", "location", "numRuns"},
+		UsersDataFilename:        {"userId", "username", "signupDate", "location"},
 	}
 
 	FileComments = map[string]string{
