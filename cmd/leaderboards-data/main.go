@@ -32,7 +32,7 @@ func run() error {
 	leaderboardsDataProcessor := &processor.LeaderboardsDataProcessor{
 		GamesIdListFile:  gamesIdListFile,
 		LeaderboardsFile: leaderboardsFile,
-		Client:           srcom_api.SrcomClient,
+		Client:           srcom_api.NewSrcomClient(),
 	}
 
 	return leaderboardsDataProcessor.Process()

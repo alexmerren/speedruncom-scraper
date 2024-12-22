@@ -60,7 +60,7 @@ func run() error {
 		LevelsFile:      levelsFile,
 		VariablesFile:   variablesFile,
 		ValuesFile:      valuesFile,
-		Client:          srcom_api.SrcomClient,
+		Client:          srcom_api.NewSrcomClient(),
 	}
 
 	return gamesDataProcessor.Process()

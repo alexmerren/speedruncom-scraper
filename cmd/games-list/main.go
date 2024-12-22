@@ -25,7 +25,7 @@ func run() error {
 
 	gamesListProcessor := &processor.GamesListProcessor{
 		GamesIdListFile: gamesIdListFile,
-		Client:          srcom_api.SrcomClient,
+		Client:          srcom_api.NewSrcomClient(),
 	}
 
 	return gamesListProcessor.Process()

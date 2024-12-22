@@ -9,10 +9,12 @@ var cachedRoundTripper = httpcache.NewCachedRoundTripper(
 	httpcache.WithName("./data/httpcache.db"),
 )
 
-var SrcomClient = NewSrcomV1Client(
-	http_client.NewHttpClient(
-		http_client.WithLogging(),
-		http_client.WithRetry(100, 5),
-		http_client.WithCache(cachedRoundTripper),
-	),
-)
+func NewSrcomClient() *SrcomV1Client {
+	return NewSrcomV1Client(
+		http_client.NewHttpClient(
+			http_client.WithLogging(),
+			http_client.WithRetry(100, 5),
+			http_client.WithCache(cachedRoundTripper),
+		),
+	)
+}

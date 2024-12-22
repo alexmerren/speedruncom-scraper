@@ -4,6 +4,7 @@ GOFMT := gofmt
 
 DIST_DIR := $(CURDIR)/dist
 CMD_DIR := $(CURDIR)/cmd
+VENDOR_DIR := $(CURDIR)/vendor
 
 GOFLAGS :=
 # Set to 1 to use static linking for all builds (including tests).
@@ -38,6 +39,12 @@ vendor:
 .PHONY: fmt
 fmt: 
 	$(GOFMT) -s -w $(CURDIR)
+
+## clean: Remove vendored code and built executables
+.PHONY: clean
+clean:
+	rm -r $(DIST_DIR)
+	rm -r $(VENDOR_DIR)
 
 ## run: Run all executables in required order
 .PHONY: run

@@ -32,7 +32,7 @@ func run() error {
 	usersListProcessor := &processor.UsersListProcessor{
 		LeaderboardsFile: leaderboardsFile,
 		UsersIdListFile:  usersIdListFile,
-		Client:           srcom_api.SrcomClient,
+		Client:           srcom_api.NewSrcomClient(),
 	}
 
 	return usersListProcessor.Process()
