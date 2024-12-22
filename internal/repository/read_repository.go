@@ -12,8 +12,11 @@ func NewReadRepository(filename string) (*ReadRepository, func() error, error) {
 		return nil, nil, err
 	}
 
+	csvReader := csv.NewReader(file)
+	csvReader.Comment = '#'
+
 	return &ReadRepository{
-		reader: csv.NewReader(file),
+		reader: csvReader,
 	}, file.Close, nil
 }
 
