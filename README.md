@@ -1,5 +1,9 @@
 # Speedrun.com API Scraper
 
+<p align="center">
+  <img src="docs/speedrun_com_logo.png" />
+</p>
+
 [![Go Report Card](https://goreportcard.com/badge/github.com/alexmerren/speedruncom-scraper)](https://goreportcard.com/report/github.com/alexmerren/speedruncom-scraper)
 ![Go Version](https://img.shields.io/badge/go%20version-%3E=1.20-61CFDD.svg?style=flat-square)
 
@@ -7,9 +11,6 @@ A series of executables to collect all data available from speedrun.com. The dat
 
 ## ⬇️  Installation
 
-<p align="center">
-  <img src="docs/speedrun_com_logo.png" />
-</p>
 
 The repository can be installed easily, and binaries can be compiled with the following commands:
 
