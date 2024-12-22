@@ -7,7 +7,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/alexmerren/speedruncom-scraper)](https://goreportcard.com/report/github.com/alexmerren/speedruncom-scraper)
 ![Go Version](https://img.shields.io/badge/go%20version-%3E=1.20-61CFDD.svg?style=flat-square)
 
-A series of executables to collect all data available from speedrun.com. The data has been published [here](https://www.kaggle.com/datasets/alexmerren1/speedrun-com-data)!
+A series of executables to collect all data available from [speedrun.com](https://www.speedrun.com). A version of the collected data has been published [here](https://www.kaggle.com/datasets/alexmerren1/speedrun-com-data)!
 
 ## ⬇️  Installation
 
@@ -29,7 +29,7 @@ This project requires:
 
 ## 🚀 Usage
 
-The compiled binaries can be executed to collect data from the speedrun.com API. The following command collects data for all runs, all leaderboards, all games, and all users (who have contributed to leaderboards) on speedrun.com:
+The compiled binaries can be executed to collect data from the [speedrun.com API](https://github.com/speedruncomorg/api). The following command collects data for all runs, all leaderboards, all games, and all users (who have contributed to leaderboards) on [speedrun.com](https://www.speedrun.com):
 
 ```bash
 ./dist/games-list && ./dist/games-data && ./dist/leaderboards-data && ./dist/users-list && ./dist/users-data && ./dist/runs-data
