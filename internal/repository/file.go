@@ -37,12 +37,12 @@ func openOrCreate(filename string) (*os.File, error) {
 		return nil, err
 	}
 
-	_, err = file.WriteString(FileComments[filename])
+	_, err = file.WriteString(FileComments[filename] + "\n")
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = file.WriteString(strings.Join(FileColumnDefinitions[filename], ","))
+	_, err = file.WriteString(strings.Join(FileColumnDefinitions[filename], ",") + "\n")
 	if err != nil {
 		return nil, err
 	}
