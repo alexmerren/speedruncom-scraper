@@ -2,7 +2,7 @@ package http_client
 
 import (
 	"io"
-	"log"
+	"log/slog"
 	"math"
 	"net/http"
 	"time"
@@ -54,7 +54,7 @@ func (c *HttpClient) Get(url string) ([]byte, error) {
 	}
 
 	if c.isVerbose {
-		log.Printf("%s: %d", url, response.StatusCode)
+		slog.Info(url, "statusCode", response.StatusCode)
 	}
 
 	return io.ReadAll(response.Body)
