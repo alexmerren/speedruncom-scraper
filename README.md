@@ -38,7 +38,7 @@ The compiled binaries can be executed to collect data from the [speedrun.com API
 Alternatively, there is a Makefile target to run all executables in order:
 
 ```bash
-make run-all
+make run
 ```
 
 NOTE: For each executable there are repeated API calls. A local HTTP cache has been implemented to remove repeated API calls from the rate-limited API. This cache is saved locally under `httpcache.db`.

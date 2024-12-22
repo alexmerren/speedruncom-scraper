@@ -39,8 +39,8 @@ vendor:
 fmt: 
 	$(GOFMT) -s -w $(CURDIR)
 
-## run-all: Run all executables in required order
-.PHONY: run-all
+## run: Run all executables in required order
+.PHONY: run
 run-all:
 	$(DIST_DIR)/games-list && \
 	$(DIST_DIR)/games-data && \
