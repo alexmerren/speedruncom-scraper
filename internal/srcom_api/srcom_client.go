@@ -1,20 +1,18 @@
-package internal
+package srcom_api
 
 import (
 	"github.com/alexmerren/httpcache"
-	"github.com/alexmerren/speedruncom-scraper/pkg/http_client"
-	"github.com/alexmerren/speedruncom-scraper/pkg/srcom_api"
+	"github.com/alexmerren/speedruncom-scraper/internal/http_client"
 )
 
 var cachedRoundTripper = httpcache.NewCachedRoundTripper(
 	httpcache.WithName("./data/httpcache.db"),
 )
 
-func NewSrcomV1Client() *srcom_api.SrcomV1Client {
-	return srcom_api.NewSrcomV1Client(
-		http_client.NewHttpClient(
-			http_client.WithRetry(250, 3),
-			http_client.WithCache(cachedRoundTripper),
-		),
-	)
-}
+var SrcomClient = NewSrcomV1Client(
+	http_client.NewHttpClient(
+		http_client.WithLogging(),
+		http_client.WithRetry(100, 5),
+		http_client.WithCache(cachedRoundTripper),
+	),
+)

@@ -18,13 +18,6 @@ func WithCache(cachedTransport http.RoundTripper) func(*HttpClient) {
 	}
 }
 
-func WithDelay(requestDelay int) func(*HttpClient) {
-	return func(c *HttpClient) {
-		c.requestDelay = requestDelay
-		c.doDelay = true
-	}
-}
-
 func WithLogging() func(*HttpClient) {
 	return func(c *HttpClient) {
 		c.isVerbose = true

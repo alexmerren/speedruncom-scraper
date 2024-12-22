@@ -1,37 +1,13 @@
-package internal
+package repository
 
 import (
-	"encoding/csv"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
-func NewCsvReader(filename string) (*csv.Reader, func() error, error) {
-	file, err := openFile(filename)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return csv.NewReader(file), file.Close, nil
-}
-
-func NewCsvWriter(filename string) (*csv.Writer, func() error, error) {
-	file, err := openFile(filename)
-	if err != nil {
-		return nil, nil, err
-	}
-	writer := csv.NewWriter(file)
-	closeFunc := func() error {
-		writer.Flush()
-		return file.Close()
-	}
-
-	return writer, closeFunc, nil
-}
-
-// I have no idea where I stole this from. There's no way I wrote this.
 func FormatCsvString(s string) string {
 	s = fmt.Sprintf("%q", s)
 	if len(s) >= 2 {
@@ -42,18 +18,63 @@ func FormatCsvString(s string) string {
 	return s
 }
 
-func openFile(filename string) (*os.File, error) {
-	if _, err := os.Stat(filename); errors.Is(err, os.ErrNotExist) {
-		directory, err := filepath.Abs(filepath.Dir(filename))
-		if err != nil {
-			return nil, err
-		}
-
-		err = os.MkdirAll(directory, os.ModePerm)
-		if err != nil {
-			return nil, err
-		}
+// openOrCreate will open a file if it already exists. If a file does not exist,
+// then we create the file and write the specified values from `FileComments` and
+// `FileHeaders` to the file, provided we have a filename that matches a key in
+// those maps.
+func openOrCreate(filename string) (*os.File, error) {
+	err := createFileIfNotExists(filename)
+	if err != nil && errors.Is(err, os.ErrExist) {
+		return openFile(filename)
 	}
 
-	return os.OpenFile(filename, os.O_CREATE|os.O_RDWR, 0600)
+	if err != nil && !errors.Is(err, os.ErrExist) {
+		return nil, err
+	}
+
+	file, err := openFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = file.WriteString(FileComments[filename])
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = file.WriteString(strings.Join(FileColumnDefinitions[filename], ","))
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
+}
+
+func createFileIfNotExists(filename string) error {
+	_, err := os.Stat(filename)
+	if err == nil {
+		return os.ErrExist
+	}
+
+	if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+
+	directory, err := filepath.Abs(filepath.Dir(filename))
+	if err != nil {
+		return err
+	}
+
+	err = os.MkdirAll(directory, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	_, err = os.Create(filename)
+
+	return err
+}
+
+func openFile(filename string) (*os.File, error) {
+	return os.OpenFile(filename, os.O_RDWR, 0600)
 }

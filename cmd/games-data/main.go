@@ -7,34 +7,16 @@ import (
 	"io"
 	"os"
 	"strconv"
-	"sync"
 
 	"github.com/alexmerren/speedruncom-scraper/internal"
 	"github.com/buger/jsonparser"
 )
 
 func main() {
-	var wg sync.WaitGroup
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if err := generateGamesDataV1(); err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			os.Exit(1)
-		}
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if err := generateGamesDataV2(); err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			os.Exit(1)
-		}
-	}()
-
-	wg.Wait()
+	if err := generateGamesDataV1(); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 func generateGamesDataV1() error {
@@ -195,59 +177,6 @@ func processGame(gamesDataFile *csv.Writer, gameResponse []byte, numCategories, 
 		strconv.Itoa(numCategories),
 		strconv.Itoa(numLevels),
 	})
-
-	return nil
-}
-
-func generateGamesDataV2() error {
-	client := internal.NewSrcomV2Client()
-
-	gamesDataFile, closeFunc, _ := internal.NewCsvWriter(internal.GamesDataFilenameV2)
-	gamesDataFile.Write(internal.FileHeaders[internal.GamesDataFilenameV2])
-	defer closeFunc()
-
-	currentPage := 0
-	request, _ := client.GetGameList(currentPage)
-	lastPage, err := jsonparser.GetInt(request, "pagination", "pages")
-	if err != nil {
-		return err
-	}
-
-	for int64(currentPage) <= lastPage {
-		_, err := jsonparser.ArrayEach(request, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			id, _ := jsonparser.GetString(value, "id")
-			name, _ := jsonparser.GetString(value, "name")
-			url, _ := jsonparser.GetString(value, "url")
-			gameType, _ := jsonparser.GetString(value, "type")
-			releaseDate, _ := jsonparser.GetInt(value, "releaseDate")
-			addedDate, _ := jsonparser.GetInt(value, "addedDate")
-			runCount, _ := jsonparser.GetInt(value, "runCount")
-			playerCount, _ := jsonparser.GetInt(value, "totalPlayerCount")
-			rules, _ := jsonparser.GetString(value, "rules")
-
-			gamesDataFile.Write([]string{
-				id,
-				name,
-				url,
-				gameType,
-				strconv.Itoa(int(releaseDate)),
-				strconv.Itoa(int(addedDate)),
-				strconv.Itoa(int(runCount)),
-				strconv.Itoa(int(playerCount)),
-				internal.FormatCsvString(rules),
-			})
-		}, "gameList")
-		if err != nil {
-			return err
-		}
-
-		currentPage += 1
-
-		request, err = client.GetGameList(currentPage)
-		if err != nil {
-			return err
-		}
-	}
 
 	return nil
 }
