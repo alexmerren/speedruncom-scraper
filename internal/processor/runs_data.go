@@ -1,55 +1,34 @@
-package main
+package processor
 
 import (
-	"encoding/csv"
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"strconv"
 	"strings"
 
-	"github.com/alexmerren/speedruncom-scraper/internal"
-	"github.com/alexmerren/speedruncom-scraper/pkg/srcom_api"
+	"github.com/alexmerren/speedruncom-scraper/internal/repository"
+	"github.com/alexmerren/speedruncom-scraper/internal/srcom_api"
 	"github.com/buger/jsonparser"
 )
 
-func main() {
-	if err := generateUsersAndRunsDataV1(); err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
-	}
+type RunsDataProcessor struct {
+	UsersIdListFile *repository.ReadRepository
+	RunsFile        *repository.WriteRepository
+	Client          *srcom_api.SrcomV1Client
 }
 
-func generateUsersAndRunsDataV1() error {
-	client := internal.NewSrcomV1Client()
-
-	usersIdListFile, closeFunc, _ := internal.NewCsvReader(internal.UsersIdListFilenameV1)
-	defer closeFunc()
-
-	usersDataFile, closeFunc, _ := internal.NewCsvWriter(internal.UsersDataFilenameV1)
-	usersDataFile.Write(internal.FileHeaders[internal.UsersDataFilenameV1])
-	defer closeFunc()
-
-	runsDataFile, closeFunc, _ := internal.NewCsvWriter(internal.RunsDataFilenameV1)
-	runsDataFile.Write(internal.FileHeaders[internal.RunsDataFilenameV1])
-	defer closeFunc()
-
-	usersIdListFile.Read()
+func (p *RunsDataProcessor) Process() error {
+	p.UsersIdListFile.Read()
 
 	for {
-		record, err := usersIdListFile.Read()
+		record, err := p.UsersIdListFile.Read()
 		if err != nil && errors.Is(err, io.EOF) {
 			break
 		}
-
 		userID := record[0]
-		numRuns, err := processRuns(runsDataFile, client, userID)
-		if err != nil {
-			return err
-		}
 
-		err = processUser(usersDataFile, client, userID, numRuns)
+		err = p.processRuns(userID)
 		if err != nil {
 			return err
 		}
@@ -58,18 +37,16 @@ func generateUsersAndRunsDataV1() error {
 	return nil
 }
 
-func processRuns(runsDataFile *csv.Writer, client *srcom_api.SrcomV1Client, userID string) (int, error) {
-	numRuns := 0
+func (p *RunsDataProcessor) processRuns(userID string) error {
 	currentPage := 0
 
 	for {
-		response, err := client.GetRunsByUser(userID, currentPage)
+		response, err := p.Client.GetRunsByUser(userID, currentPage)
 		if err != nil {
 			break
 		}
 
 		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			numRuns += 1
 			runID, _ := jsonparser.GetString(value, "id")
 			gameID, _ := jsonparser.GetString(value, "game")
 			categoryID, _ := jsonparser.GetString(value, "category")
@@ -99,7 +76,7 @@ func processRuns(runsDataFile *csv.Writer, client *srcom_api.SrcomV1Client, user
 			}, "values")
 			values := strings.Join(runValuesArray, ",")
 
-			runsDataFile.Write([]string{
+			p.RunsFile.Write([]string{
 				runID,
 				gameID,
 				categoryID,
@@ -112,40 +89,21 @@ func processRuns(runsDataFile *csv.Writer, client *srcom_api.SrcomV1Client, user
 				examiner,
 				values,
 				status,
-				internal.FormatCsvString(statusReason),
+				repository.FormatCsvString(statusReason),
 				verifiedDate,
 			})
 		}, "data")
 		if err != nil {
-			return 0, err
+			return err
 		}
 
 		size, _ := jsonparser.GetInt(response, "pagination", "size")
 		if size < 200 {
-			return numRuns, nil
+			return nil
 		}
 
 		currentPage += 1
 	}
-
-	return numRuns, nil
-}
-
-func processUser(usersDataFile *csv.Writer, client *srcom_api.SrcomV1Client, userID string, numRuns int) error {
-	response, err := client.GetUser(userID)
-	if err != nil {
-		return err
-	}
-
-	userData, _, _, err := jsonparser.Get(response, "data")
-	if err != nil {
-		return err
-	}
-
-	userName, _ := jsonparser.GetString(userData, "names", "international")
-	userSignup, _ := jsonparser.GetString(userData, "signup")
-	userLocation, _ := jsonparser.GetString(userData, "location", "country", "code")
-	usersDataFile.Write([]string{userID, userName, userSignup, userLocation, strconv.Itoa(numRuns)})
 
 	return nil
 }

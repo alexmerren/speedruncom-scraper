@@ -1,14 +1,10 @@
 GO ?= go
-DOCKER ?= docker
 LINTER := golangci-lint
 GOFMT := gofmt
 
 DIST_DIR := $(CURDIR)/dist
-INTERNAL_DIR := $(CURDIR)/internal
 CMD_DIR := $(CURDIR)/cmd
-PKG_DIR := $(CURDIR)/pkg
-
-TEST_MODULES := $(shell $(GO) list $(INTERNAL_DIR)/... $(PKG_DIR)/...)
+VENDOR_DIR := $(CURDIR)/vendor
 
 GOFLAGS :=
 # Set to 1 to use static linking for all builds (including tests).
@@ -25,7 +21,7 @@ help:
 
 ## all: Download dependencies, generate mocks, fmt, run unit tests, build binary.
 .PHONY: all
-all: vendor fmt test build
+all: vendor fmt build
 
 ## build: Create the binary 
 .PHONY: build
@@ -39,20 +35,23 @@ vendor:
 	$(GO) mod tidy
 	$(GO) mod vendor
 
-## lint: Lint the project 
-.PHONY: lint
-lint:
-	$(LINTER) run
-
-## test: Run the unit tests for the project 
-.PHONY: test
-test:
-	@$(GO) test $(TEST_MODULES) -coverprofile=$(CURDIR)/coverage.out coverpkg=$(INTERNAL_DIR)
-	@$(GO) tool cover -html=$(CURDIR)/coverage.out -o $(CURDIR)/test-coverage.html
-	@$(GO) tool cover -func=$(CURDIR)/coverage.out \
-		| awk '$$1 == "total:" {printf("Total coverage: %.2f%% of statements\n", $$3)}'
-
 ## fmt: Format all code for the project
 .PHONY: fmt
 fmt: 
 	$(GOFMT) -s -w $(CURDIR)
+
+## clean: Remove vendored code and built executables
+.PHONY: clean
+clean:
+	rm -r $(DIST_DIR)
+	rm -r $(VENDOR_DIR)
+
+## run: Run all executables in required order
+.PHONY: run
+run-all:
+	$(DIST_DIR)/games-list && \
+	$(DIST_DIR)/games-data && \
+	$(DIST_DIR)/leaderboards-data && \
+	$(DIST_DIR)/users-list && \
+	$(DIST_DIR)/users-data && \
+	$(DIST_DIR)/runs-data
