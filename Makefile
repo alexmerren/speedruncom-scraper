@@ -38,3 +38,13 @@ vendor:
 .PHONY: fmt
 fmt: 
 	$(GOFMT) -s -w $(CURDIR)
+
+## run-all: Run all executables in required order
+.PHONY: run-all
+run-all:
+	$(DIST_DIR)/games-list && \
+	$(DIST_DIR)/games-data && \
+	$(DIST_DIR)/leaderboards-data && \
+	$(DIST_DIR)/users-list && \
+	$(DIST_DIR)/users-data && \
+	$(DIST_DIR)/runs-data

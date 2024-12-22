@@ -35,6 +35,11 @@ The compiled binaries can be executed to collect data from the [speedrun.com API
 ./dist/games-list && ./dist/games-data && ./dist/leaderboards-data && ./dist/users-list && ./dist/users-data && ./dist/runs-data
 ```
 
+Alternatively, there is an identical Makefile target:
+```bash
+make run-all
+```
+
 NOTE: For each executable there are repeated API calls. A local HTTP cache has been implemented to remove repeated API calls from the rate-limited API. This cache is saved locally under `httpcache.db`.
 
 ## 🏃 Executables
