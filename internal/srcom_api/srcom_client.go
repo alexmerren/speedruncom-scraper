@@ -18,13 +18,3 @@ func NewSrcomV1Client() *srcom_api.SrcomV1Client {
 		),
 	)
 }
-
-func NewSrcomV2Client() *srcom_api.SrcomV2Client {
-	return srcom_api.NewSrcomV2Client(
-		http_client.NewHttpClient(
-			http_client.WithDelay(500),
-			http_client.WithRetry(500, 2),
-			http_client.WithCache(cachedRoundTripper),
-		),
-	)
-}
