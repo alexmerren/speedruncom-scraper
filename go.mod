@@ -1,8 +1,6 @@
 module github.com/alexmerren/speedruncom-scraper
 
-go 1.21.0
-
-toolchain go1.21.1
+go 1.23.4
 
 require (
 	github.com/alexmerren/httpcache v0.0.0-20240602103207-feadee5e2574

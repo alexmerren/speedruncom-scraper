@@ -39,7 +39,7 @@ func (p *LeaderboardsDataProcessor) Process() error {
 
 			// Per-game means that the category is only associated with a full-game run.
 			if string(categoryType) == "per-game" {
-				leaderboardResponse, _ := p.Client.GetGameCategoryLeaderboard(gameId, categoryId)
+				leaderboardResponse, _ := p.Client.GetLeaderboardByGameCategory(gameId, categoryId)
 				p.processLeaderboard(leaderboardResponse)
 			}
 
@@ -48,7 +48,7 @@ func (p *LeaderboardsDataProcessor) Process() error {
 			if string(categoryType) == "per-level" {
 				_, err = jsonparser.ArrayEach(gameResponse, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 					levelId, _ := jsonparser.GetString(value, "id")
-					leaderboardResponse, _ := p.Client.GetGameLevelCategoryLeaderboard(gameId, levelId, categoryId)
+					leaderboardResponse, _ := p.Client.GetLeaderboardByGameLevelCategory(gameId, levelId, categoryId)
 					p.processLeaderboard(leaderboardResponse)
 				}, "data", "levels", "data")
 			}

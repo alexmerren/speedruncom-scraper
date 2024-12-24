@@ -39,7 +39,7 @@ func (p *SpotLeaderboardsDataProcessor) Process(gameId string) error {
 type combination struct {
 	gameId      string
 	categoryId  string
-	levelId     string
+	levelId     *string
 	variableIds []string
 	valueIds    []string
 }
