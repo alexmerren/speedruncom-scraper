@@ -32,4 +32,5 @@ go.work
 test-coverage.html
 coverage.out
 
-scripts/venv/ 
+**venv
+.vscode

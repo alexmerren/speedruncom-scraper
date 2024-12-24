@@ -1,6 +1,8 @@
 package processor
 
 import (
+	"fmt"
+
 	"github.com/alexmerren/speedruncom-scraper/internal/repository"
 	"github.com/alexmerren/speedruncom-scraper/internal/srcom_api"
 )
@@ -11,17 +13,25 @@ type SpotLeaderboardsDataProcessor struct {
 }
 
 func (p *SpotLeaderboardsDataProcessor) Process(gameId string) error {
-	_, err := p.Client.GetGame(gameId)
+	response, err := p.Client.GetGame(gameId)
 	if err != nil {
 		return err
 	}
 
-	// combinations := generateCombinations(response)
-	// for _, combination := range combinations {
-	// 	if isValid := combination.isValid(); !isValid {
-	// 		return fmt.Errorf("combination is invalid: %+v", combination)
-	// 	}
-	// }
+	combinations, err := generateCombinations(response)
+	if err != nil {
+		return err
+	}
+
+	for _, combination := range combinations {
+		if isValid := combination.isValid(); !isValid {
+			return fmt.Errorf("combination is invalid: %+v", combination)
+		}
+	}
+
+	for _, combination := range combinations {
+		fmt.Println(combination)
+	}
 
 	return nil
 }
@@ -36,6 +46,10 @@ type combination struct {
 
 func (c *combination) isValid() bool {
 	return len(c.variableIds) == len(c.valueIds)
+}
+
+func generateCombinations(response []byte) ([]*combination, error) {
+	return nil, nil
 }
 
 // func (p *LeaderboardsDataProcessor) processLeaderboard(leaderboardResponse []byte) error {
