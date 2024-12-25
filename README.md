@@ -47,11 +47,11 @@ NOTE: For each executable there are repeated API calls. A local HTTP cache has b
 
 | Path                                  | Description                                                                                                        | Pre-requisite(s)           |
 |---------------------------------------|--------------------------------------------------------------------------------------------------------------------|----------------------------|
-| `./dist/games-list`                   | Retrieve all Game IDs and other data (such as total number of runs) for verification in other executables.         | None                       |
-| `./dist/games-data`                   | Retrieve additional data about all games retrieved in `games-list`.                                                | `./dist/games-list`        |
-| `./dist/leaderboards-data`            | Retrieve leaderboards data for all games retrieved in `games-list`. Note: This can fail for games with a high number of runs, use `additional-leaderboards-data` in this case. | `./dist/games-data` |
+| `./dist/games-list`                   | Retrieve all Game IDs and other data (i.e. total number of runs for a game) for verification in other executables. | None                       |
+| `./dist/games-data`                   | Retrieve data on categories, levels, variables, and values, etc. for all game IDs retrieved in `games-list`.       | `./dist/games-list`        |
+| `./dist/leaderboards-data`            | Retrieve leaderboard(s) data for all games retrieved in `games-list`. Note: This can fail for games with a high number of runs, use `additional-leaderboards-data` in this case. | `./dist/games-data` |
 | `./dist/additional-leaderboards-data` | Retrieve individual leaderboards data in a more precise manner. Use only if necessary, as it is less efficient.    | None                       |
-| `./dist/users-list`                   | Compile a list of all users found in the leaderboards of all games. Outputs a list of all unique user IDs.         | `./dist/leaderboards-data` |
+| `./dist/users-list`                   | Compile a list of all unique users found in the leaderboards of all games— includes both submitters and verifiers. | `./dist/leaderboards-data` |
 | `./dst/users-data`                    | Retrieve non-PII data for all unique users compiled in `users-list`.                                               | `./dist/users-list`        |
 | `./dist/runs-data`                    | Retrieve all runs for all unique users compiled in `users-list`. This **should** be all runs on speedrun.com!      | `./dist/users-list`        |
 
