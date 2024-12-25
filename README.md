@@ -55,6 +55,10 @@ NOTE: For each executable there are repeated API calls. A local HTTP cache has b
 | `./dst/users-data`                    | Retrieve non-PII data for all unique users compiled in `users-list`.                                               | `./dist/users-list`        |
 | `./dist/runs-data`                    | Retrieve all runs for all unique users compiled in `users-list`. This **should** be all runs on speedrun.com!      | `./dist/users-list`        |
 
+## 📝 Documentation
+
+All documentation can be found in the [docs](./docs/) directory.
+
 ## 💭 Feedback and Contribution
 
 Any improvements or requests can be raised via [GitHub Issues](https://github.com/alexmerren/speedruncom-scraper/issues). Any development conversations can be found on on [GitHub Discussions](https://github.com/alexmerren/speedruncom-scraper/discussions).
