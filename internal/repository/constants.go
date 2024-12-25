@@ -3,6 +3,7 @@ package repository
 const (
 	GamesIdListFilename                = "./data/v1/games-id-list.csv"
 	GamesDataFilename                  = "./data/v1/games-data.csv"
+	GamesDataFilenameV2                = "./data/v2/games-data.csv"
 	CategoriesDataFilename             = "./data/v1/categories-data.csv"
 	LevelsDataFilename                 = "./data/v1/levels-data.csv"
 	VariablesDataFilename              = "./data/v1/variables-data.csv"
@@ -19,6 +20,7 @@ var (
 		GamesIdListFilename:                {"gameId"},
 		UsersIdListFilename:                {"userId"},
 		GamesDataFilename:                  {"gameId", "gameName", "url", "releaseDate", "createdDate"},
+		GamesDataFilenameV2:                {"gameId", "gameName", "url", "type", "releaseDate", "addedDate", "runCount", "playerCount", "rules"},
 		CategoriesDataFilename:             {"parentGameId", "categoryId", "categoryName", "rules", "type", "numPlayers"},
 		LevelsDataFilename:                 {"parentGameId", "levelId", "levelName", "rules"},
 		VariablesDataFilename:              {"parentGameId", "variableId", "variableName", "category", "scope", "isSubcategory", "defaultValue"},
@@ -33,6 +35,7 @@ var (
 		GamesIdListFilename:                "#games-id-list.csv",
 		UsersIdListFilename:                "#users-id-list.csv",
 		GamesDataFilename:                  "#games-data.csv",
+		GamesDataFilenameV2:                "#games-data.csv",
 		CategoriesDataFilename:             "#categories-data.csv",
 		LevelsDataFilename:                 "#levels-data.csv",
 		VariablesDataFilename:              "#variables-data.csv",

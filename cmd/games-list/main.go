@@ -23,9 +23,17 @@ func run() error {
 	}
 	defer gamesIdListFileCloseFunc()
 
+	gamesFileV2, gamesFileV2CloseFunc, err := repository.NewWriteRepository(repository.GamesDataFilenameV2)
+	if err != nil {
+		return err
+	}
+	defer gamesFileV2CloseFunc()
+
 	gamesListProcessor := &processor.GamesListProcessor{
 		GamesIdListFile: gamesIdListFile,
+		GamesFileV2:     gamesFileV2,
 		Client:          srcom_api.NewSrcomClient(),
+		ClientV2:        srcom_api.NewSrcomClientV2(),
 	}
 
 	return gamesListProcessor.Process()
