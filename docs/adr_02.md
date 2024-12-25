@@ -11,11 +11,17 @@ on [speedrun.com](https://www.speedrun.com).
 
 The logic behind choosing appropriate variables and values is a little complicated, 
 so below is a POC that shows how the [`additional-leaderboards-data`](../cmd/additional-leaderboards-data/main.go) 
-executable decides to collect this data.
+executable decides to collect this data. Importantly, we only use the appropriate 
+variables and values which are shown as 'sub categories' in the 
+[speedrun.com](https://www.speedrun.com/smo) leaderboard page.
 
-This executable is an exception, as it accepts a parameter of a single game ID.
+i.e. (For this game)[https://www.speedrun.com/smo?h=Darker_Side-2p&x=vdooqjod-dlo9oo5l.qoxjdm5q], 
+the category is 'Darker Side' and the sub-category is 'Player' 
+
+### Usage
+
 In the below example, all current leaderboard runs of game `y65797de` will be persisted 
-to [`additional-leaderboards-data.csv`](../data/v1/additional-leaderboards-data.csv)
+to [`additional-leaderboards-data.csv`](../data/v1/additional-leaderboards-data.csv):
 
 ```bash
 ./dist/additional-leaderboards-data y65797de
@@ -56,7 +62,7 @@ def generate_combinations(data: dict[str, any]):
             applicable_variables = {
                 variable["id"]: list(variable["values"]["values"].keys())
                 for variable in variables
-                if variable_is_valid_for_category(variable, category_id)
+                if variable_is_applicable_for_category(variable, category_id)
             }
 
             for element in itertools.product(*applicable_variables.values()):
@@ -76,7 +82,7 @@ def generate_combinations(data: dict[str, any]):
                 applicable_variables = {
                     variable["id"]: list(variable["values"]["values"].keys())
                     for variable in variables
-                    if variable_is_valid_for_category_and_level(
+                    if variable_is_applicable_for_category_and_level(
                         variable, category_id, level_id
                     )
                 }
@@ -94,6 +100,37 @@ def generate_combinations(data: dict[str, any]):
 
     return combinations
 
+
+def variable_is_applicable_for_category(variable, category_id):
+    if not variable["is-subcategory"]:
+        return False
+
+    if variable["scope"]["type"] not in ("global", "full-game"):
+        return False
+
+    if variable["category"] != None and variable["category"] != category_id:
+        return False
+
+    return True
+
+
+def variable_is_applicable_for_category_and_level(variable, category_id, level_id):
+    if not variable["is-subcategory"]:
+        return False
+
+    if variable["scope"]["type"] not in ("global", "all-levels", "single-level"):
+        return False
+
+    if (
+        variable["scope"]["type"] == "single-level"
+        and variable["scope"]["level"] != level_id
+    ):
+        return False
+
+    if variable["category"] != None and variable["category"] != category_id:
+        return False
+
+    return True
 
 class Combination:
     def __init__(
@@ -115,36 +152,4 @@ class Combination:
 
     def __str__(self):
         return f"game_id: {self.game_id}, category_id: {self.category_id}, level_id: {self.level_id}, variables: {self.variables}, values: {self.values}"
-
-
-def variable_is_valid_for_category(variable, category_id):
-    if not variable["is-subcategory"]:
-        return False
-
-    if variable["scope"]["type"] not in ("global", "full-game"):
-        return False
-
-    if variable["category"] != None and variable["category"] != category_id:
-        return False
-
-    return True
-
-
-def variable_is_valid_for_category_and_level(variable, category_id, level_id):
-    if not variable["is-subcategory"]:
-        return False
-
-    if variable["scope"]["type"] not in ("global", "all-levels", "single-level"):
-        return False
-
-    if (
-        variable["scope"]["type"] == "single-level"
-        and variable["scope"]["level"] != level_id
-    ):
-        return False
-
-    if variable["category"] != None and variable["category"] != category_id:
-        return False
-
-    return True
 ```
