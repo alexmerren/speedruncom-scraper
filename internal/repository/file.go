@@ -38,14 +38,18 @@ func openOrCreate(filename string) (*os.File, error) {
 		return nil, err
 	}
 
-	_, err = file.WriteString(FileComments[filename] + "\n")
-	if err != nil {
-		return nil, err
+	if fileComment, ok := FileComments[filename]; ok {
+		_, err = file.WriteString(fileComment + "\n")
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	_, err = file.WriteString(strings.Join(FileColumnDefinitions[filename], ",") + "\n")
-	if err != nil {
-		return nil, err
+	if columnDefinitions, ok := FileColumnDefinitions[filename]; ok {
+		_, err = file.WriteString(strings.Join(columnDefinitions, ",") + "\n")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return file, nil

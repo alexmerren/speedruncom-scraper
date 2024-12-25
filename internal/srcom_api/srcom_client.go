@@ -18,3 +18,13 @@ func NewSrcomClient() *SrcomV1Client {
 		),
 	)
 }
+
+func NewSrcomClientV2() *SrcomV2Client {
+	return NewSrcomV2Client(
+		http_client.NewHttpClient(
+			http_client.WithLogging(),
+			http_client.WithRetry(100, 5),
+			http_client.WithCache(cachedRoundTripper),
+		),
+	)
+}
