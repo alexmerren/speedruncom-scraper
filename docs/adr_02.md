@@ -18,7 +18,7 @@ variables and values which are shown as 'sub categories' in the
 i.e. (For this game)[https://www.speedrun.com/smo?h=Darker_Side-2p&x=vdooqjod-dlo9oo5l.qoxjdm5q], 
 the category is 'Darker Side' and the sub-category is 'Player'.
 
-### Usage
+### Executable Usage
 
 In the below example, all current leaderboard runs of game `y65797de` will be persisted 
 to [`additional-leaderboards-data.csv`](../data/v1/additional-leaderboards-data.csv):
