@@ -3,11 +3,11 @@
 ## Title: Additional Collection Logic for Leaderboard Data
 
 Collecting leaderboards data for games that have a high number of runs 
-(i.e. [Subway Surfers](www.speedrun.com/subsurf)) leads to issues with pagination 
+(i.e. [Subway Surfers](https://www.speedrun.com/subsurf)) leads to issues with pagination 
 becoming too high. After 10,000 runs the pagination is too high and the requests 
-fail. The answer to this is to collect leaderboard data for every variable and 
+fail. The answer is to collect leaderboard data for every variable and 
 value combination. These are represented as additional filters when viewing a category 
-on [speedrun.com](www.speedrun.com). 
+on [speedrun.com](https://www.speedrun.com). 
 
 The logic behind choosing appropriate variables and values is a little complicated, 
 so below is a POC that shows how the [`additional-leaderboards-data`](../cmd/additional-leaderboards-data/main.go) 
