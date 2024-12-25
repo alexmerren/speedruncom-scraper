@@ -4,6 +4,7 @@ go 1.23.4
 
 require (
 	github.com/alexmerren/httpcache v0.0.0-20240602103207-feadee5e2574
+	github.com/alistanis/cartesian v0.0.0-20220409094110-a224e60a7f74
 	github.com/buger/jsonparser v1.1.1
 )
 

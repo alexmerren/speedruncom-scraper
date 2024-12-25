@@ -22,16 +22,17 @@ func run() error {
 	}
 
 	gameId := os.Args[1]
-	leaderboardsFile, leaderboardsFileCloseFunc, err := repository.NewWriteRepository(repository.LeaderboardsDataFilename)
+	leaderboardsFile, leaderboardsFileCloseFunc, err := repository.NewWriteRepository(repository.AdditionalLeaderboardsDataFilename)
 	if err != nil {
 		return err
 	}
 	defer leaderboardsFileCloseFunc()
 
-	spotLeaderboardsDataProcessor := &processor.SpotLeaderboardsDataProcessor{
-		LeaderboardsFile: leaderboardsFile,
-		Client:           srcom_api.NewSrcomClient(),
+	additionalLeaderboardsDataProcessor := &processor.AdditionalLeaderboardsDataProcessor{
+		GameId:                     gameId,
+		AdditionalLeaderboardsFile: leaderboardsFile,
+		Client:                     srcom_api.NewSrcomClient(),
 	}
 
-	return spotLeaderboardsDataProcessor.Process(gameId)
+	return additionalLeaderboardsDataProcessor.Process()
 }
