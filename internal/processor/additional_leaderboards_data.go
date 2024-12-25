@@ -132,6 +132,9 @@ func findApplicableVariablesAndValues(variablesData []byte, categoryId string, l
 		}
 
 		variableId, _ := jsonparser.GetString(value, "id")
+
+		// This is a dumb way to get the keys of the map, but the API model is
+		// forcing my hand here.
 		valueIds := make([]string, 0)
 		jsonparser.ObjectEach(value, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 			valueIds = append(valueIds, string(key))
