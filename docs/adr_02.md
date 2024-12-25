@@ -1,6 +1,6 @@
 ## Number: 02
 ## Date: 2024-12-24
-## Title: Spot Collection for Leaderboard Data
+## Title: Additional Collection Logic for Leaderboard Data
 
 Collecting leaderboards data for games that have a high number of runs 
 (i.e. [Subway Surfers](www.speedrun.com/subsurf)) leads to issues with pagination 
