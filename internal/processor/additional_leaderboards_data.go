@@ -23,12 +23,12 @@ func (p *AdditionalLeaderboardsDataProcessor) Process() error {
 		return err
 	}
 
-	combinations, err := generateCombinations(response)
+	leaderboardCombinations, err := generateLeaderboardCombinations(response)
 	if err != nil {
 		return err
 	}
 
-	for _, combination := range combinations {
+	for _, combination := range leaderboardCombinations {
 		leaderboardResponse, err := p.Client.GetLeaderboardByVariables(combination.gameId, combination.categoryId, combination.levelId, combination.variableIds, combination.valueIds)
 		if err != nil {
 			return err
@@ -55,7 +55,9 @@ func (c *combination) isValid() bool {
 	return len(c.variableIds) == len(c.valueIds)
 }
 
-func generateCombinations(response []byte) ([]*combination, error) {
+// Use similar logic to [leaderboards_data.go] when parsing categories and levels.
+// This can be quite opaque IMO, so in [adr_02.md] the logic is written in Python.
+func generateLeaderboardCombinations(response []byte) ([]*combination, error) {
 	gameId, err := jsonparser.GetString(response, "data", "id")
 	if err != nil {
 		return nil, err
@@ -103,6 +105,19 @@ func generateCombinations(response []byte) ([]*combination, error) {
 	return combinations, nil
 }
 
+// findApplicableVariablesAndValues will apply the criteria from [variableIsApplicable]
+// and [variableIsApplicableWithLevel] to determine if a variable (and it's corresponding
+// values) should apply to the current category and level. If the variable matches the
+// criteria, we should return a list of all the variables, and a list of list of
+// the possible values of those variables. i.e. For applicable variables and their
+// values such that the input is like:
+//
+//	{
+//		variable1: [value1, value2],
+//	 	variable2: [value3, value4]
+//	}
+//
+// we should return [variable1, variable2] [[value1, value2], [value3, value4]]
 func findApplicableVariablesAndValues(variablesData []byte, categoryId string, levelId *string) ([]string, [][]string) {
 	variables := make([]string, 0)
 	values := make([][]string, 0)
@@ -184,6 +199,7 @@ func variableIsApplicable(variableData []byte, categoryId string) bool {
 	return true
 }
 
+// https://en.wikipedia.org/wiki/Cartesian_product
 func computeCartesianProduct(gameId, categoryId string, levelId *string, variables []string, values [][]string) []*combination {
 	nonEmptyValues := filter(values, func(valueIds []string) bool {
 		return len(valueIds) > 0
@@ -191,7 +207,7 @@ func computeCartesianProduct(gameId, categoryId string, levelId *string, variabl
 
 	// If no variables apply to a category/level combination, we have no values
 	// to compute the cartesian product of. We can just return a single combination
-	// of the game, category, and level ID.
+	// of the game, category, and level ID (if applicable).
 	if nonEmptyValues == nil {
 		return []*combination{{
 			gameId:      gameId,
