@@ -15,7 +15,7 @@ executable decides to collect this data. Importantly, we only use the appropriat
 variables and values which are shown as 'sub categories' in the 
 [speedrun.com](https://www.speedrun.com/smo) leaderboard page.
 
-i.e. (For this game)[https://www.speedrun.com/smo?h=Darker_Side-2p&x=vdooqjod-dlo9oo5l.qoxjdm5q], 
+i.e. [For this game](https://www.speedrun.com/smo?h=Darker_Side-2p&x=vdooqjod-dlo9oo5l.qoxjdm5q), 
 the category is 'Darker Side' and the sub-category is 'Player'.
 
 ### Executable Usage
