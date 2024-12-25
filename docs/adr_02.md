@@ -2,7 +2,24 @@
 ## Date: 2024-12-24
 ## Title: Spot Collection for Leaderboard Data
 
-<description>
+Collecting leaderboards data for games that have a high number of runs 
+(i.e. [Subway Surfers](www.speedrun.com/subsurf)) leads to issues with pagination 
+becoming too high. After 10,000 runs the pagination is too high and the requests 
+fail. The answer to this is to collect leaderboard data for every variable and 
+value combination. These are represented as additional filters when viewing a category 
+on [speedrun.com](www.speedrun.com). 
+
+The logic behind choosing appropriate variables and values is a little complicated, 
+so below is a POC that shows how the [`additional-leaderboards-data`](../cmd/additional-leaderboards-data/main.go) 
+executable decides to collect this data.
+
+This executable is an exception, as it accepts a parameter of a single game ID.
+In the below example, all current leaderboard runs of game `y65797de` will be persisted 
+to [`additional-leaderboards-data.csv`](../data/v1/additional-leaderboards-data.csv)
+
+```bash
+./dist/additional-leaderboards-data y65797de
+```
 
 ### Spot Collection POC
 
