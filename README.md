@@ -45,15 +45,16 @@ NOTE: For each executable there are repeated API calls. A local HTTP cache has b
 
 ## 🏃 Executables
 
-| Path                                  | Description                                                                                                        | Pre-requisite(s)           |
-|---------------------------------------|--------------------------------------------------------------------------------------------------------------------|----------------------------|
-| `./dist/games-list`                   | Retrieve all Game IDs and other data (i.e. total number of runs for a game) for verification in other executables. | None                       |
-| `./dist/games-data`                   | Retrieve data on categories, levels, variables, and values, etc. for all game IDs retrieved in `games-list`.       | `./dist/games-list`        |
-| `./dist/leaderboards-data`            | Retrieve leaderboard(s) data for all games retrieved in `games-list`. Note: This can fail for games with a high number of runs, use `additional-leaderboards-data` in this case. | `./dist/games-data` |
+| Path                                    | Description                                                                                                        | Pre-requisite(s)           |
+|-----------------------------------------|--------------------------------------------------------------------------------------------------------------------|----------------------------|
+| `./dist/games-list`                     | Retrieve all Game IDs and other data (i.e. total number of runs for a game) for verification in other executables. | None                       |
+| `./dist/games-data`                     | Retrieve data on categories, levels, variables, and values, etc. for all game IDs retrieved in `games-list`.       | `./dist/games-list`        |
+| `./dist/leaderboards-data`              | Retrieve leaderboard(s) data for all games retrieved in `games-list`. Note: This can fail for games with a high number of runs, use `additional-leaderboards-data` in this case. | `./dist/games-data` |
 | `./dist/supplementary-leaderboard-data` | Retrieve leaderboards data for individual games using an overly precise method. Use only if necessary, as it is less efficient. | None |
-| `./dist/users-list`                   | Compile a list of all unique users found on all leaderboards of all games— includes both submitters and verifiers. | `./dist/leaderboards-data` |
-| `./dst/users-data`                    | Retrieve non-PII data for all unique users compiled in `users-list`.                                               | `./dist/users-list`        |
-| `./dist/runs-data`                    | Retrieve all runs for all unique users compiled in `users-list`. This **should** be all runs on speedrun.com!      | `./dist/users-list`        |
+| `./dist/users-list`                     | Compile a list of all unique users found on all leaderboards of all games— includes both submitters and verifiers. | `./dist/leaderboards-data` |
+| `./dst/users-data`                      | Retrieve non-PII data for all unique users compiled in `users-list`.                                               | `./dist/users-list`        |
+| `./dist/runs-data`                      | Retrieve all runs for all unique users compiled in `users-list`. This **should** be all runs on speedrun.com!      | `./dist/users-list`        |
+| `./dist/world-record-data`              | Retrieve world record data for all valid category/level/variable/value combinations. This is experimental and has a hard rate-limit applied to it | None |
 
 ## 📝 Documentation
 
