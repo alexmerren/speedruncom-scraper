@@ -13,6 +13,7 @@ const (
 	RunsDataFilename                     = "./data/v1/runs-data.csv"
 	UsersDataFilename                    = "./data/v1/users-data.csv"
 	UsersIdListFilename                  = "./data/v1/users-id-list.csv"
+	WorldRecordDataFilename              = "./data/v2/world-record-data.csv"
 )
 
 var (
@@ -29,5 +30,6 @@ var (
 		SupplementaryLeaderboardDataFilename: {"runId", "gameId", "categoryId", "levelId", "place", "date", "primaryTime", "platform", "isEmulated", "players", "examiner", "verifiedDate", "variablesAndValues"},
 		RunsDataFilename:                     {"runId", "gameId", "categoryId", "levelId", "date", "primaryTime", "platform", "isEmulated", "players", "examiner", "verifiedDate", "variablesAndValues", "status", "statusReason"},
 		UsersDataFilename:                    {"userId", "username", "signupDate", "location"},
+		WorldRecordDataFilename:              {"runId", "gameId", "categoryId", "levelId", "variablesAndValues", "time", "platformId", "isEmulated", "players", "verifier", "runDate", "submittedDate", "verifiedDate", "comment"},
 	}
 )

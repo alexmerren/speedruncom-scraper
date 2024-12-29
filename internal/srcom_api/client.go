@@ -24,7 +24,7 @@ var DefaultV1Client = NewSrcomV1Client(
 var DefaultV2Client = NewSrcomV2Client(
 	http_client.NewHttpClient(
 		http_client.WithLogging(),
-		http_client.WithRetry(100, 5),
+		http_client.WithRetry(1_000, 3),
 		http_client.WithCache(cachedRoundTripper),
 	),
 )
