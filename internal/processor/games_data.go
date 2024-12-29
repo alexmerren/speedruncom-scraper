@@ -71,7 +71,7 @@ func (p *GamesDataProcessor) processCategory(gameResponse []byte, gameId string)
 			gameId,
 			categoryId,
 			categoryName,
-			repository.FormatCsvString(categoryRules),
+			strconv.Quote(categoryRules),
 			categoryType,
 			strconv.Itoa(int(categoryNumPlayers)),
 		})
@@ -86,7 +86,7 @@ func (p *GamesDataProcessor) processLevel(gameResponse []byte, gameId string) er
 		levelName, _ := jsonparser.GetString(value, "name")
 		levelRules, _ := jsonparser.GetString(value, "rules")
 
-		err = p.LevelsFile.Write([]string{gameId, levelId, levelName, repository.FormatCsvString(levelRules)})
+		err = p.LevelsFile.Write([]string{gameId, levelId, levelName, strconv.Quote(levelRules)})
 	}, "data", "levels", "data")
 
 	return err
@@ -98,6 +98,7 @@ func (p *GamesDataProcessor) processVariableAndValue(gameResponse []byte, gameId
 		variableName, _ := jsonparser.GetString(value, "name")
 		variableCategory, _ := jsonparser.GetString(value, "category")
 		variableScope, _ := jsonparser.GetString(value, "scope", "type")
+		variableScopeLevel, _ := jsonparser.GetString(value, "scope", "level")
 		variableIsSubcategory, _ := jsonparser.GetBoolean(value, "is-subcategory")
 		variableDefault, _ := jsonparser.GetString(value, "values", "default")
 
@@ -107,6 +108,7 @@ func (p *GamesDataProcessor) processVariableAndValue(gameResponse []byte, gameId
 			variableName,
 			variableCategory,
 			variableScope,
+			variableScopeLevel,
 			strconv.FormatBool(variableIsSubcategory),
 			variableDefault,
 		})
@@ -121,7 +123,7 @@ func (p *GamesDataProcessor) processVariableAndValue(gameResponse []byte, gameId
 				variableId,
 				valueId,
 				valueLabel,
-				repository.FormatCsvString(valueRules),
+				strconv.Quote(valueRules),
 			})
 		}, "values", "values")
 	}, "data", "variables", "data")

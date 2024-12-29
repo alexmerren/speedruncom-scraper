@@ -11,13 +11,13 @@ import (
 	"github.com/buger/jsonparser"
 )
 
-type AdditionalLeaderboardsDataProcessor struct {
-	GameId                     string
-	AdditionalLeaderboardsFile *repository.WriteRepository
-	Client                     *srcom_api.SrcomV1Client
+type SupplementaryLeaderboardDataProcessor struct {
+	GameId                       string
+	SupplementaryLeaderboardFile *repository.WriteRepository
+	Client                       *srcom_api.SrcomV1Client
 }
 
-func (p *AdditionalLeaderboardsDataProcessor) Process() error {
+func (p *SupplementaryLeaderboardDataProcessor) Process() error {
 	response, err := p.Client.GetGame(p.GameId)
 	if err != nil {
 		return err
@@ -246,7 +246,7 @@ func filter[T any](ss []T, test func(T) bool) (result []T) {
 	return
 }
 
-func (p *AdditionalLeaderboardsDataProcessor) processLeaderboard(leaderboardResponse []byte) error {
+func (p *SupplementaryLeaderboardDataProcessor) processLeaderboard(leaderboardResponse []byte) error {
 	_, err := jsonparser.ArrayEach(leaderboardResponse, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 		place, _ := jsonparser.GetInt(value, "place")
 		runData, _, _, _ := jsonparser.Get(value, "run")
@@ -275,7 +275,7 @@ func (p *AdditionalLeaderboardsDataProcessor) processLeaderboard(leaderboardResp
 		}, "values")
 		runValues := strings.Join(runValuesArray, ",")
 
-		p.AdditionalLeaderboardsFile.Write([]string{
+		p.SupplementaryLeaderboardFile.Write([]string{
 			runId,
 			gameId,
 			categoryId,

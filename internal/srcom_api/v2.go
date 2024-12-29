@@ -23,7 +23,7 @@ func NewSrcomV2Client(client HttpClient) *SrcomV2Client {
 }
 
 func (c *SrcomV2Client) GetGameList(pageNumber int) ([]byte, error) {
-	data := map[string]interface{}{
+	data := map[string]any{
 		"page": pageNumber,
 	}
 
@@ -35,7 +35,7 @@ func (c *SrcomV2Client) GetGameList(pageNumber int) ([]byte, error) {
 	return c.client.Get(url)
 }
 
-func formatUrl(query string, data map[string]interface{}) (string, error) {
+func formatUrl(query string, data map[string]any) (string, error) {
 	encodedData, err := encodeData(data)
 	if err != nil {
 		return encodedData, err
@@ -45,7 +45,7 @@ func formatUrl(query string, data map[string]interface{}) (string, error) {
 	return fmt.Sprintf(v2ApiUrl, formattedQuery), nil
 }
 
-func encodeData(data map[string]interface{}) (string, error) {
+func encodeData(data map[string]any) (string, error) {
 	bytes, err := json.Marshal(data)
 	if err != nil {
 		return "", err

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -17,21 +18,18 @@ func main() {
 }
 
 func run() error {
-	if len(os.Args) < 2 {
-		return fmt.Errorf("Must provide a game ID i.e. 76r55vd8")
-	}
+	gameIdFlag := flag.String("game", "76r55vd8", "Game ID to collect suppplementary leaderboard data")
 
-	gameId := os.Args[1]
-	leaderboardsFile, leaderboardsFileCloseFunc, err := repository.NewWriteRepository(repository.AdditionalLeaderboardsDataFilename)
+	leaderboardsFile, leaderboardsFileCloseFunc, err := repository.NewWriteRepository(repository.SupplementaryLeaderboardDataFilename)
 	if err != nil {
 		return err
 	}
 	defer leaderboardsFileCloseFunc()
 
-	additionalLeaderboardsDataProcessor := &processor.AdditionalLeaderboardsDataProcessor{
-		GameId:                     gameId,
-		AdditionalLeaderboardsFile: leaderboardsFile,
-		Client:                     srcom_api.NewSrcomClient(),
+	additionalLeaderboardsDataProcessor := &processor.SupplementaryLeaderboardDataProcessor{
+		GameId:                       *gameIdFlag,
+		SupplementaryLeaderboardFile: leaderboardsFile,
+		Client:                       srcom_api.DefaultV1Client,
 	}
 
 	return additionalLeaderboardsDataProcessor.Process()
