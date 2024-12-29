@@ -1,24 +1,24 @@
 ## Number: 02
 ## Date: 2024-12-24
-## Title: Additional Collection Logic for Leaderboard Data
+## Title: Supplementary Collection Logic for Leaderboard Data
 
-Collecting leaderboards data for games that have a high number of runs 
-(i.e. [Subway Surfers](https://www.speedrun.com/subsurf)) leads to issues with pagination 
-becoming too high. After 10,000 runs the pagination is too high and the requests 
-fail. The answer is to collect leaderboard data for every variable and 
-value combination. These are represented as additional filters when viewing a category 
-on [speedrun.com](https://www.speedrun.com). 
+Collecting leaderboards data for games with a high number of runs 
+(i.e. [Subway Surfers](https://www.speedrun.com/subsurf)) leads to pagination issues. 
+After 10,000 runs the pagination is too high and the requests fail. The solution 
+to this problem is to collect leaderboard data for every variable and 
+value combination. These are represented as additional filters when viewing a 
+category on [speedrun.com](https://www.speedrun.com). 
 
-The logic behind choosing appropriate variables and values is a little complicated, 
-so below is a POC that shows how the [`additional-leaderboards-data`](../cmd/additional-leaderboards-data/main.go) 
-executable decides to collect this data. Importantly, we only use the appropriate 
-variables and values which are shown as 'sub categories' in the 
-[speedrun.com](https://www.speedrun.com/smo) leaderboard page.
+Variables that create a "sub category" have the property `is-subcategory`. For 
+[this game](https://www.speedrun.com/smo?h=Darker_Side-2p&x=vdooqjod-dlo9oo5l.qoxjdm5q), 
+the category is 'Darker Side' and the sub-category is 'Player'. There 
+is some additional logic whether a variable is applied to a single category, a 
+single level, all categories, or all levels. This is highlighted below in an example 
+python script to generate all category/level/variable/value combinations.
 
-i.e. [For this game](https://www.speedrun.com/smo?h=Darker_Side-2p&x=vdooqjod-dlo9oo5l.qoxjdm5q), 
-the category is 'Darker Side' and the sub-category is 'Player'.
+i.e. 
 
-### Executable Usage
+### Executable Usage
 
 In the below example, all current leaderboard runs of game `y65797de` will be persisted 
 to [`additional-leaderboards-data.csv`](../data/v1/additional-leaderboards-data.csv):

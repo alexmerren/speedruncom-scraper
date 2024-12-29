@@ -89,7 +89,7 @@ func (p *RunsDataProcessor) processRuns(userID string) error {
 				examiner,
 				values,
 				status,
-				repository.FormatCsvString(statusReason),
+				strconv.Quote(statusReason),
 				verifiedDate,
 			})
 		}, "data")

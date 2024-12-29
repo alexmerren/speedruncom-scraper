@@ -1,63 +1,15 @@
-package processor
+package combinations
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 
-	"github.com/alexmerren/speedruncom-scraper/internal/repository"
-	"github.com/alexmerren/speedruncom-scraper/internal/srcom_api"
 	"github.com/alistanis/cartesian"
 	"github.com/buger/jsonparser"
 )
 
-type AdditionalLeaderboardsDataProcessor struct {
-	GameId                     string
-	AdditionalLeaderboardsFile *repository.WriteRepository
-	Client                     *srcom_api.SrcomV1Client
-}
-
-func (p *AdditionalLeaderboardsDataProcessor) Process() error {
-	response, err := p.Client.GetGame(p.GameId)
-	if err != nil {
-		return err
-	}
-
-	leaderboardCombinations, err := generateLeaderboardCombinations(response)
-	if err != nil {
-		return err
-	}
-
-	for _, combination := range leaderboardCombinations {
-		leaderboardResponse, err := p.Client.GetLeaderboardByVariables(combination.gameId, combination.categoryId, combination.levelId, combination.variableIds, combination.valueIds)
-		if err != nil {
-			return err
-		}
-
-		err = p.processLeaderboard(leaderboardResponse)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-type combination struct {
-	gameId      string
-	categoryId  string
-	levelId     *string
-	variableIds []string
-	valueIds    []string
-}
-
-func (c *combination) isValid() bool {
-	return len(c.variableIds) == len(c.valueIds)
-}
-
-// Use similar logic to [leaderboards_data.go] when parsing categories and levels.
-// This can be quite opaque IMO, so in [adr_02.md] the logic is written in Python.
-func generateLeaderboardCombinations(response []byte) ([]*combination, error) {
+// GenerateLeaderboardCombinations returns a list of valid category/level/variables/values
+// combinations for a given game ID. The function requires the response of [SrcomV1Client.GetGame].
+func GenerateLeaderboardCombinations(response []byte) ([]*Combination, error) {
 	gameId, err := jsonparser.GetString(response, "data", "id")
 	if err != nil {
 		return nil, err
@@ -68,7 +20,7 @@ func generateLeaderboardCombinations(response []byte) ([]*combination, error) {
 		return nil, err
 	}
 
-	combinations := make([]*combination, 0)
+	combinations := make([]*Combination, 0)
 
 	_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
 		categoryId, _ := jsonparser.GetString(value, "id")
@@ -203,7 +155,7 @@ func variableIsApplicable(variableData []byte, categoryId string) bool {
 }
 
 // https://en.wikipedia.org/wiki/Cartesian_product
-func computeCartesianProduct(gameId, categoryId string, levelId *string, variables []string, values [][]string) []*combination {
+func computeCartesianProduct(gameId, categoryId string, levelId *string, variables []string, values [][]string) []*Combination {
 	nonEmptyValues := filter(values, func(valueIds []string) bool {
 		return len(valueIds) > 0
 	})
@@ -212,24 +164,24 @@ func computeCartesianProduct(gameId, categoryId string, levelId *string, variabl
 	// to compute the cartesian product of. We can just return a single combination
 	// of the game, category, and level ID (if applicable).
 	if nonEmptyValues == nil {
-		return []*combination{{
-			gameId:      gameId,
-			categoryId:  categoryId,
-			levelId:     levelId,
-			variableIds: nil,
-			valueIds:    nil,
+		return []*Combination{{
+			GameId:      gameId,
+			CategoryId:  categoryId,
+			LevelId:     levelId,
+			VariableIds: nil,
+			ValueIds:    nil,
 		}}
 	}
 
-	combinations := make([]*combination, 0)
+	combinations := make([]*Combination, 0)
 
 	for _, product := range cartesian.Product(nonEmptyValues...) {
-		combinations = append(combinations, &combination{
-			gameId:      gameId,
-			categoryId:  categoryId,
-			levelId:     levelId,
-			variableIds: variables,
-			valueIds:    product,
+		combinations = append(combinations, &Combination{
+			GameId:      gameId,
+			CategoryId:  categoryId,
+			LevelId:     levelId,
+			VariableIds: variables,
+			ValueIds:    product,
 		})
 	}
 
@@ -244,53 +196,4 @@ func filter[T any](ss []T, test func(T) bool) (result []T) {
 		}
 	}
 	return
-}
-
-func (p *AdditionalLeaderboardsDataProcessor) processLeaderboard(leaderboardResponse []byte) error {
-	_, err := jsonparser.ArrayEach(leaderboardResponse, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
-		place, _ := jsonparser.GetInt(value, "place")
-		runData, _, _, _ := jsonparser.Get(value, "run")
-		runId, _ := jsonparser.GetString(runData, "id")
-		gameId, _ := jsonparser.GetString(runData, "game")
-		categoryId, _ := jsonparser.GetString(runData, "category")
-		levelId, _ := jsonparser.GetString(runData, "level")
-		runDate, _ := jsonparser.GetString(runData, "date")
-		runPrimaryTime, _ := jsonparser.GetFloat(runData, "times", "primary_t")
-		runPlatform, _ := jsonparser.GetString(runData, "system", "platform")
-		runEmulated, _ := jsonparser.GetBoolean(runData, "system", "emulated")
-		runVerifiedDate, _ := jsonparser.GetString(runData, "status", "verify-date")
-		runExaminer, _ := jsonparser.GetString(runData, "status", "examiner")
-
-		playerIDArray := []string{}
-		jsonparser.ArrayEach(runData, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			playerID, _ := jsonparser.GetString(value, "id")
-			playerIDArray = append(playerIDArray, string(playerID))
-		}, "players")
-		runPlayers := strings.Join(playerIDArray, ",")
-
-		runValuesArray := []string{}
-		jsonparser.ObjectEach(runData, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
-			runValuesArray = append(runValuesArray, fmt.Sprintf("%s=%s", string(key), string(value)))
-			return nil
-		}, "values")
-		runValues := strings.Join(runValuesArray, ",")
-
-		p.AdditionalLeaderboardsFile.Write([]string{
-			runId,
-			gameId,
-			categoryId,
-			levelId,
-			strconv.Itoa(int(place)),
-			runDate,
-			strconv.FormatFloat(runPrimaryTime, 'f', -1, 64),
-			runPlatform,
-			strconv.FormatBool(runEmulated),
-			runPlayers,
-			runExaminer,
-			runVerifiedDate,
-			runValues,
-		})
-	}, "data", "runs")
-
-	return err
 }

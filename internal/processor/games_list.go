@@ -86,7 +86,7 @@ func (p *GamesListProcessor) processV2() error {
 				strconv.Itoa(int(addedDate)),
 				strconv.Itoa(int(runCount)),
 				strconv.Itoa(int(playerCount)),
-				repository.FormatCsvString(rules),
+				strconv.Quote(rules),
 			})
 		}, "gameList")
 		if err != nil {

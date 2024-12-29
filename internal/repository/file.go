@@ -2,21 +2,10 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 )
-
-func FormatCsvString(s string) string {
-	s = fmt.Sprintf("%q", s)
-	if len(s) >= 2 {
-		if c := s[len(s)-1]; s[0] == c && (c == '"' || c == '\'') {
-			return s[1 : len(s)-1]
-		}
-	}
-	return s
-}
 
 // openOrCreate will open a file if it already exists. If a file does not exist, then
 //   - Create the file;
@@ -36,13 +25,6 @@ func openOrCreate(filename string) (*os.File, error) {
 	file, err := openFile(filename)
 	if err != nil {
 		return nil, err
-	}
-
-	if fileComment, ok := FileComments[filename]; ok {
-		_, err = file.WriteString(fileComment + "\n")
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	if columnDefinitions, ok := FileColumnDefinitions[filename]; ok {

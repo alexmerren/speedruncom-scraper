@@ -15,17 +15,44 @@ const (
 )
 
 type UsersListProcessor struct {
-	LeaderboardsFile *repository.ReadRepository
-	UsersIdListFile  *repository.WriteRepository
-	Client           *srcom_api.SrcomV1Client
+	LeaderboardsFile             *repository.ReadRepository
+	SupplementaryLeaderboardFile *repository.ReadRepository
+	UsersIdListFile              *repository.WriteRepository
+	Client                       *srcom_api.SrcomV1Client
 }
 
 func (p *UsersListProcessor) Process() error {
+	leaderboardsUsers, err := getUsersFromFile(p.LeaderboardsFile)
+	if err != nil {
+		return err
+	}
+
+	for userID := range leaderboardsUsers {
+		p.UsersIdListFile.Write([]string{userID})
+	}
+
+	supplementaryLeaderboardUsers, err := getUsersFromFile(p.SupplementaryLeaderboardFile)
+	if err != nil {
+		return err
+	}
+
+	for userID := range supplementaryLeaderboardUsers {
+		p.UsersIdListFile.Write([]string{userID})
+	}
+
+	return nil
+}
+
+func getUsersFromFile(file *repository.ReadRepository) (map[string]struct{}, error) {
 	allUsers := make(map[string]struct{})
-	p.LeaderboardsFile.Read()
+	file.Read()
 
 	for {
-		record, err := p.LeaderboardsFile.Read()
+		record, err := file.Read()
+		if err != nil && !errors.Is(err, io.EOF) {
+			return nil, err
+		}
+
 		if err != nil && errors.Is(err, io.EOF) {
 			break
 		}
@@ -41,9 +68,5 @@ func (p *UsersListProcessor) Process() error {
 		}
 	}
 
-	for userID := range allUsers {
-		p.UsersIdListFile.Write([]string{userID})
-	}
-
-	return nil
+	return allUsers, nil
 }
