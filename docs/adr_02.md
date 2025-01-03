@@ -1,30 +1,37 @@
 ## Number: 02
+
 ## Date: 2024-12-24
+
 ## Title: Supplementary Collection Logic for Leaderboard Data
 
-Collecting leaderboards data for games with a high number of runs 
-(i.e. [Subway Surfers](https://www.speedrun.com/subsurf)) leads to pagination issues. 
-After 10,000 runs the pagination is too high and the requests fail. The solution 
-to this problem is to collect leaderboard data for every variable and 
-value combination. These are represented as additional filters when viewing a 
-category on [speedrun.com](https://www.speedrun.com). 
+Collecting leaderboards data for games with a high number of runs
+(i.e. [Subway Surfers](https://www.speedrun.com/subsurf)) leads to instability
+and pagination issues. After 10,000 runs the pagination breaks and the requests
+fail, or there are too many runs and requests time out i.e.
+[this example](https://www.speedrun.com/api/v1/leaderboards/y65797de/category/n2y350ed).
+The solution to this problem is to collect leaderboard data for every variable
+and value combination. These are represented as additional filters when viewing
+a category on [speedrun.com](https://www.speedrun.com).
 
-Variables that create a "sub category" have the property `is-subcategory`. For 
-[this game](https://www.speedrun.com/smo?h=Darker_Side-2p&x=vdooqjod-dlo9oo5l.qoxjdm5q), 
-the category is 'Darker Side' and the sub-category is 'Player'. There 
-is some additional logic whether a variable is applied to a single category, a 
-single level, all categories, or all levels. This is highlighted below in an example 
-python script to generate all category/level/variable/value combinations.
+To ensure requests return a reasonable number of runs we must generate all valid
+category/level/variable/value combinations. At the time of writing, no leaderboards
+contain an incredibly high number of runs for a single combination, so an API request
+for a combination's leaderboard data will (hopefully) not timeout. If we request
+for all combinations we should retrieve all runs for the game.
 
-i.e. 
+Variables that create a "sub category" have the property `is-subcategory`. For
+[this game](https://www.speedrun.com/smo?h=Darker_Side-2p&x=vdooqjod-dlo9oo5l.qoxjdm5q),
+the category is 'Darker Side' and the sub-category is 'Player'. There
+is some additional logic whether a variable is applied to a single category, a
+single level, all categories, or all levels.
 
 ### Executable Usage
 
-In the below example, all current leaderboard runs of game `y65797de` will be persisted 
-to [`additional-leaderboards-data.csv`](../data/v1/additional-leaderboards-data.csv):
+In the below example, all current leaderboard runs of game `y65797de` will be persisted
+to [`supplementary-leaderboard-data.csv`](../data/v1/supplementary-leaderboard-data.csv):
 
 ```bash
-./dist/additional-leaderboards-data y65797de
+./dist/supplementary-leaderboard-data --gameId y65797de
 ```
 
 ### Spot Collection POC
