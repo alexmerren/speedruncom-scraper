@@ -31,27 +31,27 @@ func (p *GamesDataProcessor) Process() error {
 		}
 
 		gameId := record[0]
-		response, err := p.Client.GetGame(gameId)
+		gameResponse, err := p.Client.GetGame(gameId)
 		if err != nil {
 			continue
 		}
 
-		err = p.processCategory(response, gameId)
+		err = p.processCategory(gameResponse, gameId)
 		if err != nil {
 			return err
 		}
 
-		err = p.processLevel(response, gameId)
+		err = p.processLevel(gameResponse, gameId)
 		if err != nil {
 			return err
 		}
 
-		err = p.processVariableAndValue(response, gameId)
+		err = p.processVariableAndValue(gameResponse, gameId)
 		if err != nil {
 			return err
 		}
 
-		err = p.processGame(response, gameId)
+		err = p.processGame(gameResponse, gameId)
 		if err != nil {
 			return err
 		}

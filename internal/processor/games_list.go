@@ -11,6 +11,10 @@ import (
 type GamesListProcessor struct {
 	GamesIdListFile *repository.WriteRepository
 	GamesFileV2     *repository.WriteRepository
+	DevelopersFile  *repository.WriteRepository
+	GenresFile      *repository.WriteRepository
+	PlatformsFile   *repository.WriteRepository
+	PublishersFile  *repository.WriteRepository
 	Client          *srcom_api.SrcomV1Client
 	ClientV2        *srcom_api.SrcomV2Client
 }
@@ -22,6 +26,26 @@ func (p *GamesListProcessor) Process() error {
 	}
 
 	err = p.processV2()
+	if err != nil {
+		return err
+	}
+
+	err = p.processGenres()
+	if err != nil {
+		return err
+	}
+
+	err = p.processPlatforms()
+	if err != nil {
+		return err
+	}
+
+	err = p.processPublishers()
+	if err != nil {
+		return err
+	}
+
+	err = p.processDevelopers()
 	if err != nil {
 		return err
 	}
@@ -99,6 +123,123 @@ func (p *GamesListProcessor) processV2() error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (p *GamesListProcessor) processDevelopers() error {
+	currentPage := 0
+
+	for {
+		response, err := p.Client.GetDeveloperList(currentPage)
+		if err != nil {
+			return err
+		}
+
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
+			developerId, _ := jsonparser.GetString(value, "id")
+			name, _ := jsonparser.GetString(value, "name")
+			err = p.DevelopersFile.Write([]string{developerId, name})
+		}, "data")
+		if err != nil {
+			return err
+		}
+
+		size, _ := jsonparser.GetInt(response, "pagination", "size")
+		if size < 200 {
+			break
+		}
+
+		currentPage += 1
+	}
+
+	return nil
+}
+
+func (p *GamesListProcessor) processPublishers() error {
+	currentPage := 0
+
+	for {
+		response, err := p.Client.GetPublisherList(currentPage)
+		if err != nil {
+			return err
+		}
+
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
+			publisherId, _ := jsonparser.GetString(value, "id")
+			name, _ := jsonparser.GetString(value, "name")
+			err = p.PublishersFile.Write([]string{publisherId, name})
+		}, "data")
+		if err != nil {
+			return err
+		}
+
+		size, _ := jsonparser.GetInt(response, "pagination", "size")
+		if size < 200 {
+			break
+		}
+
+		currentPage += 1
+	}
+
+	return nil
+}
+
+func (p *GamesListProcessor) processPlatforms() error {
+	currentPage := 0
+
+	for {
+		response, err := p.Client.GetPlatformList(currentPage)
+		if err != nil {
+			return err
+		}
+
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
+			platformId, _ := jsonparser.GetString(value, "id")
+			name, _ := jsonparser.GetString(value, "name")
+			releaseYear, _ := jsonparser.GetInt(value, "released")
+			err = p.PlatformsFile.Write([]string{platformId, name, strconv.Itoa(int(releaseYear))})
+		}, "data")
+		if err != nil {
+			return err
+		}
+
+		size, _ := jsonparser.GetInt(response, "pagination", "size")
+		if size < 200 {
+			break
+		}
+
+		currentPage += 1
+	}
+
+	return nil
+}
+
+func (p *GamesListProcessor) processGenres() error {
+	currentPage := 0
+
+	for {
+		response, err := p.Client.GetGenreList(currentPage)
+		if err != nil {
+			return err
+		}
+
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
+			genreId, _ := jsonparser.GetString(value, "id")
+			name, _ := jsonparser.GetString(value, "name")
+			err = p.GenresFile.Write([]string{genreId, name})
+		}, "data")
+		if err != nil {
+			return err
+		}
+
+		size, _ := jsonparser.GetInt(response, "pagination", "size")
+		if size < 200 {
+			break
+		}
+
+		currentPage += 1
 	}
 
 	return nil
