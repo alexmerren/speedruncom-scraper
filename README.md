@@ -46,7 +46,6 @@ NOTE: For each executable there are repeated API calls. A local HTTP cache has b
 
 | Path | Description | Pre-requisite(s) |
 | :--: | :---------: | :--------------: |
-
 | `./dist/games-list` | Retrieve all Game IDs and other data (i.e. total number of runs for a game) for verification in other executables. | None |
 | `./dist/games-data` | Retrieve data on categories, levels, variables, and values, etc. for all game IDs retrieved in `games-list`. | `./dist/games-list` |
 | `./dist/leaderboards-data` | Retrieve leaderboard(s) data for all games retrieved in `games-list`. Note: This can fail for games with a high number of runs, use `additional-leaderboards-data` in this case. | `./dist/games-data` |
