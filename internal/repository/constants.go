@@ -16,6 +16,7 @@ const (
 	GenresDataFilename                   = "./data/v1/genres-data.csv"
 	PlatformsDataFilename                = "./data/v1/platforms-data.csv"
 	PublishersDataFilename               = "./data/v1/publishers-data.csv"
+	EnginesDataFilename                  = "./data/v1/engines-data.csv"
 	WorldRecordDataFilename              = "./data/v2/world-record-data.csv"
 	GamesDataFilenameV2                  = "./data/v2/games-data.csv"
 )
@@ -39,5 +40,6 @@ var (
 		GenresDataFilename:                   {"genreId", "name"},
 		PlatformsDataFilename:                {"platformId", "name", "releaseYear"},
 		PublishersDataFilename:               {"publisherId", "name"},
+		EnginesDataFilename:                  {"engineId", "name"},
 	}
 )

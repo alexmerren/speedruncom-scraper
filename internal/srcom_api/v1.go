@@ -19,6 +19,7 @@ const (
 	publisherListQuery              = "publishers?max=%d&offset=%d"
 	genreListQuery                  = "genres?max=%d&offset=%d"
 	developerListQuery              = "developers?max=%d&offset=%d"
+	engineListQuery                 = "engines?max=%d&offset=%d"
 )
 
 const (
@@ -141,6 +142,11 @@ func (c *SrcomV1Client) GetGenreList(pageNumber int) ([]byte, error) {
 
 func (c *SrcomV1Client) GetDeveloperList(pageNumber int) ([]byte, error) {
 	requestQuery := fmt.Sprintf(developerListQuery, maximumPagination, pageNumber*maximumPagination)
+	return c.get(requestQuery)
+}
+
+func (c *SrcomV1Client) GetEngineList(pageNumber int) ([]byte, error) {
+	requestQuery := fmt.Sprintf(engineListQuery, maximumPagination, pageNumber*maximumPagination)
 	return c.get(requestQuery)
 }
 

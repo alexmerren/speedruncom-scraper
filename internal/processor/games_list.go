@@ -15,6 +15,7 @@ type GamesListProcessor struct {
 	GenresFile      *repository.WriteRepository
 	PlatformsFile   *repository.WriteRepository
 	PublishersFile  *repository.WriteRepository
+	EnginesFile     *repository.WriteRepository
 	Client          *srcom_api.SrcomV1Client
 	ClientV2        *srcom_api.SrcomV2Client
 }
@@ -46,6 +47,11 @@ func (p *GamesListProcessor) Process() error {
 	}
 
 	err = p.processDevelopers()
+	if err != nil {
+		return err
+	}
+
+	err = p.processEngines()
 	if err != nil {
 		return err
 	}
@@ -229,6 +235,35 @@ func (p *GamesListProcessor) processGenres() error {
 			genreId, _ := jsonparser.GetString(value, "id")
 			name, _ := jsonparser.GetString(value, "name")
 			err = p.GenresFile.Write([]string{genreId, name})
+		}, "data")
+		if err != nil {
+			return err
+		}
+
+		size, _ := jsonparser.GetInt(response, "pagination", "size")
+		if size < 200 {
+			break
+		}
+
+		currentPage += 1
+	}
+
+	return nil
+}
+
+func (p *GamesListProcessor) processEngines() error {
+	currentPage := 0
+
+	for {
+		response, err := p.Client.GetEngineList(currentPage)
+		if err != nil {
+			return err
+		}
+
+		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, _ error) {
+			engineId, _ := jsonparser.GetString(value, "id")
+			name, _ := jsonparser.GetString(value, "name")
+			err = p.EnginesFile.Write([]string{engineId, name})
 		}, "data")
 		if err != nil {
 			return err

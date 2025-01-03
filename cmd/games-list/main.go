@@ -53,6 +53,12 @@ func run() error {
 	}
 	defer publishersFileCloseFunc()
 
+	enginesFile, enginesFileCloseFunc, err := repository.NewWriteRepository(repository.EnginesDataFilename)
+	if err != nil {
+		return err
+	}
+	defer enginesFileCloseFunc()
+
 	gamesListProcessor := &processor.GamesListProcessor{
 		GamesIdListFile: gamesIdListFile,
 		GamesFileV2:     gamesFileV2,
@@ -60,6 +66,7 @@ func run() error {
 		GenresFile:      genresFile,
 		PlatformsFile:   platformsFile,
 		PublishersFile:  publishersFile,
+		EnginesFile:     enginesFile,
 		Client:          srcom_api.DefaultV1Client,
 		ClientV2:        srcom_api.DefaultV2Client,
 	}
