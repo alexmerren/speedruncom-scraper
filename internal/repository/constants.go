@@ -20,7 +20,7 @@ var (
 	FileColumnDefinitions = map[string][]string{
 		GamesIdListFilename:                  {"gameId"},
 		UsersIdListFilename:                  {"userId"},
-		GamesDataFilename:                    {"gameId", "gameName", "url", "releaseDate", "createdDate"},
+		GamesDataFilename:                    {"gameId", "gameName", "url", "releaseDate", "createdDate", "gameTypes", "platforms", "regions", "genres", "engines", "developers", "publishers", "runsRequireVerification", "runsRequireVideo", "runTimingOptions", "runDefaultTimingOption", "runsEmulatorsAllowed", "isRomhack"},
 		GamesDataFilenameV2:                  {"gameId", "gameName", "url", "type", "releaseDate", "addedDate", "runCount", "playerCount", "rules"},
 		CategoriesDataFilename:               {"parentGameId", "categoryId", "categoryName", "rules", "type", "numPlayers"},
 		LevelsDataFilename:                   {"parentGameId", "levelId", "levelName", "rules"},

@@ -7,7 +7,7 @@ import (
 
 const (
 	apiUrl                          = "https://www.speedrun.com/api/v1/%s"
-	gameQuery                       = "games/%s?embed=levels,categories,developers,platforms,genres,variables,publishers"
+	gameQuery                       = "games/%s?embed=levels,categories,variables"
 	categoryQuery                   = "categories/%s"
 	levelQuery                      = "levels/%s"
 	developerQuery                  = "developers/%s"
