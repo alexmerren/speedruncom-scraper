@@ -46,7 +46,7 @@ NOTE: For each executable there are repeated API calls. A local HTTP cache has b
 
 | Path | Description | Pre-requisite(s) |
 | ---- | ----------- | ---------------- |
-| `./dist/games-list` | Retrieve all Game IDs and other data (i.e. total number of runs for a game) for verification in other executables. | None |
+| `./dist/games-list` | Retrieve all Game IDs and other data (i.e. total number of runs for a game) for verification in other executables. Retrieve other miscellaneous pieces of data such as platforms, developers, genres, etc. | None |
 | `./dist/games-data` | Retrieve data on categories, levels, variables, and values, etc. for all game IDs retrieved in `games-list`. | `./dist/games-list` |
 | `./dist/leaderboards-data` | Retrieve leaderboard(s) data for all games retrieved in `games-list`. Note: This can fail for games with a high number of runs, use `additional-leaderboards-data` in this case. | `./dist/games-data` |
 | `./dist/supplementary-leaderboard-data` | Retrieve leaderboard data for all category/level/variable/value combinations of a game. This executable is tailored to retrieve data for games with an extremely high number of runs i.e. Subway Surfers. This will be extremely inefficient for games with a high count of unique category/level/variable/value combinations. | None |
