@@ -28,7 +28,7 @@ This project requires:
 
 ## 🚀 Usage
 
-The compiled binaries can be executed to collect data from the [speedrun.com API](https://github.com/speedruncomorg/api). The following command collects data for all runs, all leaderboards, all games, and all users (who have contributed to leaderboards) on [speedrun.com](https://www.speedrun.com):
+The compiled binaries can be executed to scrape data from the [speedrun.com API](https://github.com/speedruncomorg/api). The following command retrieves data for all runs, all leaderboards, all games, and all users (whom have contributed to leaderboards) on [speedrun.com](https://www.speedrun.com):
 
 ```bash
 ./dist/games-list && ./dist/games-data && ./dist/leaderboards-data && ./dist/users-list && ./dist/users-data && ./dist/runs-data
@@ -40,7 +40,7 @@ Alternatively, there is a Makefile target to run all executables in order:
 make run
 ```
 
-NOTE: For each executable there are repeated API calls. A local HTTP cache has been implemented to remove repeated API calls from the rate-limited API. This cache is saved locally under `httpcache.db`.
+NOTE: During the scraping process there may be repeated API calls. A local HTTP cache has been implemented to handle repeated API calls locally instead of via the rate-limited API. This cache is saved as `httpcache.db`.
 
 ## 🏃 Executables
 
