@@ -16,7 +16,7 @@ a category on [speedrun.com](https://www.speedrun.com).
 To ensure requests return a reasonable number of runs we must generate all valid
 category/level/variable/value combinations. At the time of writing, no leaderboards
 contain an incredibly high number of runs for a single combination, so an API request
-for a combination's leaderboard data will (hopefully) not timeout. If we request 
+for a combination's leaderboard data will (hopefully) not timeout. If we request
 for all combinations we should retrieve all runs for the game.
 
 Variables that create a "sub category" have the property `is-subcategory`. For
