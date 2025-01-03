@@ -21,10 +21,10 @@ i.e.
 ### Executable Usage
 
 In the below example, all current leaderboard runs of game `y65797de` will be persisted 
-to [`additional-leaderboards-data.csv`](../data/v1/additional-leaderboards-data.csv):
+to [`supplementary-leaderboard-data.csv`](../data/v1/supplementary-leaderboard-data.csv):
 
 ```bash
-./dist/additional-leaderboards-data y65797de
+./dist/supplementary-leaderboard-data --gameId y65797de
 ```
 
 ### Spot Collection POC
