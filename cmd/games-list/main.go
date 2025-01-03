@@ -29,9 +29,44 @@ func run() error {
 	}
 	defer gamesFileV2CloseFunc()
 
+	developersFile, developersFileCloseFunc, err := repository.NewWriteRepository(repository.DevelopersDataFilename)
+	if err != nil {
+		return err
+	}
+	defer developersFileCloseFunc()
+
+	genresFile, genresFileCloseFunc, err := repository.NewWriteRepository(repository.GenresDataFilename)
+	if err != nil {
+		return err
+	}
+	defer genresFileCloseFunc()
+
+	platformsFile, platformsFileCloseFunc, err := repository.NewWriteRepository(repository.PlatformsDataFilename)
+	if err != nil {
+		return err
+	}
+	defer platformsFileCloseFunc()
+
+	publishersFile, publishersFileCloseFunc, err := repository.NewWriteRepository(repository.PublishersDataFilename)
+	if err != nil {
+		return err
+	}
+	defer publishersFileCloseFunc()
+
+	enginesFile, enginesFileCloseFunc, err := repository.NewWriteRepository(repository.EnginesDataFilename)
+	if err != nil {
+		return err
+	}
+	defer enginesFileCloseFunc()
+
 	gamesListProcessor := &processor.GamesListProcessor{
 		GamesIdListFile: gamesIdListFile,
 		GamesFileV2:     gamesFileV2,
+		DevelopersFile:  developersFile,
+		GenresFile:      genresFile,
+		PlatformsFile:   platformsFile,
+		PublishersFile:  publishersFile,
+		EnginesFile:     enginesFile,
 		Client:          srcom_api.DefaultV1Client,
 		ClientV2:        srcom_api.DefaultV2Client,
 	}

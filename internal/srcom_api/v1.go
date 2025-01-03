@@ -7,10 +7,9 @@ import (
 
 const (
 	apiUrl                          = "https://www.speedrun.com/api/v1/%s"
-	gameQuery                       = "games/%s?embed=levels,categories,developers,platforms,genres,variables,publishers"
+	gameQuery                       = "games/%s?embed=levels,categories,variables"
 	categoryQuery                   = "categories/%s"
 	levelQuery                      = "levels/%s"
-	developerQuery                  = "developers/%s"
 	leaderboardByCategoryQuery      = "leaderboards/%s/category/%s"
 	leaderboardByLevelCategoryQuery = "leaderboards/%s/level/%s/%s"
 	userQuery                       = "users/%s"
@@ -19,6 +18,8 @@ const (
 	platformListQuery               = "platforms?max=%d&offset=%d"
 	publisherListQuery              = "publishers?max=%d&offset=%d"
 	genreListQuery                  = "genres?max=%d&offset=%d"
+	developerListQuery              = "developers?max=%d&offset=%d"
+	engineListQuery                 = "engines?max=%d&offset=%d"
 )
 
 const (
@@ -53,11 +54,6 @@ func (c *SrcomV1Client) GetCategory(categoryId string) ([]byte, error) {
 
 func (c *SrcomV1Client) GetLevel(levelId string) ([]byte, error) {
 	requestQuery := fmt.Sprintf(levelQuery, levelId)
-	return c.get(requestQuery)
-}
-
-func (c *SrcomV1Client) GetDeveloper(developerId string) ([]byte, error) {
-	requestQuery := fmt.Sprintf(developerQuery, developerId)
 	return c.get(requestQuery)
 }
 
@@ -141,6 +137,16 @@ func (c *SrcomV1Client) GetPublisherList(pageNumber int) ([]byte, error) {
 
 func (c *SrcomV1Client) GetGenreList(pageNumber int) ([]byte, error) {
 	requestQuery := fmt.Sprintf(genreListQuery, maximumPagination, pageNumber*maximumPagination)
+	return c.get(requestQuery)
+}
+
+func (c *SrcomV1Client) GetDeveloperList(pageNumber int) ([]byte, error) {
+	requestQuery := fmt.Sprintf(developerListQuery, maximumPagination, pageNumber*maximumPagination)
+	return c.get(requestQuery)
+}
+
+func (c *SrcomV1Client) GetEngineList(pageNumber int) ([]byte, error) {
+	requestQuery := fmt.Sprintf(engineListQuery, maximumPagination, pageNumber*maximumPagination)
 	return c.get(requestQuery)
 }
 
