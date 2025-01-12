@@ -15,8 +15,15 @@ func NewWriteRepository(filename string) (*WriteRepository, func() error, error)
 	}
 
 	writer := csv.NewWriter(file)
+
 	closeFunc := func() error {
+
 		writer.Flush()
+		err := writer.Error()
+		if err != nil {
+			return err
+		}
+
 		return file.Close()
 	}
 
@@ -26,5 +33,15 @@ func NewWriteRepository(filename string) (*WriteRepository, func() error, error)
 }
 
 func (w *WriteRepository) Write(record []string) error {
-	return w.writer.Write(record)
+	err := w.writer.Write(record)
+	if err != nil {
+		return err
+	}
+
+	err = w.writer.Error()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

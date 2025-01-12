@@ -28,25 +28,25 @@ func (c *SrcomV2Client) GetGameList(pageNumber int) ([]byte, error) {
 		"page": pageNumber,
 	}
 
-	url, err := formatUrl(v2GameListQuery, data)
+	requestQuery, err := generateRequestQuery(v2GameListQuery, data)
 	if err != nil {
 		return nil, err
 	}
 
-	return c.client.Get(url)
+	return c.get(requestQuery)
 }
 
 func (c *SrcomV2Client) GetGameRecordHistory(gameId, categoryId string, levelId *string, variables, values []string) ([]byte, error) {
-	data := generateGameRecordHistoryQuery(gameId, categoryId, levelId, variables, values)
-	url, err := formatUrl(v2GameRecordQuery, data)
+	data := generateGameRecordHistoryData(gameId, categoryId, levelId, variables, values)
+	requestQuery, err := generateRequestQuery(v2GameRecordQuery, data)
 	if err != nil {
 		return nil, err
 	}
 
-	return c.client.Get(url)
+	return c.get(requestQuery)
 }
 
-func generateGameRecordHistoryQuery(gameId, categoryId string, levelId *string, variables, values []string) map[string]any {
+func generateGameRecordHistoryData(gameId, categoryId string, levelId *string, variables, values []string) map[string]any {
 	variablesAndValues := make([]map[string]any, len(variables))
 
 	for index := range len(variables) {
@@ -66,22 +66,19 @@ func generateGameRecordHistoryQuery(gameId, categoryId string, levelId *string, 
 	}
 }
 
-func formatUrl(query string, data map[string]any) (string, error) {
-	encodedData, err := encodeData(data)
+func generateRequestQuery(query string, data map[string]any) (string, error) {
+	dataBytes, err := json.Marshal(data)
 	if err != nil {
 		return "", err
 	}
-	formattedQuery := fmt.Sprintf(query, encodedData)
 
-	return fmt.Sprintf(v2ApiUrl, formattedQuery), nil
+	encodedData := base64.StdEncoding.EncodeToString(dataBytes)
+	trimmedData := strings.TrimRight(encodedData, "=")
+
+	return fmt.Sprintf(query, trimmedData), nil
 }
 
-func encodeData(data map[string]any) (string, error) {
-	bytes, err := json.Marshal(data)
-	if err != nil {
-		return "", err
-	}
-
-	encodedString := base64.StdEncoding.EncodeToString(bytes)
-	return strings.TrimRight(encodedString, "="), nil
+func (c *SrcomV2Client) get(requestQuery string) ([]byte, error) {
+	url := fmt.Sprintf(v2ApiUrl, requestQuery)
+	return c.client.Get(url)
 }

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,20 +10,22 @@ import (
 
 // openOrCreate will open a file if it already exists. If a file does not exist, then
 //   - Create the file;
-//   - Write the values from `FileComments` and `FileHeaders` (provided we have a
-//     filename that matches a key in those maps);
+//   - Write the value from `FileHeaders` (provided we have a
+//     filename that matches a key in the map);
 //   - Open the file.
 func openOrCreate(filename string) (*os.File, error) {
-	err := createFileIfNotExists(filename)
-	if err != nil && errors.Is(err, os.ErrExist) {
-		return openFile(filename)
-	}
-
-	if err != nil && !errors.Is(err, os.ErrExist) {
+	fileExists, err := doesFileExist(filename)
+	if err != nil {
 		return nil, err
 	}
 
-	file, err := openFile(filename)
+	if fileExists {
+		slog.Info("Opening existing file", "filename", filename)
+		return openFile(filename)
+	}
+
+	slog.Info("Creating missing file", "filename", filename)
+	file, err := createFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -34,32 +37,39 @@ func openOrCreate(filename string) (*os.File, error) {
 		}
 	}
 
+	err = file.Sync()
+	if err != nil {
+		return nil, err
+	}
+
 	return file, nil
 }
 
-func createFileIfNotExists(filename string) error {
+func doesFileExist(filename string) (bool, error) {
 	_, err := os.Stat(filename)
-	if err == nil {
-		return os.ErrExist
+	if err != nil && errors.Is(err, os.ErrNotExist) {
+		return false, nil
 	}
 
-	if !errors.Is(err, os.ErrNotExist) {
-		return err
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return false, err
 	}
 
+	return true, nil
+}
+
+func createFile(filename string) (*os.File, error) {
 	directory, err := filepath.Abs(filepath.Dir(filename))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = os.MkdirAll(directory, os.ModePerm)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = os.Create(filename)
-
-	return err
+	return os.Create(filename)
 }
 
 func openFile(filename string) (*os.File, error) {

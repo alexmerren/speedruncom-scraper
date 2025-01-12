@@ -54,7 +54,11 @@ func (c *HttpClient) Get(url string) ([]byte, error) {
 	}
 
 	if c.isVerbose {
-		slog.Info(url, "statusCode", response.StatusCode)
+		slog.Info(
+			"Request finished",
+			"url", url,
+			"statusCode", response.StatusCode,
+		)
 	}
 
 	return io.ReadAll(response.Body)

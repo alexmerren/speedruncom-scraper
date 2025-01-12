@@ -5,6 +5,7 @@ GOFMT := gofmt
 DIST_DIR := $(CURDIR)/dist
 CMD_DIR := $(CURDIR)/cmd
 VENDOR_DIR := $(CURDIR)/vendor
+DATA_DIR := $(CURDIR)/data
 
 GOFLAGS :=
 # Set to 1 to use static linking for all builds (including tests).
@@ -19,7 +20,7 @@ endif
 help:
 	@fgrep -h '##' $(MAKEFILE_LIST) | fgrep -v fgrep | column -t -s ':' | sed -e 's/## //'
 
-## all: Download dependencies, generate mocks, fmt, run unit tests, build binary.
+## all: Download dependencies, format code, build binary.
 .PHONY: all
 all: vendor fmt build
 
@@ -48,10 +49,15 @@ clean:
 
 ## run: Run all executables in required order
 .PHONY: run
-run-all:
+run:
 	$(DIST_DIR)/games-list && \
 	$(DIST_DIR)/games-data && \
 	$(DIST_DIR)/leaderboards-data && \
 	$(DIST_DIR)/users-list && \
 	$(DIST_DIR)/users-data && \
 	$(DIST_DIR)/runs-data
+
+## monitor: Monitor the progress of `make run`
+.PHONY: monitor
+monitor:
+	@sh -c "find $(DATA_DIR)/v1 $(DATA_DIR)/v2 -type f -exec wc -l {} \;"

@@ -26,7 +26,7 @@ func run() error {
 		return errors.New("gameId must be provided")
 	}
 
-	worldRecordFile, worldRecordFileCloseFunc, err := repository.NewWriteRepository(repository.WorldRecordDataFilename)
+	worldRecordFile, worldRecordFileCloseFunc, err := repository.NewWriteRepository(repository.WorldRecordDataFilenameV2)
 	if err != nil {
 		return err
 	}
