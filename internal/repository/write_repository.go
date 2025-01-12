@@ -17,7 +17,6 @@ func NewWriteRepository(filename string) (*WriteRepository, func() error, error)
 	writer := csv.NewWriter(file)
 
 	closeFunc := func() error {
-
 		writer.Flush()
 		err := writer.Error()
 		if err != nil {

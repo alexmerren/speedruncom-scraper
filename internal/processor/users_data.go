@@ -38,7 +38,6 @@ func (p *UsersDataProcessor) Process() error {
 		userSignup, _ := jsonparser.GetString(userData, "signup")
 		userLocation, _ := jsonparser.GetString(userData, "location", "country", "code")
 
-		// We write 0 as the number of runs as this executable won't deal with runs data.
 		err = p.UsersFile.Write([]string{userId, userName, userSignup, userLocation})
 		if err != nil {
 			return err

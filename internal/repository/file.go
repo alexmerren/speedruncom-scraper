@@ -25,6 +25,7 @@ func openOrCreate(filename string) (*os.File, error) {
 	}
 
 	slog.Info("Creating missing file", "filename", filename)
+
 	file, err := createFile(filename)
 	if err != nil {
 		return nil, err
