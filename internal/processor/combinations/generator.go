@@ -128,6 +128,13 @@ func variableIsApplicableWithLevel(variableData []byte, categoryId string, level
 		return false
 	}
 
+	// Some variables are straight up broken and have no values.
+	// i.e. `https://www.speedrun.com/api/v1/games/j1n475e6?embed=levels,categories,variables` and variable `kn099g7n`
+	valueDefault, _, _, err := jsonparser.Get(variableData, "values", "default")
+	if err != nil || string(valueDefault) == "null" {
+		return false
+	}
+
 	return true
 }
 
@@ -147,7 +154,14 @@ func variableIsApplicable(variableData []byte, categoryId string) bool {
 		return false
 	}
 
-	if category != nil && string(category) != categoryId {
+	if string(category) != "null" && string(category) != categoryId {
+		return false
+	}
+
+	// Some variables are straight up broken and have no values.
+	// i.e. `https://www.speedrun.com/api/v1/games/j1n475e6?embed=levels,categories,variables` and variable `kn099g7n`
+	valueDefault, _, _, err := jsonparser.Get(variableData, "values", "default")
+	if err != nil || string(valueDefault) == "null" {
 		return false
 	}
 

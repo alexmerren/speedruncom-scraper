@@ -68,6 +68,9 @@ func (p *LeaderboardsDataProcessor) processLeaderboard(leaderboardResponse []byt
 		levelId, _ := jsonparser.GetString(runData, "level")
 		runDate, _ := jsonparser.GetString(runData, "date")
 		runPrimaryTime, _ := jsonparser.GetFloat(runData, "times", "primary_t")
+		runRealTime, _ := jsonparser.GetFloat(runData, "times", "realtime_t")
+		runRealTimeNoLoads, _ := jsonparser.GetFloat(runData, "times", "realtime_noloads_t")
+		runIngameTime, _ := jsonparser.GetFloat(runData, "times", "ingame_t")
 		runPlatform, _ := jsonparser.GetString(runData, "system", "platform")
 		runEmulated, _ := jsonparser.GetBoolean(runData, "system", "emulated")
 		runVerifiedDate, _ := jsonparser.GetString(runData, "status", "verify-date")
@@ -95,6 +98,9 @@ func (p *LeaderboardsDataProcessor) processLeaderboard(leaderboardResponse []byt
 			strconv.Itoa(int(place)),
 			runDate,
 			strconv.FormatFloat(runPrimaryTime, 'f', -1, 64),
+			strconv.FormatFloat(runRealTime, 'f', -1, 64),
+			strconv.FormatFloat(runRealTimeNoLoads, 'f', -1, 64),
+			strconv.FormatFloat(runIngameTime, 'f', -1, 64),
 			runPlatform,
 			strconv.FormatBool(runEmulated),
 			runPlayers,
