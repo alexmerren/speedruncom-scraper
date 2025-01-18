@@ -53,6 +53,9 @@ func (p *RunsDataProcessor) processRuns(userID string) error {
 			levelID, _ := jsonparser.GetString(value, "level")
 			date, _ := jsonparser.GetString(value, "date")
 			primaryTime, _ := jsonparser.GetFloat(value, "times", "primary_t")
+			realTime, _ := jsonparser.GetFloat(value, "times", "realtime_t")
+			realTimeNoLoads, _ := jsonparser.GetFloat(value, "times", "realtime_noloads_t")
+			ingameTime, _ := jsonparser.GetFloat(value, "times", "ingame_t")
 			platform, _ := jsonparser.GetString(value, "system", "platform")
 			emulated, _ := jsonparser.GetBoolean(value, "system", "emulated")
 
@@ -83,6 +86,9 @@ func (p *RunsDataProcessor) processRuns(userID string) error {
 				levelID,
 				date,
 				strconv.FormatFloat(primaryTime, 'f', -1, 64),
+				strconv.FormatFloat(realTime, 'f', -1, 64),
+				strconv.FormatFloat(realTimeNoLoads, 'f', -1, 64),
+				strconv.FormatFloat(ingameTime, 'f', -1, 64),
 				platform,
 				strconv.FormatBool(emulated),
 				players,

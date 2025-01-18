@@ -10,15 +10,14 @@ import (
 )
 
 const (
-	usersFieldIndex    = 9
-	examinerFieldIndex = 10
+	usersFieldIndex    = 12
+	examinerFieldIndex = 13
 )
 
 type UsersListProcessor struct {
-	LeaderboardsFile             *repository.ReadRepository
-	SupplementaryLeaderboardFile *repository.ReadRepository
-	UsersIdListFile              *repository.WriteRepository
-	Client                       *srcom_api.SrcomV1Client
+	LeaderboardsFile *repository.ReadRepository
+	UsersIdListFile  *repository.WriteRepository
+	Client           *srcom_api.SrcomV1Client
 }
 
 func (p *UsersListProcessor) Process() error {
@@ -28,15 +27,6 @@ func (p *UsersListProcessor) Process() error {
 	}
 
 	for userID := range leaderboardsUsers {
-		p.UsersIdListFile.Write([]string{userID})
-	}
-
-	supplementaryLeaderboardUsers, err := getUsersFromFile(p.SupplementaryLeaderboardFile)
-	if err != nil {
-		return err
-	}
-
-	for userID := range supplementaryLeaderboardUsers {
 		p.UsersIdListFile.Write([]string{userID})
 	}
 

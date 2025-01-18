@@ -23,7 +23,7 @@ $ make all
 
 This project requires:
 
-- [Golang 1.20+](https://go.dev/dl/)
+- [Golang 1.23+](https://go.dev/dl/)
 - [`gcc` Compatible Compiler](https://gcc.gnu.org)
 
 ## 🚀 Usage
