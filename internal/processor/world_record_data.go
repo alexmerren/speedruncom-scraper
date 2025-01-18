@@ -32,7 +32,7 @@ func (p *WorldRecordDataProcessor) Process() error {
 
 	for _, combination := range leaderboardCombinations {
 		// There is an aggresive rate-limit on the V2 API
-		time.Sleep(1_000)
+		time.Sleep(1_000 * time.Millisecond)
 
 		response, err := p.ClientV2.GetGameRecordHistory(
 			combination.GameId,
