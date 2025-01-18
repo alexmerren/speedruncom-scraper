@@ -74,5 +74,5 @@ func createFile(filename string) (*os.File, error) {
 }
 
 func openFile(filename string) (*os.File, error) {
-	return os.OpenFile(filename, os.O_RDWR, 0600)
+	return os.OpenFile(filename, os.O_RDWR|os.O_APPEND, 0600)
 }
