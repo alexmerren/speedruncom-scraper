@@ -1,13 +1,21 @@
 package repository
 
-import "encoding/csv"
+import (
+	"encoding/csv"
+	"os"
+)
 
+// ReadRepository creates a read-only csv reader for the given filename. Use
+// when reading input files for processing data.
 type ReadRepository struct {
 	reader *csv.Reader
 }
 
+// NewReadRepository will create a [ReadRepository]. If the specified file does
+// not exist then we throw an error. If the file does exist, open with
+// [os.O_RDONLY] mode.
 func NewReadRepository(filename string) (*ReadRepository, func() error, error) {
-	file, err := openFile(filename)
+	file, err := openFile(filename, os.O_RDONLY)
 	if err != nil {
 		return nil, nil, err
 	}

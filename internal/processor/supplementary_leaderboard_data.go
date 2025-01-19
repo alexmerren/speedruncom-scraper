@@ -13,7 +13,7 @@ import (
 
 type SupplementaryLeaderboardDataProcessor struct {
 	GameId                       string
-	SupplementaryLeaderboardFile *repository.WriteRepository
+	SupplementaryLeaderboardFile *repository.AppendRepository
 	Client                       *srcom_api.SrcomV1Client
 }
 

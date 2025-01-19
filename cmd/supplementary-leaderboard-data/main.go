@@ -26,7 +26,7 @@ func run() error {
 		return errors.New("gameId must be provided")
 	}
 
-	leaderboardsFile, leaderboardsFileCloseFunc, err := repository.NewWriteRepository(repository.SupplementaryLeaderboardDataFilename)
+	leaderboardsFile, leaderboardsFileCloseFunc, err := repository.NewAppendRepository(repository.SupplementaryLeaderboardDataFilename)
 	if err != nil {
 		return err
 	}

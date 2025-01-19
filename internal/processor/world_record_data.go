@@ -14,7 +14,7 @@ import (
 
 type WorldRecordDataProcessor struct {
 	GameId              string
-	WorldRecordDataFile *repository.WriteRepository
+	WorldRecordDataFile *repository.AppendRepository
 	ClientV1            *srcom_api.SrcomV1Client
 	ClientV2            *srcom_api.SrcomV2Client
 }

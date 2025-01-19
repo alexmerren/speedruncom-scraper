@@ -13,7 +13,7 @@ import (
 //   - Write the value from `FileHeaders` (provided we have a
 //     filename that matches a key in the map);
 //   - Open the file.
-func openOrCreate(filename string) (*os.File, error) {
+func openOrCreate(filename string, mode int) (*os.File, error) {
 	fileExists, err := doesFileExist(filename)
 	if err != nil {
 		return nil, err
@@ -21,7 +21,7 @@ func openOrCreate(filename string) (*os.File, error) {
 
 	if fileExists {
 		slog.Info("Opening existing file", "filename", filename)
-		return openFile(filename)
+		return openFile(filename, mode)
 	}
 
 	slog.Info("Creating missing file", "filename", filename)
@@ -73,6 +73,6 @@ func createFile(filename string) (*os.File, error) {
 	return os.Create(filename)
 }
 
-func openFile(filename string) (*os.File, error) {
-	return os.OpenFile(filename, os.O_RDWR|os.O_APPEND, 0600)
+func openFile(filename string, mode int) (*os.File, error) {
+	return os.OpenFile(filename, mode, 0600)
 }
