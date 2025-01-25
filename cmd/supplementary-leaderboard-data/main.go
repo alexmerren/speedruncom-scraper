@@ -26,18 +26,17 @@ func run() error {
 		return errors.New("gameId must be provided")
 	}
 
-	worldRecordFile, worldRecordFileCloseFunc, err := repository.NewAppendRepository(repository.WorldRecordDataFilenameV2)
+	leaderboardsFile, leaderboardsFileCloseFunc, err := repository.NewAppendRepository(repository.SupplementaryLeaderboardDataFilename)
 	if err != nil {
 		return err
 	}
-	defer worldRecordFileCloseFunc()
+	defer leaderboardsFileCloseFunc()
 
-	worldRecordDataProcessor := &processor.WorldRecordDataProcessor{
-		GameId:              *gameIdFlag,
-		WorldRecordDataFile: worldRecordFile,
-		ClientV1:            srcom_api.DefaultV1Client,
-		ClientV2:            srcom_api.DefaultV2Client,
+	additionalLeaderboardsDataProcessor := &processor.SupplementaryLeaderboardDataProcessor{
+		GameId:                       *gameIdFlag,
+		SupplementaryLeaderboardFile: leaderboardsFile,
+		Client:                       srcom_api.DefaultV1Client,
 	}
 
-	return worldRecordDataProcessor.Process()
+	return additionalLeaderboardsDataProcessor.Process()
 }

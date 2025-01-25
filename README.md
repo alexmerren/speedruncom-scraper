@@ -1,88 +1,15 @@
 # Speedrun.com API Scraper
 
+<p align="center">
+  <img src="docs/speedrun_com_logo.png" />
+</p>
+
 [![Go Report Card](https://goreportcard.com/badge/github.com/alexmerren/speedruncom-scraper)](https://goreportcard.com/report/github.com/alexmerren/speedruncom-scraper)
-![Go Version](https://img.shields.io/badge/go%20version-%3E=1.20-61CFDD.svg?style=flat-square)
+![Go Version](https://img.shields.io/badge/go%20version-%3E=1.23-61CFDD.svg?style=flat-square)
 
-A system to collect data from speedrun.com for machine learning and data science applications.
+A series of executables to collect all data available from [speedrun.com](https://www.speedrun.com). A version of the collected data has been published [here](https://www.kaggle.com/datasets/alexmerren1/speedrun-com-data)!
 
-> Let us know what other data that needs to be collected from speedrun.com! Open a [GitHub Issue](https://github.com/alexmerren/speedruncom-scraper/issues) today.
-
-
-Find the published dataset [here](https://www.kaggle.com/datasets/alexmerren1/speedrun-com-data)!
-
-## 🌟 Highlights
-
- - Want to collect data from speedrun.com? speedruncom-scraper provides an accesible method of data collection.
- - Data from speedrun.com is easily-accessible, and is formatted for applications in data science and machine learning.
-
-## ℹ️  Overview
-
-My final project and dissertation at University of Exeter required data that focused on user behaviour and cumulative culture of online speedrunning communities. This project focuses on reproducing the data used in that study, and publishing tools to recreate that dataset.
-
-Speedruncom-scraper is written in Golang. It can be compiled and deployed to collect data continuously and is formatted to publish after collection.
-
-## 💨 Executables
-
- 1. [`games-list`](./cmd/games-list/main.go)
-
-    * **Reason**: List of all games available via the speedrun.com API. This only collects the internal ID of each game, further information is collected in subsequent functions.
-    * **Requirements**: None.
-
- 2. [`games-data`](./cmd/games-data/main.go)
-
-    * **Reason**: Collecting available information for each game using their internal ID. Metadata is collected on the games themselves. Furthermore, the categories, levels, variables, and values are collected and stored.
-    * **Requirements**: `games-list`.
-
- 3. [`leaderboards-data`](./cmd/leaderboards-data/main.go)
-
-    * **Reason**: Retrieves all leaderboards for every combination of game, category, and level. Each run that conitrbutes to the leaderboards is recorded, along with each player that contributed to the run (amongst other metadata).
-    * **Requirements**: `games-list`, `games-data`.
-
- 4. [`games-and-leaderboards-data`](./cmd/games-and-leaderboards-data/main.go)
-
-    * **Reason**: Combination of the `games-data` and `leaderboards-data` executables.
-    * **Requirements**: `games-list`
-
- 5. [`users-list`](./cmd/users-list/main.go)
-
-    * **Reason**: Creates a list of unique users that appear in the output of the `leaderboards-data` binary.
-    * **Requirements**: `games-list`, `games-data`.
-
- 6. [`users-data`](./cmd/users-data/main.go)
-
-    * **Reason**: Collect metadata and run data for each user that has contributed to any given leaderboard on speedrun.com.
-    * **Requirements**: `games-list`, `games-data`, `users-list`.
- 
- 7. [`runs-data`](./cmd/runs-data/main.go)
-
-    * **Reason**: Retrieves all leaderboards for every combination of game, category, and level. Each run that conitrbutes to the leaderboards is recorded, along with each player that contributed to the run (amongst other metadata).
-    * **Requirements**: `games-list`, `games-data`, `users-list`.
-
- 8. [`users-and-runs-data`](./cmd/users-and-runs-data/main.go)
-
-    * **Reason**: Combination of the `users-data` and `runs-data` executables.
-    * **Requirements**: `games-list`, `leaderboards-data`, `users-list`.
-
-
-## 🚀 Usage
-
-A set of executables can be compiled using `make build`. These can be executed in a specific order to collect (most) of the data available from speedrun.com.
-
-```bash
-$ cd speedruncom-scraper
-$ make all
-...
-```
-
-A complete set of data from speedrun.com can be obtained via the commands:
-
-```bash
-$ ./dist/games-list && ./dist/games-and-leaderboards-data && ./dist/users-list && ./dist/users-and-runs-data
-```
-
-NOTE: For each executable (or, each piece of data) there is repeated API calls. A local HTTP cache has been implemented to remove repeated API calls from the rate-limited API. This cache is saved locally under `httpcache.db`.
-
-## ⬇️  Installation
+## ⬇️ Installation
 
 The repository can be installed easily, and binaries can be compiled with the following commands:
 
@@ -96,29 +23,42 @@ $ make all
 
 This project requires:
 
- * [Golang 1.20+](https://go.dev/dl/)
- * [`gcc` Compatible Compiler](https://gcc.gnu.org)
+- [Golang 1.23+](https://go.dev/dl/)
+- [`gcc` Compatible Compiler](https://gcc.gnu.org)
 
-## Previous Collections
+## 🚀 Usage
 
-The last full data collection occurred in November 2023, here are the number of lines generated for each executable:
+The compiled binaries can be executed to scrape data from the [speedrun.com API](https://github.com/speedruncomorg/api). The following command retrieves data for all runs, all leaderboards, all games, and all users (whom have contributed to leaderboards) on [speedrun.com](https://www.speedrun.com):
 
-```
-  390286 ./data/v1/users-data.csv
-  391092 ./data/v1/users-id-list.csv
- 1847581 ./data/v1/leaderboards-data.csv
- 3995740 ./data/v1/runs-data.csv
-   37249 ./data/v1/games-data.csv
-   56721 ./data/v1/variables-data.csv
-  252642 ./data/v1/values-data.csv
-  266380 ./data/v1/levels-data.csv
-   37251 ./data/v1/games-id-list.csv
-  147959 ./data/v1/categories-data.csv
-   37870 ./data/v2/games-id-list.csv
+```bash
+./dist/games-list && ./dist/games-data && ./dist/leaderboards-data && ./dist/users-list && ./dist/users-data && ./dist/runs-data
 ```
 
-## 💭 Feedback and Contributing
+Alternatively, there is a Makefile target to run all executables in order:
 
-If you use this repository- great! If you could let me know any improvements or requests through [GitHub issues](https://github.com/alexmerren/speedruncom-scraper/issues), that would be great.
+```bash
+make run
+```
 
-Furthermore, if you want to join discussions on the developement of `speedruncom-scraper`, find the conversations on [GitHub discussions](https://github.com/alexmerren/speedruncom-scraper/discussions).
+NOTE: During the scraping process there may be repeated API calls. A local HTTP cache has been implemented to handle repeated API calls locally instead of via the rate-limited API. This cache is saved as `httpcache.db`.
+
+## 🏃 Executables
+
+| Path | Description | Pre-requisite(s) |
+| ---- | ----------- | ---------------- |
+| `./dist/games-list` | Retrieve all Game IDs and other data (i.e. total number of runs for a game) for verification in other executables. Retrieve other miscellaneous pieces of data such as platforms, developers, genres, etc. | None |
+| `./dist/games-data` | Retrieve data on categories, levels, variables, and values, etc. for all game IDs retrieved in `games-list`. | `./dist/games-list` |
+| `./dist/leaderboards-data` | Retrieve leaderboard(s) data for all games retrieved in `games-list`. Note: This can fail for games with a high number of runs, use `additional-leaderboards-data` in this case. | `./dist/games-data` |
+| `./dist/supplementary-leaderboard-data` | Retrieve leaderboard data for all category/level/variable/value combinations of a game. This executable is tailored to retrieve data for games with an extremely high number of runs i.e. Subway Surfers. This will be extremely inefficient for games with a high count of unique category/level/variable/value combinations. | None |
+| `./dist/users-list` | Compile a list of all unique users found on all leaderboards of all games— includes both submitters and verifiers. | `./dist/leaderboards-data` |
+| `./dst/users-data` | Retrieve non-PII data for all unique users compiled in `users-list`. | `./dist/users-list` |
+| `./dist/runs-data` | Retrieve all runs for all unique users compiled in `users-list`. This **should** be all runs on speedrun.com! | `./dist/users-list` |
+| `./dist/world-record-data` | Retrieve world record data for all valid category/level/variable/value combinations of a game. This is experimental, and has a delay of 1s applied to every request to ensure the V2 API is not rate limited externally. | None |
+
+## 📝 Documentation
+
+All documentation can be found in the [docs](./docs/) directory.
+
+## 💭 Feedback and Contribution
+
+Any improvements or requests can be raised via [GitHub Issues](https://github.com/alexmerren/speedruncom-scraper/issues). Any development conversations can be found on on [GitHub Discussions](https://github.com/alexmerren/speedruncom-scraper/discussions).

@@ -4,47 +4,72 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/alexmerren/speedruncom-scraper/internal"
-	"github.com/buger/jsonparser"
+	"github.com/alexmerren/speedruncom-scraper/internal/processor"
+	"github.com/alexmerren/speedruncom-scraper/internal/repository"
+	"github.com/alexmerren/speedruncom-scraper/internal/srcom_api"
 )
 
 func main() {
-	if err := generateGamesListV1(); err != nil {
+	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func generateGamesListV1() error {
-	client := internal.NewSrcomV1Client()
+func run() error {
+	gamesIdListFile, gamesIdListFileCloseFunc, err := repository.NewWriteRepository(repository.GamesIdListFilename)
+	if err != nil {
+		return err
+	}
+	defer gamesIdListFileCloseFunc()
 
-	gamesIdListFile, closeFunc, _ := internal.NewCsvWriter(internal.GamesIdListFilenameV1)
-	gamesIdListFile.Write(internal.FileHeaders[internal.GamesDataFilenameV1])
-	defer closeFunc()
+	gamesFileV2, gamesFileV2CloseFunc, err := repository.NewWriteRepository(repository.GamesDataFilenameV2)
+	if err != nil {
+		return err
+	}
+	defer gamesFileV2CloseFunc()
 
-	currentPage := 0
+	developersFile, developersFileCloseFunc, err := repository.NewWriteRepository(repository.DevelopersDataFilename)
+	if err != nil {
+		return err
+	}
+	defer developersFileCloseFunc()
 
-	for {
-		response, err := client.GetGameList(currentPage)
-		if err != nil {
-			return err
-		}
+	genresFile, genresFileCloseFunc, err := repository.NewWriteRepository(repository.GenresDataFilename)
+	if err != nil {
+		return err
+	}
+	defer genresFileCloseFunc()
 
-		_, err = jsonparser.ArrayEach(response, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			gameID, _ := jsonparser.GetString(value, "id")
-			gamesIdListFile.Write([]string{gameID})
-		}, "data")
-		if err != nil {
-			return err
-		}
+	platformsFile, platformsFileCloseFunc, err := repository.NewWriteRepository(repository.PlatformsDataFilename)
+	if err != nil {
+		return err
+	}
+	defer platformsFileCloseFunc()
 
-		size, _ := jsonparser.GetInt(response, "pagination", "size")
-		if size < 1000 {
-			break
-		}
+	publishersFile, publishersFileCloseFunc, err := repository.NewWriteRepository(repository.PublishersDataFilename)
+	if err != nil {
+		return err
+	}
+	defer publishersFileCloseFunc()
 
-		currentPage += 1
+	enginesFile, enginesFileCloseFunc, err := repository.NewWriteRepository(repository.EnginesDataFilename)
+	if err != nil {
+		return err
+	}
+	defer enginesFileCloseFunc()
+
+	gamesListProcessor := &processor.GamesListProcessor{
+		GamesIdListFile: gamesIdListFile,
+		GamesFileV2:     gamesFileV2,
+		DevelopersFile:  developersFile,
+		GenresFile:      genresFile,
+		PlatformsFile:   platformsFile,
+		PublishersFile:  publishersFile,
+		EnginesFile:     enginesFile,
+		Client:          srcom_api.DefaultV1Client,
+		ClientV2:        srcom_api.DefaultV2Client,
 	}
 
-	return nil
+	return gamesListProcessor.Process()
 }

@@ -2,7 +2,7 @@ package http_client
 
 import (
 	"io"
-	"log"
+	"log/slog"
 	"math"
 	"net/http"
 	"time"
@@ -11,9 +11,7 @@ import (
 const (
 	defaultRetryDelay   = 0
 	defaultRetryMaximum = 0
-	defaultRequestDelay = 0
 	defaultIsVerbose    = false
-	defaultDoDelay      = false
 	defaultDoRetry      = false
 )
 
@@ -21,10 +19,8 @@ type HttpClient struct {
 	httpClient   *http.Client
 	retryDelay   int
 	retryMaximum int
-	requestDelay int
 	isVerbose    bool
 	doRetry      bool
-	doDelay      bool
 }
 
 func NewHttpClient(options ...func(*HttpClient)) *HttpClient {
@@ -32,10 +28,8 @@ func NewHttpClient(options ...func(*HttpClient)) *HttpClient {
 		httpClient:   http.DefaultClient,
 		retryDelay:   defaultRetryDelay,
 		retryMaximum: defaultRetryMaximum,
-		requestDelay: defaultRequestDelay,
 		isVerbose:    defaultIsVerbose,
 		doRetry:      defaultDoRetry,
-		doDelay:      defaultDoDelay,
 	}
 
 	for _, optionFunc := range options {
@@ -60,11 +54,11 @@ func (c *HttpClient) Get(url string) ([]byte, error) {
 	}
 
 	if c.isVerbose {
-		log.Printf("%s: %d", url, response.StatusCode)
-	}
-
-	if c.doDelay {
-		time.Sleep(time.Duration(c.requestDelay) * time.Millisecond)
+		slog.Info(
+			"Request finished",
+			"url", url,
+			"statusCode", response.StatusCode,
+		)
 	}
 
 	return io.ReadAll(response.Body)
