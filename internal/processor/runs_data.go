@@ -94,9 +94,9 @@ func (p *RunsDataProcessor) processRuns(userID string) error {
 				players,
 				examiner,
 				values,
+				verifiedDate,
 				status,
 				strconv.Quote(statusReason),
-				verifiedDate,
 			})
 		}, "data")
 		if err != nil {
